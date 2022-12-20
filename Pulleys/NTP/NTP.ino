@@ -9,6 +9,10 @@ int ledpin = 5;  // D1
 const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
+// Define NTP Client to get time
+WiFiUDP ntpUDP;
+NTPClient timeClient(ntpUDP, "pool.ntp.org");
+
 // Variable to save current epoch time
 unsigned long epochTime; 
 
@@ -23,7 +27,6 @@ void setup() {
   Serial.begin(9600);
   pinMode(ledpin, OUTPUT);
   timeClient.begin();
-  server.begin();
 }
 
 void loop()

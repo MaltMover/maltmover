@@ -128,14 +128,16 @@ void handleRequest(WiFiClient client){
 void loop()
 {
     epochTime = getTime();
-    Serial.print("Epoch Time: ");
-    Serial.println(epochTime);
-    if (epochTime % 2 == 0){
+    if (epochTime % 50 == 0){
+      Serial.print("Epoch Time: ");
+      Serial.println(epochTime);
+    }
+    /*if (epochTime % 2 == 0){
       digitalWrite(ledpin, HIGH);
     }
     else{
       digitalWrite(ledpin, LOW);
-    }
+    }*/
     
     WiFiClient client = server.available(); // Listen for incoming clients
     if (client)
