@@ -83,7 +83,7 @@ void handleRequest(WiFiClient client){
                     Serial.println("TIME: "); 
                   }
 
-                  client.println("{'success': true}");
+                  client.println("{\"success\": True}");
 
                   // The HTTP response ends with another blank line
                   client.println();
