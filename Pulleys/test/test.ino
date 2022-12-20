@@ -5,8 +5,9 @@
 int ledpin = 5;  // D1
 
 // WiFi credentials 
-const char *ssid = "DMIL";
-const char *password = "Leicester";
+#include "Secret.h"
+const char *ssid = SECRET_SSID;
+const char *password = SECRET_PASS;
 
 // Define NTP Client to get time
 WiFiUDP ntpUDP;
@@ -95,8 +96,7 @@ void handleRequest(WiFiClient client){
                   }
                   else if (header.indexOf("GET /timer") >= 0)
                   {
-                    Serial.println("TIME: ");
-                    Serial.println(server.arg("time"));     
+                    Serial.println("TIME: "); 
                   }
 
                   client.println("{'success': true}");
