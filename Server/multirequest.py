@@ -16,7 +16,7 @@ def send_request(address: str, subpage: str) -> bool:
     Send request to one client, and return success as bool
     """
     try:
-        response = requests.get("http://"+address+"/"+subpage, timeout=0.5).text
+        response = requests.get(f"http://{address}/{subpage}", timeout=0.5).text
         print(response)
         return response
         print(json.loads(response))
