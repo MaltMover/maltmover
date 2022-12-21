@@ -1,4 +1,8 @@
 class Point:
+    """
+    Point class is used to represent a point in 3D space.
+    1 unit is equal to 10 cm.
+    """
     def __init__(self, x: int | float, y: int | float, z: int | float):
         self.x = round(float(x), 1)
         self.y = round(float(y), 1)
