@@ -19,12 +19,16 @@ class Pulley:
         self.max_length = round(float(max_length), 2)  # in decimeters (10 cm)
         self.max_speed = round(float(max_speed), 2)  # in decimeters per second (10 cm/s)
 
+    def __repr__(self):
+        return f'Pulley(Location: ({self.x}, {self.y}, {self.z}), Max length: {self.max_length} dm, Max speed: {self.max_speed} dm/s)'
+
+    def __lt__(self, other):
+        return self.location < other.location
+
 
 def main():
     pulley = Pulley(Point(0, 0, 0), 10, 10)
-    print(pulley.location)
-    print(pulley.max_length)
-    print(pulley.max_speed)
+    print(pulley)
 
 
 if __name__ == '__main__':
