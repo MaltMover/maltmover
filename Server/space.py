@@ -1,4 +1,7 @@
+from point import Point
 from pulley import Pulley
+
+from math import sqrt
 
 
 class Space:
@@ -14,3 +17,8 @@ class Space:
     def add_pulley(self, pulley: Pulley):
         self.pulleys.append(pulley)
         self.pulleys = sorted(self.pulleys)
+
+    def update_lengths(self, point: Point, time: int | float):
+        for pulley in self.pulleys:
+            new_length = sqrt((pulley.x - point.x) ** 2 + (pulley.y - point.y) ** 2 + (pulley.z - point.z) ** 2)
+            pulley.set_length(new_length, time)

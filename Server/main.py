@@ -14,9 +14,12 @@ def main():
     space.add_pulley(Pulley(Point(SIZE[0], 0, SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(0, SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(SIZE[0], SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
-    print(space.pulleys)
-    space.pulleys[0].set_length(10, 5)
-    print(space.pulleys[0].length)
+    target1 = Point(3, 3, SIZE[2])
+    space.update_lengths(target1, 1)
+    target2 = Point(4, 3, SIZE[2])
+    space.update_lengths(target2, 0.2)
+    for pulley in space.pulleys:
+        print(pulley.length)
 
 
 if __name__ == '__main__':
