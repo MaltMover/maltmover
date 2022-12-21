@@ -1,0 +1,2 @@
+class SpeedLimitError(Exception):
+    pass
