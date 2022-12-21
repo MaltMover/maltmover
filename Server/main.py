@@ -2,9 +2,10 @@ from point import Point
 from pulley import Pulley
 from space import Space
 
+# All measurements are in decimeters (10 cm)
 SIZE = [10, 10, 10]
+ROPE_LENGTH = 50
 MAX_SPEED = 10
-ROPE_LENGTH = 10
 
 
 def main():
@@ -14,7 +15,7 @@ def main():
     space.add_pulley(Pulley(Point(0, SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(SIZE[0], SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     print(space.pulleys)
-    space.pulleys[0].set_length(50, 1)
+    space.pulleys[0].set_length(10, 5)
     print(space.pulleys[0].length)
 
 

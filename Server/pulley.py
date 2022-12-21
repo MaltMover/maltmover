@@ -1,5 +1,5 @@
 from point import Point
-from exceptions import SpeedLimitError
+from exceptions import SpeedLimitError, RopeLengthError
 
 
 class Pulley:
@@ -33,6 +33,8 @@ class Pulley:
         :param length: The new length of the rope attached to the pulley.
         :param time: The time it should take to change the length of the rope.
         """
+        if length > self.max_length:
+            raise RopeLengthError(f'Length cannot be greater than {self.max_length} dm.')
         speed = abs(self.length - length) / time
         if speed > self.max_speed:
             raise SpeedLimitError(f"Pulley at {self.location} can't change length at {round(speed, 2)} dm/s, max speed is {self.max_speed} dm/s")
