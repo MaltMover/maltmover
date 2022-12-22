@@ -88,7 +88,7 @@ void handleBody() {
 
       server.send(200, "application/json", responseOut);
 
-      runPulleys(); // Is run later than success, since it holds up the execution of code
+      runPulleys(preparedLength, preparedTime, &currentLength); // Is run later than success, since it holds up the execution of code
       return;
     }
 
