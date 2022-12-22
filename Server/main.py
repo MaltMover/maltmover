@@ -2,19 +2,18 @@ from point import Point
 from pulley import Pulley
 from space import Space
 from request_handler import RequestsHandler
+import json
+
+with open("config.json", "r") as f:
+    config = json.loads(f.read())
 
 # All measurements are in decimeters (10 cm)
-SIZE = [10, 10, 10]
-ROPE_LENGTH = 15
-MAX_SPEED = 10
+SIZE = config["size"]
+ROPE_LENGTH = config["rope_length"]
+MAX_SPEED = config["max_speed"]
 
 # Ips of the pulley-systems
-IPS = (
-    "192.168.1.64",
-    "192.168.172.2",
-    "192.168.172.3",
-    "192.168.172.4"
-)
+IPS = config["ips"]
 
 
 def main():
