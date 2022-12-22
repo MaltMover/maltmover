@@ -105,14 +105,28 @@ class ConfigPage(customtkinter.CTkFrame):
         self.y_entry.place(relx=0.45, rely=0.08, anchor="sw")
         self.z_label.place(relx=0.55, rely=0.08, anchor="sw")
         self.z_entry.place(relx=0.65, rely=0.08, anchor="se")
-        self.size_unit_label.place(relx=0.70, rely=0.08, anchor="sw")
+        self.size_unit_label.place(relx=0.69, rely=0.08, anchor="sw")
         # Rope Length
         self.rope_length_label = customtkinter.CTkLabel(self, text="Rope Length", font=big_font)
         self.rope_length_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
         self.rope_length_unit_label = customtkinter.CTkLabel(self, text="[dm] (10 cm)", font=big_font)
         self.rope_length_label.place(relx=0.03, rely=0.18, anchor="sw")
         self.rope_length_entry.place(relx=0.65, rely=0.18, anchor="se")
-        self.rope_length_unit_label.place(relx=0.70, rely=0.18, anchor="sw")
+        self.rope_length_unit_label.place(relx=0.69, rely=0.18, anchor="sw")
+        # Max speed
+        self.max_speed_label = customtkinter.CTkLabel(self, text="Max Speed", font=big_font)
+        self.max_speed_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.max_speed_unit_label = customtkinter.CTkLabel(self, text="[dm/s] (10 cm/s)", font=big_font)
+        self.max_speed_label.place(relx=0.03, rely=0.28, anchor="sw")
+        self.max_speed_entry.place(relx=0.65, rely=0.28, anchor="se")
+        self.max_speed_unit_label.place(relx=0.69, rely=0.28, anchor="sw")
+        # Edge limit
+        self.edge_limit_label = customtkinter.CTkLabel(self, text="Edge Limit", font=big_font)
+        self.edge_limit_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.edge_limit_unit_label = customtkinter.CTkLabel(self, text="[dm] (10 cm)", font=big_font)
+        self.edge_limit_label.place(relx=0.03, rely=0.38, anchor="sw")
+        self.edge_limit_entry.place(relx=0.65, rely=0.38, anchor="se")
+        self.edge_limit_unit_label.place(relx=0.69, rely=0.38, anchor="sw")
 
         self.read_config()
         self.save_button = customtkinter.CTkButton(self, text="Save Config", font=big_font, command=self.save_config)
@@ -131,6 +145,12 @@ class ConfigPage(customtkinter.CTkFrame):
         # Rope Length
         self.rope_length_entry.delete(0, customtkinter.END)
         self.rope_length_entry.insert(0, config["rope_length"])
+        # Max speed
+        self.max_speed_entry.delete(0, customtkinter.END)
+        self.max_speed_entry.insert(0, config["max_speed"])
+        # Edge limit
+        self.edge_limit_entry.delete(0, customtkinter.END)
+        self.edge_limit_entry.insert(0, config["edge_limit"])
 
     def save_config(self):
         with open(self.config_path, "r") as f:
@@ -139,6 +159,8 @@ class ConfigPage(customtkinter.CTkFrame):
         config["size"][1] = float(self.y_entry.get())
         config["size"][2] = float(self.z_entry.get())
         config["rope_length"] = float(self.rope_length_entry.get())
+        config["max_speed"] = float(self.max_speed_entry.get())
+        config["edge_limit"] = float(self.edge_limit_entry.get())
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=4)
 
