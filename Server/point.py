@@ -27,12 +27,47 @@ class Point:
         return self.y < other.y
 
 
+class Waypoint(Point):
+    def __init__(self, x: int | float, y: int | float, z: int | float, name: str):
+        super().__init__(x, y, z)
+        self.name = name
+
+    def __repr__(self):
+        return f'Waypoint({self.x}, {self.y}, {self.z}, {self.name})'
+
+    def to_list(self) -> list:
+        return [self.x, self.y, self.z, self.name]
+
+    @classmethod
+    def from_point(cls, point: Point, name: str):
+        return cls(point.x, point.y, point.z, name)
+
+    @classmethod
+    def from_list(cls, lst: list):
+        return cls(lst[0], lst[1], lst[2], lst[3])
+
+    @classmethod
+    def waypoints_from_2d_list(cls, list2d: list):
+        return [cls.from_list(lst) for lst in list2d]
+
+
 def main():
+    import json
     p0 = Point(0, 0, 0)
     p1 = Point(1, 0, 0)
     p2 = Point(0, 1, 0)
     p3 = Point(1, 1, 0)
     print(sorted([p1, p3, p2, p0]))
+    w0 = Waypoint.from_point(p0, 'Start')
+    w1 = Waypoint.from_list([4.0, 13.0, 12.0, "Den gode"])
+    w2 = Waypoint(1, 2, 3, 'End')
+    print(w0)
+    print(w1)
+    print(w2)
+    with open("waypoints.json", "r") as f:
+        waypoints = Waypoint.waypoints_from_2d_list(json.load(f))
+    print(waypoints)
+    print(json.dumps([w.to_list() for w in waypoints], indent=4))
 
 
 if __name__ == '__main__':
