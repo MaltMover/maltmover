@@ -2,6 +2,7 @@ from pulley import Pulley
 import requests
 import threading
 
+import json
 from time import sleep
 
 IPS = (
@@ -31,6 +32,18 @@ class RequestHandler:
         self.send_requests(data, request_num=0, timeout=timeout)
         lengths = [i["length"] if i else 0.0 for i in self.responses]
         return lengths, self.success_map[0]
+
+    def reset_pulley(self, pulley_id: int):
+        threading.Thread(target=self.send_reset_request, args=(pulley_id,)).start()
+
+    def send_reset_request(self, pulley_id: int):
+        address = self.addresses[pulley_id]
+        with open("config.json", "r") as f:
+            config = json.load(f)
+            time = config["init_time"]
+        data = {"length": 0.0, "time": time}
+        self.send_request(address, data, timeout=3, request_num=0, pulley_num=pulley_id)
+        self.send_request(address, {"run": True}, timeout=3, request_num=0, pulley_num=pulley_id)
 
     def set_pulleys(self, pulleys: list[Pulley], time: int | float) -> list[list[bool]]:
         if len(pulleys) != len(self.addresses):

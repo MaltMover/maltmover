@@ -85,6 +85,11 @@ class StatusPage(customtkinter.CTkFrame):
         self.pulley_1_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
         self.pulley_2_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
         self.pulley_3_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
+        self.pulley_0_image.bind("<Button-3>", lambda event: self.show_reset_dialog(0))
+        self.pulley_1_image.bind("<Button-3>", lambda event: self.show_reset_dialog(1))
+        self.pulley_2_image.bind("<Button-3>", lambda event: self.show_reset_dialog(2))
+        self.pulley_3_image.bind("<Button-3>", lambda event: self.show_reset_dialog(3))
+
         self.pulley_0_id = customtkinter.CTkLabel(self, text="0", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_1_id = customtkinter.CTkLabel(self, text="1", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_2_id = customtkinter.CTkLabel(self, text="2", font=customtkinter.CTkFont(size=17, weight="bold"))
@@ -142,6 +147,24 @@ class StatusPage(customtkinter.CTkFrame):
         for i, length in enumerate(lengths):
             self.master.space.pulleys[i].length = length
         self.load_pulley_info()
+
+    def show_reset_dialog(self, pulley_id=0):
+        toplevel = customtkinter.CTkToplevel()
+        toplevel.title(f"Reset Pulley {pulley_id}")
+        toplevel.geometry("300x200")
+        toplevel.resizable(False, False)
+        toplevel.grab_set()
+        toplevel.focus_set()
+        customtkinter.CTkLabel(toplevel, text=f"Reset length of pulley {pulley_id}?", font=customtkinter.CTkFont(size=17, weight="bold")).place(
+            relx=0.5, rely=0.3, anchor="center")
+        customtkinter.CTkButton(toplevel, text="Cancel", font=customtkinter.CTkFont(size=14, weight="bold"), fg_color="#b52802",
+                                width=15, command=toplevel.destroy).place(relx=0.3, rely=0.7, anchor="center")
+        customtkinter.CTkButton(toplevel, text="Confirm", font=customtkinter.CTkFont(size=14, weight="bold"), fg_color="#0a8c02",
+                                width=15, command=lambda: self.reset_pulley(pulley_id, toplevel)).place(relx=0.7, rely=0.7, anchor="center")
+
+    def reset_pulley(self, pulley_id, toplevel):
+        self.master.request_handler.reset_pulley(pulley_id)
+        toplevel.destroy()
 
 
 class ConfigPage(customtkinter.CTkFrame):

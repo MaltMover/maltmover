@@ -5,9 +5,9 @@
         25.0
     ],
     "rope_length": 65.0,
-    "max_speed": 2.0,
+    "max_speed": 10.0,
     "edge_limit": 5.0,
-    "init_time": 25.0,
+    "init_time": 15.0,
     "ips": [
         "192.168.1.69",
         "192.168.1.69",
