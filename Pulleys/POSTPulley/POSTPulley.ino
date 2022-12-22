@@ -14,9 +14,9 @@ const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
 // Set static IP
-IPAddress subnet(255, 255, 0, 0);			            
-IPAddress gateway(192, 168, 1, 1);			            
-IPAddress local_IP(192, 168, 1, 69);	//Only change this 
+IPAddress subnet(255, 255, 0, 0);
+IPAddress gateway(192, 168, 1, 1);
+IPAddress local_IP(192, 168, 1, 69);  //Only change this
 
 // Global vars
 double currentLength = 0;
@@ -29,12 +29,11 @@ void setup() {
 
   Serial.begin(9600);
 
-  calibrate(); // stops execution of code until pulley is calibrated
+  calibrate();  // stops execution of code until pulley is calibrated
 
   if (WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("Static IP Configured");
-  }
-  else {
+  } else {
     Serial.println("Static IP Configuration Failed");
   }
 
@@ -61,12 +60,11 @@ void loop() {
 }
 
 void handleBody() {
-  DynamicJsonDocument doc(1024); // Init json message buffer
-  DynamicJsonDocument response(1024); // Init json response buffer
+  DynamicJsonDocument doc(1024);       // Init json message buffer
+  DynamicJsonDocument response(1024);  // Init json response buffer
   String responseOut;
 
   if (server.hasArg("plain") == false) {
-
     server.send(200, "text/plain", "Body not received");
     return;
   }
@@ -77,18 +75,20 @@ void handleBody() {
 
   // Deserialize json and return if error
   DeserializationError error = deserializeJson(doc, message);
-  if (error)
+  if (error) {
     return;
+  }
+
   if (doc.containsKey("run")) {
     if (doc["run"]) {
       Serial.println("Run pulleys \n");
-
-      runPulleys();
 
       response["sucess"] = true;
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);
+
+      runPulleys(); // Is run later than sucess, since it holds up the execution of code
       return;
     }
 
@@ -101,11 +101,12 @@ void handleBody() {
     server.send(200, "application/json", responseOut);
     return;
   }
+
   else if (doc.containsKey("length") && doc.containsKey("time")) {
     double length = doc["length"];
     double time = doc["time"];
 
-    
+
     setConfig(length, time, &preparedLength, &preparedTime);
 
     response["sucess"] = true;
@@ -114,6 +115,7 @@ void handleBody() {
     server.send(200, "application/json", responseOut);
     return;
   }
+
   else if (doc.containsKey("send_length")) {
     if (doc["send_length"]) {
       Serial.println("Send length \n");
@@ -134,5 +136,4 @@ void handleBody() {
 
   server.send(400, "application/json", responseOut);
   return;
-
 }
