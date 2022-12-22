@@ -75,10 +75,8 @@ class RequestHandler:
             self.success_map[1] = [False for _ in range(len(self.addresses))]
 
         # Create one thread for each client
-        pulley_num = 0
-        for address, d in zip(self.addresses, data):
+        for address, d, pulley_num in zip(self.addresses, data, range(len(self.addresses))):
             self.threads.append(threading.Thread(target=self.send_request, args=(address, d, timeout, request_num, pulley_num)))
-            pulley_num += 1
 
         # Start all threads
         for thread in self.threads:
