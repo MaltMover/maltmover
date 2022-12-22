@@ -1,10 +1,10 @@
 {
     "size": [
-        "50",
-        "50",
-        "25"
+        50.0,
+        50.0,
+        25.0
     ],
-    "rope_length": 50,
+    "rope_length": 50.0,
     "max_speed": 10,
     "edge_limit": 5,
     "ips": [
