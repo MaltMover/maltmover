@@ -61,7 +61,9 @@ void loop() {
 }
 
 void handleBody() {
-  DynamicJsonDocument doc(1024); // Init json buffer
+  DynamicJsonDocument doc(1024); // Init json message buffer
+  DynamicJsonDocument response(1024); // Init json response buffer
+  String responseOut;
 
   if (server.hasArg("plain") == false) {
 
@@ -82,33 +84,55 @@ void handleBody() {
       Serial.println("Run pulleys \n");
 
       runPulleys();
-      server.send(200, "application/json", "{\"success\": true}");
+
+      response["sucess"] = true;
+      serializeJson(response, responseOut);
+
+      server.send(200, "application/json", responseOut);
       return;
     }
 
     Serial.println("Reverts config...");
     revertConfig(currentLength, &preparedLength, &preparedTime);
 
-    server.send(200, "application/json", "{\"success\": true}");
+    response["sucess"] = true;
+    serializeJson(response, responseOut);
+
+    server.send(200, "application/json", responseOut);
     return;
   }
   else if (doc.containsKey("length") && doc.containsKey("time")) {
     double length = doc["length"];
     double time = doc["time"];
-    server.send(200, "application/json", "{\"success\": true}");
+
+    
     setConfig(length, time, &preparedLength, &preparedTime);
+
+    response["sucess"] = true;
+    serializeJson(response, responseOut);
+
+    server.send(200, "application/json", responseOut);
     return;
   }
   else if (doc.containsKey("send_length")) {
     if (doc["send_length"]) {
       Serial.println("Send length \n");
-      server.send(200, "application/json", "{\"success\": true, \"length\": 69.4}");
+
+      response["sucess"] = true;
+      response["length"] = currentLength;
+      serializeJson(response, responseOut);
+
+      server.send(200, "application/json", responseOut);
       return;
     }
   }
 
   Serial.println("Error - request does not contain known key \n");
-  server.send(400, "application/json", "{\"error\": \"Unknown key\"}");
+
+  response["error"] = "Unknown Key";
+  serializeJson(response, responseOut);
+
+  server.send(400, "application/json", responseOut);
   return;
 
 }
