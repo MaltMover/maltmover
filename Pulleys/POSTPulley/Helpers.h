@@ -1,5 +1,5 @@
 void revertConfig(double currentLength, double* mem_preparedLength, double* mem_preparedTime) {
-  // Runs if recieves "run": false. 
+  // Runs if receives "run": false.
   *mem_preparedLength = currentLength;
   *mem_preparedTime = -1;
 
