@@ -67,6 +67,9 @@ class HomePage(customtkinter.CTkFrame):
                                                            anchor="w")
         self.home_frame_button_4.grid(row=4, column=0, padx=20, pady=10)
 
+    def load(self):
+        pass
+
 
 class StatusPage(customtkinter.CTkFrame):
     def __init__(self, master):
@@ -100,6 +103,9 @@ class StatusPage(customtkinter.CTkFrame):
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                               command=self.test_connection)
         self.test_connection_button.place(relx=0.5, rely=0.5, anchor="center")
+        self.load_pulley_info()
+
+    def load(self):
         self.load_pulley_info()
 
     def load_pulley_info(self):
@@ -192,6 +198,9 @@ class ConfigPage(customtkinter.CTkFrame):
         self.save_button = customtkinter.CTkButton(self, text="Save Config", font=big_font, command=self.save_config)
         self.save_button.place(relx=0.5, rely=0.92, anchor="center")
 
+    def load(self):
+        self.read_config()
+
     def read_config(self):
         with open(self.config_path, "r") as f:
             config = json.load(f)
@@ -277,14 +286,17 @@ class App(customtkinter.CTk):
         # show selected frame
         if name == "home":
             self.home_frame.grid(row=0, column=1, sticky="nsew")
+            self.home_frame.load()
         else:
             self.home_frame.grid_forget()
         if name == "pulleys":
             self.status_frame.grid(row=0, column=1, sticky="nsew")
+            self.status_frame.load()
         else:
             self.status_frame.grid_forget()
         if name == "config":
             self.config_frame.grid(row=0, column=1, sticky="nsew")
+            self.config_frame.load()
         else:
             self.config_frame.grid_forget()
 
