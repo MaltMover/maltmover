@@ -17,12 +17,15 @@ class RequestsHandler:
         self.addresses = addresses
         self.threads = []
         self.response_count = 0
-        self.success_map = []  # Stores boolean map of success for each request
+        self.success_map = [  # Stores boolean map of success for each request
+            [False for _ in range(len(self.addresses))],
+            [False for _ in range(len(self.addresses))]
+        ]
 
     def __repr__(self):
         return f"RequestsHandler{self.addresses}"
 
-    def set_pulleys(self, pulleys: list[Pulley], time: int | float) -> list[bool]:
+    def set_pulleys(self, pulleys: list[Pulley], time: int | float) -> list[list[bool]]:
         if len(pulleys) != len(self.addresses):
             raise ValueError("Number of pulleys must equal number of addresses")
         data = []

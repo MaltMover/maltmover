@@ -1,7 +1,7 @@
 from point import Point
 from pulley import Pulley
 
-from math import sqrt
+from math import sqrt, ceil
 
 
 class Space:
@@ -36,6 +36,7 @@ class Space:
     def calculate_min_time(self, target: Point) -> float:
         """
         Calculates the minimum time it takes to move from current position to target point, given the max_speed of the pulleys.
+        :return: time in seconds, rounded to 2 decimal places
         """
         min_time = -1
         for pulley in self.pulleys:
@@ -44,4 +45,4 @@ class Space:
             if pulley_time > min_time:
                 min_time = pulley_time
 
-        return min_time
+        return ceil(min_time * 100) / 100
