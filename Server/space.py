@@ -1,6 +1,7 @@
-from point import Point
+from point import Point, Waypoint
 from pulley import Pulley
 
+import json
 from math import sqrt, ceil
 
 
@@ -11,9 +12,18 @@ class Space:
         self.size_z = round(float(size_z), 1)  # in decimeter (10 cm)
         self.edge_limit = round(float(edge_limit), 1)  # in decimeter (10 cm)
         self.pulleys = []  # List of pulleys in the space
+        self.waypoints = []  # List of waypoints in the space
 
     def __repr__(self) -> str:
         return f'Space(({self.size_x}, {self.size_y}, {self.size_z}), Pulleys: {len(self.pulleys)})'
+
+    def read_waypoints(self, path: str) -> None:
+        """
+        Reads waypoints from a file.
+        :param path: Path to the file
+        """
+        with open(path, 'r') as f:
+            self.waypoints = Waypoint.waypoints_from_2d_list(json.load(f))
 
     def is_in_space(self, point: Point, check_limit=True) -> bool:
         """

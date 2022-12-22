@@ -20,6 +20,7 @@ IPS = config["ips"]
 
 def main():
     space = Space(*SIZE, edge_limit=EDGE_LIMIT)
+    space.read_waypoints("waypoints.json")
     space.add_pulley(Pulley(Point(0, 0, SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(SIZE[0], 0, SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(0, SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
