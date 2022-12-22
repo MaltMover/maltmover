@@ -16,6 +16,8 @@ const char *password = SECRET_PASS;
 // Define LED's
 #define ALIVELED D0
 #define WIFILED D1
+#define CONFIGLED D2
+#define RUNNINGLED D3
 
 // Set static IP
 IPAddress subnet(255, 255, 0, 0);
@@ -32,11 +34,16 @@ ESP8266WebServer server(80);
 void setup() {
 
   Serial.begin(9600);
-  pinMode(ALIVELED, OUTPUT);
-  digitalWrite(ALIVELED, HIGH);
-
+  
   //Setup LED's
   pinMode(WIFILED, OUTPUT);
+  pinMode(ALIVELED, OUTPUT);
+  pinMode(CONFIGLED, OUTPUT);
+  pinMode(RUNNINGLED, OUTPUT);
+
+
+  digitalWrite(ALIVELED, HIGH);
+
 
   calibrate();  // stops execution of code until pulley is calibrated
 
@@ -56,7 +63,7 @@ void setup() {
     delay(250);
   }
   digitalWrite(WIFILED, HIGH);
-  
+
   Serial.print("\nIP address: ");
   Serial.println(WiFi.localIP());
 
@@ -100,7 +107,14 @@ void handleBody() {
 
       server.send(200, "application/json", responseOut);
 
+      digitalWrite(RUNNINGLED, HIGH);
+      digitalWrite(CONFIGLED, LOW);
+      
       runPulleys(preparedLength, preparedTime, &currentLength); // Is run later than success, since it holds up the execution of code
+
+      digitalWrite(RUNNINGLED, LOW);
+      
+
       return;
     }
 
@@ -111,6 +125,9 @@ void handleBody() {
     serializeJson(response, responseOut);
 
     server.send(200, "application/json", responseOut);
+
+    digitalWrite(CONFIGLED, LOW);
+
     return;
   }
 
@@ -125,6 +142,9 @@ void handleBody() {
     serializeJson(response, responseOut);
 
     server.send(200, "application/json", responseOut);
+
+    digitalWrite(CONFIGLED, HIGH);
+
     return;
   }
 
