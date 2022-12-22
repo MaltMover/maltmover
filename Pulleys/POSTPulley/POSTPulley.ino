@@ -5,6 +5,7 @@
 // Include other files
 #include "Helpers.h"
 #include "Pulleys.h"
+#include "Calibrate.h"
 
 
 // WiFi credentials
@@ -110,10 +111,4 @@ void handleBody() {
   server.send(400, "application/json", "{\"error\": \"Unknown key\"}");
   return;
 
-}
-
-void calibrate() {
-  // add code to calibrate length of wire
-  //delay(5000);
-  return;
 }
