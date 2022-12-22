@@ -14,8 +14,8 @@ const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
 // Define LED's
-#define ALIVELED D0
-#define WIFILED D1
+#define ALIVELED 16  // D0
+#define WIFILED 5  // D1
 
 // Set static IP
 IPAddress subnet(255, 255, 0, 0);
