@@ -83,19 +83,19 @@ void handleBody() {
     if (doc["run"]) {
       Serial.println("Run pulleys \n");
 
-      response["sucess"] = true;
+      response["success"] = true;
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);
 
-      runPulleys(); // Is run later than sucess, since it holds up the execution of code
+      runPulleys(); // Is run later than success, since it holds up the execution of code
       return;
     }
 
     Serial.println("Reverts config...");
     revertConfig(currentLength, &preparedLength, &preparedTime);
 
-    response["sucess"] = true;
+    response["success"] = true;
     serializeJson(response, responseOut);
 
     server.send(200, "application/json", responseOut);
@@ -109,7 +109,7 @@ void handleBody() {
 
     setConfig(length, time, &preparedLength, &preparedTime);
 
-    response["sucess"] = true;
+    response["success"] = true;
     serializeJson(response, responseOut);
 
     server.send(200, "application/json", responseOut);
@@ -120,7 +120,7 @@ void handleBody() {
     if (doc["send_length"]) {
       Serial.println("Send length \n");
 
-      response["sucess"] = true;
+      response["success"] = true;
       response["length"] = currentLength;
       serializeJson(response, responseOut);
 
