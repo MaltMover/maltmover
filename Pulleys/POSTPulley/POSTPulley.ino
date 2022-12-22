@@ -76,7 +76,7 @@ void handleBody() {
       Serial.println("Run pulleys \n");
 
       runPulleys();
-
+      server.send(200, "application/json", "{\"success\": true}");
       return;
     }
 
