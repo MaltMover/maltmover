@@ -76,14 +76,14 @@ void handleBody() {
     return;
   if (doc.containsKey("run")) {
     if (doc["run"]) {
-      Serial.println("Run pulleys");
+      Serial.println("Run pulleys \n");
 
       runPulleys();
 
       return;
     }
 
-    Serial.println("Reverts config...\n");
+    Serial.println("Reverts config...");
     revertConfig();
     return;
   }
