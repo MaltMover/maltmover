@@ -67,9 +67,6 @@ void handleBody() {
   message += server.arg("plain");
   message += "\n";
 
-  server.send(200, "text/plain", message);
-  //Serial.println(message);
-
   // Deserialize json and return if error
   DeserializationError error = deserializeJson(doc, message);
   if (error)
@@ -85,17 +82,25 @@ void handleBody() {
 
     Serial.println("Reverts config...");
     revertConfig();
+    server.send(200, "application/json", "{\"success\": true}");
     return;
   }
   else if (doc.containsKey("length") && doc.containsKey("time")) {
     double length = doc["length"];
     double time = doc["time"];
-
+    server.send(200, "application/json", "{\"success\": true}");
     setConfig(length, time);
     return;
   }
-
+  else if (doc.containsKey("send_length")) {
+    if (doc["send_length"]) {
+      Serial.println("Send length \n");
+      server.send(200, "application/json", "{\"success\": true, \"length\": 69.4}");
+      return;
+    }
+  }
   Serial.println("Error - request does not contain known key \n");
+  server.send(400, "application/json", "{\"error\": \"Unknown key\"}");
   return;
 }
 
