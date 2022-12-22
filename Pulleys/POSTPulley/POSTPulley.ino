@@ -2,6 +2,8 @@
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
 
+#include "Helpers.h"
+
 // WiFi credentials
 #include "Secret.h"
 const char *ssid = SECRET_SSID;
@@ -81,7 +83,8 @@ void handleBody() {
     }
 
     Serial.println("Reverts config...");
-    revertConfig();
+    revertConfig(currentLength, &preparedLength, &preparedTime);
+
     server.send(200, "application/json", "{\"success\": true}");
     return;
   }
@@ -99,9 +102,11 @@ void handleBody() {
       return;
     }
   }
+
   Serial.println("Error - request does not contain known key \n");
   server.send(400, "application/json", "{\"error\": \"Unknown key\"}");
   return;
+
 }
 
 void setConfig(double length, double time){
@@ -119,14 +124,7 @@ void setConfig(double length, double time){
 
 }
 
-void revertConfig() {
-  // Runs if recieves "run": false. 
-  preparedLength = currentLength;
-  preparedTime = -1;
 
-  Serial.println("Reverted config to original state \n");
-  return;
-}
 
 void runPulleys() {
   // add code to run pulleys
