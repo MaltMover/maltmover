@@ -39,19 +39,19 @@ class RequestsHandler:
             )
         # Send first request to all pulleys
         if not self.send_requests(data, request_num=0):
+            self.send_requests([{"run": False}] * len(self.addresses), request_num=1)
             return self.success_map
 
         # If all succeeded, send second request to all pulleys
-        self.send_requests([{"Run": True}] * len(self.addresses), request_num=1)
+        self.send_requests([{"run": True}] * len(self.addresses), request_num=1)
         return self.success_map
 
     def send_requests(self, data: list[dict], timeout: int | float = 3, request_num=-1) -> bool:
         self.response_count = 0
-        # Reset success map, all False
-        self.success_map = [
-            [False for _ in range(len(self.addresses))],
-            [False for _ in range(len(self.addresses))]
-        ]
+        # Reset success map, for current and future requests
+        self.success_map[request_num] = [False for _ in range(len(self.addresses))]
+        if request_num < 1:
+            self.success_map[1] = [False for _ in range(len(self.addresses))]
 
         # Create one thread for each client
         pulley_num = 0
