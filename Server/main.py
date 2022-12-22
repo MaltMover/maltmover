@@ -11,18 +11,19 @@ with open("config.json", "r") as f:
 SIZE = config["size"]
 ROPE_LENGTH = config["rope_length"]
 MAX_SPEED = config["max_speed"]
+EDGE_LIMIT = config["edge_limit"]  # How close to the edge of the space, the object can be
 
 # Ips of the pulley-systems
 IPS = config["ips"]
 
 
 def main():
-    space = Space(*SIZE)
+    space = Space(*SIZE, edge_limit=EDGE_LIMIT)
     space.add_pulley(Pulley(Point(0, 0, SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(SIZE[0], 0, SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(0, SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(SIZE[0], SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
-    target = Point(10, 10, SIZE[2])
+    target = Point(25, 25, 10)
     time = space.calculate_min_time(target)
     print(f"Time: {time}s")
     space.update_lengths(target, time)
