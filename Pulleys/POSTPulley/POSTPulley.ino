@@ -13,6 +13,10 @@
 const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
+// Define LED's
+#define ALIVELED D0
+#define WIFILED D1
+
 // Set static IP
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
@@ -28,6 +32,11 @@ ESP8266WebServer server(80);
 void setup() {
 
   Serial.begin(9600);
+  pinMode(ALIVELED, OUTPUT);
+  digitalWrite(ALIVELED, HIGH);
+
+  //Setup LED's
+  pinMode(WIFILED, OUTPUT);
 
   calibrate();  // stops execution of code until pulley is calibrated
 
@@ -40,11 +49,14 @@ void setup() {
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
-
-    delay(500);
+    digitalWrite(WIFILED, HIGH);
+    delay(250);
     Serial.println("Waiting to connect...");
+    digitalWrite(WIFILED, LOW);
+    delay(250);
   }
-
+  digitalWrite(WIFILED, HIGH);
+  
   Serial.print("\nIP address: ");
   Serial.println(WiFi.localIP());
 
