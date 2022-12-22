@@ -120,8 +120,8 @@ class StatusPage(customtkinter.CTkFrame):
         for pulley, label in zip(self.master.space.pulleys, [self.pulley_0_length, self.pulley_1_length, self.pulley_2_length, self.pulley_3_length]):
             label.configure(text=f"{pulley.length} dm")
 
-    def get_lengths(self):
-        lengths, success_map = self.master.request_handler.get_lengths()
+    def get_lengths(self, timeout=3):
+        lengths, success_map = self.master.request_handler.get_lengths(timeout=timeout)
         for success, image in zip(success_map, [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
             if success:
                 image.configure(image=images["green_pulley_image"])
@@ -311,6 +311,7 @@ class App(customtkinter.CTk):
     def move_system(self, target: Point | Waypoint, time: float):
         self.space.update_lengths(target, time)
         self.request_handler.set_pulleys(self.space.pulleys, time)
+        self.status_frame.get_lengths(timeout=1)
 
 
 if __name__ == "__main__":
