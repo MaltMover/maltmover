@@ -1,4 +1,5 @@
 import tkinter
+import json
 
 import customtkinter
 import os
@@ -82,9 +83,51 @@ class StatusPage(customtkinter.CTkFrame):
 
 
 class ConfigPage(customtkinter.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master, config_path: str):
         super().__init__(master)
+        self.config_path = config_path
+        small_font = customtkinter.CTkFont(size=15)
+        big_font = customtkinter.CTkFont(size=20, weight="bold")
         self.configure(self, corner_radius=0, fg_color="transparent")
+        self.size_label = customtkinter.CTkLabel(self, text="Room Size", font=big_font)
+        self.x_label = customtkinter.CTkLabel(self, text="x", font=small_font)
+        self.x_entry = customtkinter.CTkEntry(self, width=35, font=small_font)
+        self.y_label = customtkinter.CTkLabel(self, text="y", font=small_font)
+        self.y_entry = customtkinter.CTkEntry(self, width=35, font=small_font)
+        self.z_label = customtkinter.CTkLabel(self, text="z", font=small_font)
+        self.z_entry = customtkinter.CTkEntry(self, width=35, font=small_font)
+        self.size_unit_label = customtkinter.CTkLabel(self, text="[dm] (10 cm)", font=big_font)
+        self.size_label.place(relx=0.03, rely=0.08, anchor="sw")
+        self.x_label.place(relx=0.28, rely=0.08, anchor="sw")
+        self.x_entry.place(relx=0.30, rely=0.08, anchor="sw")
+        self.y_label.place(relx=0.40, rely=0.08, anchor="sw")
+        self.y_entry.place(relx=0.42, rely=0.08, anchor="sw")
+        self.z_label.place(relx=0.51, rely=0.08, anchor="sw")
+        self.z_entry.place(relx=0.60, rely=0.08, anchor="se")
+        self.size_unit_label.place(relx=0.65, rely=0.08, anchor="sw")
+
+        self.read_config()
+        self.save_button = customtkinter.CTkButton(self, text="Save Config", font=big_font, command=self.save_config)
+        self.save_button.place(relx=0.5, rely=0.9, anchor="center")
+
+    def read_config(self):
+        with open(self.config_path, "r") as f:
+            config = json.load(f)
+        self.x_entry.delete(0, customtkinter.END)
+        self.x_entry.insert(0, config["size"][0])
+        self.y_entry.delete(0, customtkinter.END)
+        self.y_entry.insert(0, config["size"][1])
+        self.z_entry.delete(0, customtkinter.END)
+        self.z_entry.insert(0, config["size"][2])
+
+    def save_config(self):
+        with open(self.config_path, "r") as f:
+            config = json.load(f)
+        config["size"][0] = self.x_entry.get()
+        config["size"][1] = self.y_entry.get()
+        config["size"][2] = self.z_entry.get()
+        with open(self.config_path, "w") as f:
+            json.dump(config, f, indent=4)
 
 
 class App(customtkinter.CTk):
@@ -110,7 +153,7 @@ class App(customtkinter.CTk):
         self.status_frame = StatusPage(self)
 
         # create third frame
-        self.config_frame = ConfigPage(self)
+        self.config_frame = ConfigPage(self, "config.json")
 
         # select default frame
         self.select_frame_by_name("home")
