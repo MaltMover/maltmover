@@ -127,10 +127,33 @@ class ConfigPage(customtkinter.CTkFrame):
         self.edge_limit_label.place(relx=0.03, rely=0.38, anchor="sw")
         self.edge_limit_entry.place(relx=0.65, rely=0.38, anchor="se")
         self.edge_limit_unit_label.place(relx=0.69, rely=0.38, anchor="sw")
+        # Separating line
+        line = customtkinter.CTkCanvas(self, width=510, height=2, bg="gray25", highlightthickness=0)
+        line.create_line(0, 0, 510, 0, fill="gray25", width=4)
+        line.place(relx=0.03, rely=0.4, anchor="w")
+        # IPS
+        self.ips_label = customtkinter.CTkLabel(self, text="IP Addresses", font=big_font)
+        self.ips_label.place(relx=0.03, rely=0.48, anchor="sw")
+        self.pulley_0_label = customtkinter.CTkLabel(self, text="Pulley 0", font=small_font)
+        self.pulley_0_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_1_label = customtkinter.CTkLabel(self, text="Pulley 1", font=small_font)
+        self.pulley_1_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_2_label = customtkinter.CTkLabel(self, text="Pulley 2", font=small_font)
+        self.pulley_2_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_3_label = customtkinter.CTkLabel(self, text="Pulley 3", font=small_font)
+        self.pulley_3_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_0_label.place(relx=0.03, rely=0.55, anchor="sw")
+        self.pulley_0_entry.place(relx=0.65, rely=0.55, anchor="se")
+        self.pulley_1_label.place(relx=0.03, rely=0.65, anchor="sw")
+        self.pulley_1_entry.place(relx=0.65, rely=0.65, anchor="se")
+        self.pulley_2_label.place(relx=0.03, rely=0.75, anchor="sw")
+        self.pulley_2_entry.place(relx=0.65, rely=0.75, anchor="se")
+        self.pulley_3_label.place(relx=0.03, rely=0.85, anchor="sw")
+        self.pulley_3_entry.place(relx=0.65, rely=0.85, anchor="se")
 
         self.read_config()
         self.save_button = customtkinter.CTkButton(self, text="Save Config", font=big_font, command=self.save_config)
-        self.save_button.place(relx=0.5, rely=0.9, anchor="center")
+        self.save_button.place(relx=0.5, rely=0.92, anchor="center")
 
     def read_config(self):
         with open(self.config_path, "r") as f:
@@ -151,6 +174,15 @@ class ConfigPage(customtkinter.CTkFrame):
         # Edge limit
         self.edge_limit_entry.delete(0, customtkinter.END)
         self.edge_limit_entry.insert(0, config["edge_limit"])
+        # IPS
+        self.pulley_0_entry.delete(0, customtkinter.END)
+        self.pulley_0_entry.insert(0, config["ips"][0])
+        self.pulley_1_entry.delete(0, customtkinter.END)
+        self.pulley_1_entry.insert(0, config["ips"][1])
+        self.pulley_2_entry.delete(0, customtkinter.END)
+        self.pulley_2_entry.insert(0, config["ips"][2])
+        self.pulley_3_entry.delete(0, customtkinter.END)
+        self.pulley_3_entry.insert(0, config["ips"][3])
 
     def save_config(self):
         with open(self.config_path, "r") as f:
@@ -161,6 +193,10 @@ class ConfigPage(customtkinter.CTkFrame):
         config["rope_length"] = float(self.rope_length_entry.get())
         config["max_speed"] = float(self.max_speed_entry.get())
         config["edge_limit"] = float(self.edge_limit_entry.get())
+        config["ips"][0] = self.pulley_0_entry.get()
+        config["ips"][1] = self.pulley_1_entry.get()
+        config["ips"][2] = self.pulley_2_entry.get()
+        config["ips"][3] = self.pulley_3_entry.get()
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=4)
 
