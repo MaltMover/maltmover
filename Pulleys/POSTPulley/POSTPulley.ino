@@ -2,19 +2,22 @@
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
 
+// Include other files
 #include "Helpers.h"
+#include "Pulleys.h"
+
 
 // WiFi credentials
 #include "Secret.h"
 const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
-
+// Set static IP
 IPAddress subnet(255, 255, 0, 0);			            
 IPAddress gateway(192, 168, 1, 1);			            
-IPAddress local_IP(192, 168, 1, 69);	
+IPAddress local_IP(192, 168, 1, 69);	//Only change this 
 
-
+// Global vars
 double currentLength = 0;
 double preparedLength = -1;
 double preparedTime = -1;
@@ -92,7 +95,7 @@ void handleBody() {
     double length = doc["length"];
     double time = doc["time"];
     server.send(200, "application/json", "{\"success\": true}");
-    setConfig(length, time);
+    setConfig(length, time, &preparedLength, &preparedTime);
     return;
   }
   else if (doc.containsKey("send_length")) {
@@ -108,29 +111,6 @@ void handleBody() {
   return;
 
 }
-
-void setConfig(double length, double time){
-
-  preparedLength = length;
-  preparedTime = time;
-
-  Serial.print("Prepared length: ");
-  Serial.println(preparedLength);
-  Serial.print("Prepared time: ");
-  Serial.println(preparedTime);
-  Serial.println();
-
-  return;
-
-}
-
-
-
-void runPulleys() {
-  // add code to run pulleys
-  return;
-}
-
 
 void calibrate() {
   // add code to calibrate length of wire
