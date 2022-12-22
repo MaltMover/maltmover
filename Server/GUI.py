@@ -70,16 +70,40 @@ class StatusPage(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
         self.configure(self, corner_radius=0, fg_color="transparent")
-        self.pulley_0_label = customtkinter.CTkLabel(self, text="", image=images["green_pulley_image"])
-        self.pulley_1_label = customtkinter.CTkLabel(self, text="", image=images["green_pulley_image"])
-        self.pulley_2_label = customtkinter.CTkLabel(self, text="", image=images["green_pulley_image"])
-        self.pulley_3_label = customtkinter.CTkLabel(self, text="", image=images["green_pulley_image"])
-        self.pulley_0_label.place(relx=0.2, rely=0.8, anchor="center")
-        self.pulley_1_label.place(relx=0.8, rely=0.2, anchor="center")
-        self.pulley_2_label.place(relx=0.2, rely=0.2, anchor="center")
-        self.pulley_3_label.place(relx=0.8, rely=0.8, anchor="center")
-        self.pulley_test_button = customtkinter.CTkButton(self, text="Test Pulleys", command=lambda: print("wow"))
-        self.pulley_test_button.place(relx=0.5, rely=0.5, anchor="center")
+        self.pulley_0_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
+        self.pulley_1_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
+        self.pulley_2_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
+        self.pulley_3_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
+        self.pulley_0_id = customtkinter.CTkLabel(self, text="0", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_1_id = customtkinter.CTkLabel(self, text="1", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_2_id = customtkinter.CTkLabel(self, text="2", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_3_id = customtkinter.CTkLabel(self, text="3", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_0_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_1_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_2_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_3_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
+        self.pulley_0_image.place(relx=0.12, rely=0.78, anchor="center")
+        self.pulley_1_image.place(relx=0.88, rely=0.78, anchor="center")
+        self.pulley_2_image.place(relx=0.12, rely=0.18, anchor="center")
+        self.pulley_3_image.place(relx=0.88, rely=0.18, anchor="center")
+        self.pulley_0_id.place(relx=0.12, rely=0.63, anchor="center")
+        self.pulley_1_id.place(relx=0.88, rely=0.63, anchor="center")
+        self.pulley_2_id.place(relx=0.12, rely=0.03, anchor="center")
+        self.pulley_3_id.place(relx=0.88, rely=0.03, anchor="center")
+        self.pulley_0_length.place(relx=0.12, rely=0.93, anchor="center")
+        self.pulley_1_length.place(relx=0.88, rely=0.93, anchor="center")
+        self.pulley_2_length.place(relx=0.12, rely=0.33, anchor="center")
+        self.pulley_3_length.place(relx=0.88, rely=0.33, anchor="center")
+
+        self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
+                                                              command=self.test_connection)
+        self.test_connection_button.place(relx=0.5, rely=0.5, anchor="center")
+
+    def load_pulley_info(self):
+        pass
+
+    def test_connection(self):
+        print("wow")
 
 
 class ConfigPage(customtkinter.CTkFrame):
