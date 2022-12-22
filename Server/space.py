@@ -10,6 +10,7 @@ class Space:
         self.size_x = round(float(size_x), 1)  # in decimeter (10 cm)
         self.size_y = round(float(size_y), 1)  # in decimeter (10 cm)
         self.size_z = round(float(size_z), 1)  # in decimeter (10 cm)
+        self.center = Point(self.size_x / 2, self.size_y / 2, self.size_z / 2)
         self.current_point = Point(0, 0, 0)
         self.edge_limit = round(float(edge_limit), 1)  # in decimeter (10 cm)
         self.pulleys = []  # List of pulleys in the space
@@ -76,6 +77,7 @@ class Space:
             new_length = sqrt((pulley.x - point.x) ** 2 + (pulley.y - point.y) ** 2 + (pulley.z - point.z) ** 2)
             pulley.set_length(new_length, time)
         self.current_point = point
+        print(self.current_point)
 
     def calculate_min_time(self, target: Point) -> float:
         """

@@ -63,19 +63,18 @@ class HomePage(customtkinter.CTkFrame):
     def load(self):
         legal_waypoints = [w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)]
         illegal_waypoints = [w for w in self.master.space.waypoints if w not in legal_waypoints]
-        print(legal_waypoints)
-        print(illegal_waypoints)
         for i, waypoint in enumerate(legal_waypoints):
             time = self.master.space.calculate_min_time(waypoint)
             waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10,
                                                       text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
                                                       fg_color="transparent", text_color="gray90", hover_color="gray30",
                                                       image=images["waypoint_image"], anchor="w", font=(customtkinter.CTkFont, 18),
-                                                      command=lambda waypoint=waypoint: self.master.move_as_thread(waypoint, time))
+                                                      command=lambda waypoint=waypoint, time=time: self.master.move_as_thread(waypoint, time))
             if self.master.space.current_point == waypoint:
                 waypoint_button.configure(state="disabled")
             waypoint_button.grid(row=i, column=0, sticky="ew")
             self.waypoint_buttons.append(waypoint_button)
+        print(self.master.space.current_point)
 
 
 class StatusPage(customtkinter.CTkFrame):
@@ -107,9 +106,16 @@ class StatusPage(customtkinter.CTkFrame):
         self.pulley_2_length.place(relx=0.12, rely=0.33, anchor="center")
         self.pulley_3_length.place(relx=0.88, rely=0.33, anchor="center")
 
+        with open("config.json", "r") as f:
+            config = json.load(f)
+            init_time = config["init_time"]
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                               command=self.get_lengths)
+        self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
+                                                             command=lambda master=master: master.move_as_thread(master.space.center,
+                                                                                                                 init_time))
         self.test_connection_button.place(relx=0.5, rely=0.5, anchor="center")
+        self.center_pulleys_button.place(relx=0.5, rely=0.6, anchor="center")
         self.load_pulley_info()
 
     def load(self):
