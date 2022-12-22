@@ -30,6 +30,7 @@ class NavigationBar(customtkinter.CTkFrame):
         self.configure(
             corner_radius=0,
         )
+        self.grid_rowconfigure(5, weight=1)
         self.nav_label = customtkinter.CTkLabel(self, text="  Malt Mover", image=images["logo_image"],
                                                 compound="left", font=customtkinter.CTkFont(size=15, weight="bold"))
         self.nav_label.grid(row=0, column=0, padx=20, pady=20)
@@ -51,6 +52,12 @@ class NavigationBar(customtkinter.CTkFrame):
                                                      image=images["cog_image"], anchor="w",
                                                      command=lambda: master.select_frame_by_name("config"))
         self.config_button.grid(row=3, column=0, sticky="ew")
+
+        self.waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Waypoints",
+                                                         fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                         image=images["waypoint_image"], anchor="w",
+                                                         command=lambda: master.select_frame_by_name("waypoints"))
+        self.waypoint_button.grid(row=4, column=0, sticky="ew")
 
 
 class HomePage(customtkinter.CTkFrame):
@@ -289,6 +296,17 @@ class ConfigPage(customtkinter.CTkFrame):
             json.dump(config, f, indent=4)
 
 
+class WaypointPage(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+        self.configure(self, corner_radius=0, fg_color="transparent")
+        customtkinter.CTkLabel(self, text="Waypoints", font=customtkinter.CTkFont(size=15, weight="bold")
+                               ).place(relx=0.5, rely=0.05, anchor="center")
+
+    def load(self):
+        pass
+
+
 class App(customtkinter.CTk):
     def __init__(self, space: Space, request_handler: RequestHandler):
         super().__init__()
@@ -304,17 +322,19 @@ class App(customtkinter.CTk):
         # create navigation frame
         self.navigation_frame = NavigationBar(self)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-        self.navigation_frame.grid_rowconfigure(4, weight=1)
 
         # create home frame
         self.home_frame = HomePage(self)
         self.home_frame.grid_columnconfigure(0, weight=1)
 
-        # create second frame
+        # create frame for status page
         self.status_frame = StatusPage(self)
 
-        # create third frame
+        # create frame for config page
         self.config_frame = ConfigPage(self, "config.json")
+
+        # create frame for waypoint page
+        self.waypoint_frame = WaypointPage(self)
 
         # select default frame
         self.select_frame_by_name("home")
@@ -341,6 +361,11 @@ class App(customtkinter.CTk):
             self.config_frame.load()
         else:
             self.config_frame.grid_forget()
+        if name == "waypoints":
+            self.waypoint_frame.grid(row=0, column=1, sticky="nsew")
+            self.waypoint_frame.load()
+        else:
+            self.waypoint_frame.grid_forget()
 
     def move_system(self, target: Point | Waypoint, time: float):
         self.space.update_lengths(target, time)
