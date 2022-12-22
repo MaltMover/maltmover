@@ -1,6 +1,7 @@
 from point import Point
 from pulley import Pulley
 from space import Space
+from request_handler import RequestsHandler
 
 # All measurements are in decimeters (10 cm)
 SIZE = [10, 10, 10]
