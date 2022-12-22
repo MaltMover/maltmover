@@ -89,22 +89,30 @@ class ConfigPage(customtkinter.CTkFrame):
         small_font = customtkinter.CTkFont(size=15)
         big_font = customtkinter.CTkFont(size=20, weight="bold")
         self.configure(self, corner_radius=0, fg_color="transparent")
+        # Room Size
         self.size_label = customtkinter.CTkLabel(self, text="Room Size", font=big_font)
         self.x_label = customtkinter.CTkLabel(self, text="x", font=small_font)
-        self.x_entry = customtkinter.CTkEntry(self, width=35, font=small_font)
+        self.x_entry = customtkinter.CTkEntry(self, width=45, font=small_font)
         self.y_label = customtkinter.CTkLabel(self, text="y", font=small_font)
-        self.y_entry = customtkinter.CTkEntry(self, width=35, font=small_font)
+        self.y_entry = customtkinter.CTkEntry(self, width=45, font=small_font)
         self.z_label = customtkinter.CTkLabel(self, text="z", font=small_font)
-        self.z_entry = customtkinter.CTkEntry(self, width=35, font=small_font)
+        self.z_entry = customtkinter.CTkEntry(self, width=45, font=small_font)
         self.size_unit_label = customtkinter.CTkLabel(self, text="[dm] (10 cm)", font=big_font)
         self.size_label.place(relx=0.03, rely=0.08, anchor="sw")
-        self.x_label.place(relx=0.28, rely=0.08, anchor="sw")
-        self.x_entry.place(relx=0.30, rely=0.08, anchor="sw")
-        self.y_label.place(relx=0.40, rely=0.08, anchor="sw")
-        self.y_entry.place(relx=0.42, rely=0.08, anchor="sw")
-        self.z_label.place(relx=0.51, rely=0.08, anchor="sw")
-        self.z_entry.place(relx=0.60, rely=0.08, anchor="se")
-        self.size_unit_label.place(relx=0.65, rely=0.08, anchor="sw")
+        self.x_label.place(relx=0.31, rely=0.08, anchor="sw")
+        self.x_entry.place(relx=0.33, rely=0.08, anchor="sw")
+        self.y_label.place(relx=0.43, rely=0.08, anchor="sw")
+        self.y_entry.place(relx=0.45, rely=0.08, anchor="sw")
+        self.z_label.place(relx=0.55, rely=0.08, anchor="sw")
+        self.z_entry.place(relx=0.65, rely=0.08, anchor="se")
+        self.size_unit_label.place(relx=0.70, rely=0.08, anchor="sw")
+        # Rope Length
+        self.rope_length_label = customtkinter.CTkLabel(self, text="Rope Length", font=big_font)
+        self.rope_length_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.rope_length_unit_label = customtkinter.CTkLabel(self, text="[dm] (10 cm)", font=big_font)
+        self.rope_length_label.place(relx=0.03, rely=0.18, anchor="sw")
+        self.rope_length_entry.place(relx=0.65, rely=0.18, anchor="se")
+        self.rope_length_unit_label.place(relx=0.70, rely=0.18, anchor="sw")
 
         self.read_config()
         self.save_button = customtkinter.CTkButton(self, text="Save Config", font=big_font, command=self.save_config)
@@ -113,19 +121,24 @@ class ConfigPage(customtkinter.CTkFrame):
     def read_config(self):
         with open(self.config_path, "r") as f:
             config = json.load(f)
+        # Room Size
         self.x_entry.delete(0, customtkinter.END)
         self.x_entry.insert(0, config["size"][0])
         self.y_entry.delete(0, customtkinter.END)
         self.y_entry.insert(0, config["size"][1])
         self.z_entry.delete(0, customtkinter.END)
         self.z_entry.insert(0, config["size"][2])
+        # Rope Length
+        self.rope_length_entry.delete(0, customtkinter.END)
+        self.rope_length_entry.insert(0, config["rope_length"])
 
     def save_config(self):
         with open(self.config_path, "r") as f:
             config = json.load(f)
-        config["size"][0] = self.x_entry.get()
-        config["size"][1] = self.y_entry.get()
-        config["size"][2] = self.z_entry.get()
+        config["size"][0] = float(self.x_entry.get())
+        config["size"][1] = float(self.y_entry.get())
+        config["size"][2] = float(self.z_entry.get())
+        config["rope_length"] = float(self.rope_length_entry.get())
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=4)
 
