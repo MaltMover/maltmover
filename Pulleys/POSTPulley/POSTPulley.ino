@@ -7,6 +7,12 @@
 const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
+
+IPAddress subnet(255, 255, 0, 0);			            
+IPAddress gateway(192, 168, 1, 1);			            
+IPAddress local_IP(192, 168, 1, 69);	
+
+
 double currentLength = 0;
 double preparedLength = -1;
 double preparedTime = -1;
@@ -19,6 +25,13 @@ void setup() {
 
   calibrate(); // stops execution of code until pulley is calibrated
 
+  if (WiFi.config(local_IP, gateway, subnet)) {
+    Serial.println("Static IP Configured");
+  }
+  else {
+    Serial.println("Static IP Configuration Failed");
+  }
+
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -27,13 +40,13 @@ void setup() {
     Serial.println("Waiting to connect...");
   }
 
-  Serial.print("IP address: ");
+  Serial.print("\nIP address: ");
   Serial.println(WiFi.localIP());
 
   server.on("/", handleBody);
 
   server.begin();
-  Serial.println("Server listening");
+  Serial.println("Server listening \n");
 }
 
 void loop() {
@@ -70,8 +83,9 @@ void handleBody() {
       return;
     }
 
-    Serial.println("Reverts config...");
+    Serial.println("Reverts config...\n");
     revertConfig();
+    return;
   }
   else if (doc.containsKey("length") && doc.containsKey("time")) {
     double length = doc["length"];
@@ -81,8 +95,8 @@ void handleBody() {
     return;
   }
 
-  Serial.println("Error - request does not contain known key");
-
+  Serial.println("Error - request does not contain known key \n");
+  return;
 }
 
 void setConfig(double length, double time){
@@ -105,7 +119,8 @@ void revertConfig() {
   preparedLength = currentLength;
   preparedTime = -1;
 
-  Serial.println("Reverted config to original state");
+  Serial.println("Reverted config to original state \n");
+  return;
 }
 
 void runPulleys() {
