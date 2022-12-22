@@ -2,7 +2,6 @@
 #include <WiFiClient.h>
 
 
-
 // WiFi credentials
 #include "Secret.h"
 const char *ssid = SECRET_SSID;
@@ -11,8 +10,11 @@ char c;
 String readString = String(100);
 WiFiServer wifiServer(80);
 
+bool ledstate = HIGH;
+int pin = 5;
 
 void setup() {
+
   Serial.begin(9600);
   delay(1000);
 
@@ -31,9 +33,10 @@ void setup() {
 
 void loop() {
   WiFiClient client = wifiServer.available();
-
-
+  digitalWrite(pin, HIGH);
   if (client) {
+    ledstate = !ledstate;
+    //digitalWrite(5, ledstate);
     Serial.println("Client connected");
 
     while (client.connected()) {
