@@ -25,7 +25,7 @@ class Space:
         with open(path, 'r') as f:
             self.waypoints = Waypoint.waypoints_from_2d_list(json.load(f))
 
-    def is_in_space(self, point: Point, check_limit=True) -> bool:
+    def is_in_space(self, point: Point | Waypoint, check_limit=True) -> bool:
         """
         Checks if the point is in the space.
         :param point: Point to check
@@ -45,11 +45,25 @@ class Space:
             return False
         return True
 
+    def is_legal_point(self, point: Point | Waypoint) -> bool:
+        """
+        Checks if the point is in space, and doesn't require a longer rope than possible.
+        :param point: Point to check
+        :return: True if the point is legal, False otherwise
+        """
+        if not self.is_in_space(point):
+            return False
+        for pulley in self.pulleys:
+            new_length = sqrt((pulley.x - point.x) ** 2 + (pulley.y - point.y) ** 2 + (pulley.z - point.z) ** 2)
+            if new_length > pulley.max_length:
+                return False
+        return True
+
     def add_pulley(self, pulley: Pulley) -> None:
         self.pulleys.append(pulley)
         self.pulleys = sorted(self.pulleys)
 
-    def update_lengths(self, point: Point, time: int | float) -> None:
+    def update_lengths(self, point: Point | Waypoint, time: int | float) -> None:
         """
         Updates the lengths of the ropes of the pulleys in the space.
         Raises ValueError if the point is not in the space.

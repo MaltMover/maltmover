@@ -25,8 +25,8 @@ def main():
     space.add_pulley(Pulley(Point(SIZE[0], 0, SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(0, SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(SIZE[0], SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
-    requests_handler = RequestHandler(IPS)
-    app = App(space, requests_handler)
+    request_handler = RequestHandler(IPS)
+    app = App(space, request_handler)
     app.mainloop()
 
 

@@ -1,8 +1,8 @@
+from point import Point, Waypoint
 from space import Space
 from request_handler import RequestHandler
-import tkinter
-import json
 
+import json
 import customtkinter
 import os
 from PIL import Image
@@ -13,6 +13,7 @@ images = {
     "logo_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "crane.png")), size=(26, 26)),
     "large_test_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "large_test_image.png")), size=(500, 150)),
     "image_icon_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "image_icon_light.png")), size=(20, 20)),
+    "waypoint_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "waypoint_light.png")), size=(30, 30)),
     "home_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "home_light.png")), size=(20, 20)),
     "cog_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "cog_light.png")), size=(20, 20)),
     "white_pulley_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "whitepulley.png")), size=(25, 25)),
@@ -53,22 +54,23 @@ class NavigationBar(customtkinter.CTkFrame):
 class HomePage(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+        self.master = master
+        self.waypoint_buttons = []
         self.configure(fg_color="transparent")
-        self.home_frame_large_image_label = customtkinter.CTkLabel(self, text="", image=images["large_test_image"])
-        self.home_frame_large_image_label.grid(row=0, column=0, padx=20, pady=10)
-
-        self.home_frame_button_1 = customtkinter.CTkButton(self, text="", image=images["image_icon_image"])
-        self.home_frame_button_1.grid(row=1, column=0, padx=20, pady=10)
-        self.home_frame_button_2 = customtkinter.CTkButton(self, text="CTkButton", image=images["image_icon_image"], compound="right")
-        self.home_frame_button_2.grid(row=2, column=0, padx=20, pady=10)
-        self.home_frame_button_3 = customtkinter.CTkButton(self, text="CTkButton", image=images["image_icon_image"], compound="top")
-        self.home_frame_button_3.grid(row=3, column=0, padx=20, pady=10)
-        self.home_frame_button_4 = customtkinter.CTkButton(self, text="CTkButton", image=images["image_icon_image"], compound="bottom",
-                                                           anchor="w")
-        self.home_frame_button_4.grid(row=4, column=0, padx=20, pady=10)
 
     def load(self):
-        pass
+        legal_waypoints = [w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)]
+        illegal_waypoints = [w for w in self.master.space.waypoints if w not in legal_waypoints]
+        print(legal_waypoints)
+        print(illegal_waypoints)
+        for i, waypoint in enumerate(legal_waypoints):
+            time = self.master.space.calculate_min_time(waypoint)
+            waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text=waypoint.name,
+                                                      fg_color="transparent", text_color="gray90", hover_color="gray30",
+                                                      image=images["waypoint_image"], anchor="w",
+                                                      command=lambda waypoint=waypoint: self.master.move_system(waypoint, time))
+            waypoint_button.grid(row=i, column=0, sticky="ew")
+            self.waypoint_buttons.append(waypoint_button)
 
 
 class StatusPage(customtkinter.CTkFrame):
@@ -101,18 +103,24 @@ class StatusPage(customtkinter.CTkFrame):
         self.pulley_3_length.place(relx=0.88, rely=0.33, anchor="center")
 
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                              command=self.test_connection)
+                                                              command=self.get_lengths)
         self.test_connection_button.place(relx=0.5, rely=0.5, anchor="center")
         self.load_pulley_info()
 
     def load(self):
+        for success, image in zip(self.master.request_handler.success_map[0],
+                                  [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
+            if success:
+                image.configure(image=images["green_pulley_image"])
+            else:
+                image.configure(image=images["red_pulley_image"])
         self.load_pulley_info()
 
     def load_pulley_info(self):
         for pulley, label in zip(self.master.space.pulleys, [self.pulley_0_length, self.pulley_1_length, self.pulley_2_length, self.pulley_3_length]):
             label.configure(text=f"{pulley.length} dm")
 
-    def test_connection(self):
+    def get_lengths(self):
         lengths, success_map = self.master.request_handler.get_lengths()
         for success, image in zip(success_map, [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
             if success:
@@ -299,6 +307,10 @@ class App(customtkinter.CTk):
             self.config_frame.load()
         else:
             self.config_frame.grid_forget()
+
+    def move_system(self, target: Point | Waypoint, time: float):
+        self.space.update_lengths(target, time)
+        self.request_handler.set_pulleys(self.space.pulleys, time)
 
 
 if __name__ == "__main__":
