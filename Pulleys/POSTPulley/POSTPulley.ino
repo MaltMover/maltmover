@@ -16,6 +16,9 @@ ESP8266WebServer server(80);
 void setup() {
 
   Serial.begin(9600);
+
+  calibrate(); // stops execution of code until pulley is calibrated
+
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -77,7 +80,7 @@ void handleBody() {
     setConfig(length, time);
     return;
   }
-  
+
   Serial.println("Error - request does not contain known key");
 
 }
@@ -110,3 +113,9 @@ void runPulleys() {
   return;
 }
 
+
+void calibrate() {
+  // add code to calibrate length of wire
+  //delay(5000);
+  return;
+}
