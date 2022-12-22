@@ -1,3 +1,5 @@
+from space import Space
+from request_handler import RequestHandler
 import tkinter
 import json
 
@@ -103,7 +105,12 @@ class StatusPage(customtkinter.CTkFrame):
         pass
 
     def test_connection(self):
-        print("wow")
+        success_map = self.master.request_handler.run_test()
+        for success, image in zip(success_map, [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
+            if success:
+                image.configure(image=images["green_pulley_image"])
+            else:
+                image.configure(image=images["red_pulley_image"])
 
 
 class ConfigPage(customtkinter.CTkFrame):
@@ -226,8 +233,10 @@ class ConfigPage(customtkinter.CTkFrame):
 
 
 class App(customtkinter.CTk):
-    def __init__(self):
+    def __init__(self, space: Space, request_handler: RequestHandler):
         super().__init__()
+        self.space = space
+        self.request_handler = request_handler
         self.title("Malt Mover")
         self.geometry("700x450")
 

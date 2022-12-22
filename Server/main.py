@@ -1,7 +1,8 @@
 from point import Point
 from pulley import Pulley
 from space import Space
-from request_handler import RequestsHandler
+from request_handler import RequestHandler
+from GUI import App
 import json
 
 with open("config.json", "r") as f:
@@ -23,14 +24,9 @@ def main():
     space.add_pulley(Pulley(Point(SIZE[0], 0, SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(0, SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
     space.add_pulley(Pulley(Point(SIZE[0], SIZE[1], SIZE[2]), ROPE_LENGTH, MAX_SPEED))
-    target = Point(25, 25, 10)
-    time = space.calculate_min_time(target)
-    print(f"Time: {time}s")
-    space.update_lengths(target, time)
-    for pulley in space.pulleys:
-        print(pulley)
-    requests_handler = RequestsHandler(IPS)
-    print(requests_handler.set_pulleys(space.pulleys, time))
+    requests_handler = RequestHandler(IPS)
+    app = App(space, requests_handler)
+    app.mainloop()
 
 
 if __name__ == '__main__':

@@ -12,7 +12,7 @@ IPS = (
 )
 
 
-class RequestsHandler:
+class RequestHandler:
     def __init__(self, addresses: tuple[str, ...] | list[str, ...]):
         self.addresses = addresses
         self.threads = []
@@ -24,6 +24,11 @@ class RequestsHandler:
 
     def __repr__(self):
         return f"RequestsHandler{self.addresses}"
+
+    def run_test(self) -> list[bool]:
+        data = [{"test": True} for _ in range(len(self.addresses))]
+        self.send_requests(data, request_num=0)
+        return self.success_map[0]
 
     def set_pulleys(self, pulleys: list[Pulley], time: int | float) -> list[list[bool]]:
         if len(pulleys) != len(self.addresses):
@@ -92,5 +97,5 @@ class RequestsHandler:
 
 
 if __name__ == "__main__":
-    handler = RequestsHandler(IPS)
+    handler = RequestHandler(IPS)
     print(handler)
