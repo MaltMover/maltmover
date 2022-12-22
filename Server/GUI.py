@@ -100,17 +100,23 @@ class StatusPage(customtkinter.CTkFrame):
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                               command=self.test_connection)
         self.test_connection_button.place(relx=0.5, rely=0.5, anchor="center")
+        self.load_pulley_info()
 
     def load_pulley_info(self):
-        pass
+        for pulley, label in zip(self.master.space.pulleys, [self.pulley_0_length, self.pulley_1_length, self.pulley_2_length, self.pulley_3_length]):
+            label.configure(text=f"{pulley.length} dm")
 
     def test_connection(self):
-        success_map = self.master.request_handler.run_test()
+        lengths, success_map = self.master.request_handler.get_lengths()
         for success, image in zip(success_map, [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
             if success:
                 image.configure(image=images["green_pulley_image"])
             else:
                 image.configure(image=images["red_pulley_image"])
+
+        for i, length in enumerate(lengths):
+            self.master.space.pulleys[i].length = length
+        self.load_pulley_info()
 
 
 class ConfigPage(customtkinter.CTkFrame):

@@ -17,6 +17,7 @@ class RequestHandler:
         self.addresses = addresses
         self.threads = []
         self.response_count = 0
+        self.responses = [{}] * len(self.addresses)
         self.success_map = [  # Stores boolean map of success for each request
             [False for _ in range(len(self.addresses))],
             [False for _ in range(len(self.addresses))]
@@ -25,10 +26,11 @@ class RequestHandler:
     def __repr__(self):
         return f"RequestsHandler{self.addresses}"
 
-    def run_test(self) -> list[bool]:
-        data = [{"test": True} for _ in range(len(self.addresses))]
+    def get_lengths(self) -> tuple[list[float], list[bool]]:
+        data = [{"send_length": True} for _ in range(len(self.addresses))]
         self.send_requests(data, request_num=0)
-        return self.success_map[0]
+        lengths = [i["length"] if i else 0.0 for i in self.responses]
+        return lengths, self.success_map[0]
 
     def set_pulleys(self, pulleys: list[Pulley], time: int | float) -> list[list[bool]]:
         if len(pulleys) != len(self.addresses):
@@ -53,6 +55,7 @@ class RequestHandler:
 
     def send_requests(self, data: list[dict], timeout: int | float = 3, request_num=-1) -> bool:
         self.response_count = 0
+        self.responses = [""] * len(self.addresses)
         # Reset success map, for current and future requests
         self.success_map[request_num] = [False for _ in range(len(self.addresses))]
         if request_num < 1:
@@ -86,6 +89,7 @@ class RequestHandler:
         """
         try:
             response = requests.post(f"http://{address}/", json=data, timeout=timeout)
+            self.responses[pulley_num] = response.json()
         except (requests.exceptions.InvalidSchema, requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
             self.response_count += 1
             return False
