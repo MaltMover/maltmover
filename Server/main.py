@@ -7,6 +7,14 @@ SIZE = [10, 10, 10]
 ROPE_LENGTH = 50
 MAX_SPEED = 10
 
+# Ips of the pulley-systems
+IPS = [
+    "192.168.172.1",
+    "192.168.172.2",
+    "192.168.172.3",
+    "192.168.172.4"
+]
+
 
 def main():
     space = Space(*SIZE)
