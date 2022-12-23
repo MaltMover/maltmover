@@ -8,7 +8,7 @@
   "max_speed": 10.0,
   "edge_limit": 5.0,
   "init_time": 15.0,
-  "three_point_move": true,
+  "three_point_move": false,
   "ips": [
     "192.168.1.69",
     "192.168.1.69",

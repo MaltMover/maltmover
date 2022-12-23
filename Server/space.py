@@ -87,11 +87,19 @@ class Space:
         self.current_point = point
         print(self.current_point)
 
-    def calculate_min_time(self, target: Point) -> float:
+    def calculate_min_time(self, target: Point, three_point_move=False) -> float:
         """
         Calculates the minimum time it takes to move from current position to target point, given the max_speed of the pulleys.
+        :param target: Target point
+        :param three_point_move: If True, calculates the time for a three-point move
         :return: time in seconds, rounded to 2 decimal places
         """
+        if three_point_move:
+            t1 = self.calculate_min_time(Point(self.current_point.x, self.current_point.y, self.size_z - self.edge_limit))
+            t2 = self.calculate_min_time(Point(target.x, target.y, self.size_z - self.edge_limit))
+            t3 = self.calculate_min_time(Point(target.x, target.y, target.z))
+            time = t1 + t2 + t3
+            return ceil(time * 100) / 100
         min_time = -1
         for pulley in self.pulleys:
             end_length = sqrt((pulley.x - target.x) ** 2 + (pulley.y - target.y) ** 2 + (pulley.z - target.z) ** 2)
@@ -99,7 +107,6 @@ class Space:
             if pulley_time > min_time:
                 min_time = pulley_time
 
-        print(min_time)
         return ceil(min_time * 100) / 100
 
 

@@ -77,7 +77,7 @@ class HomePage(customtkinter.CTkFrame):
             config = json.load(f)
         three_point = config['three_point_move']
         for i, waypoint in enumerate(legal_waypoints + illegal_waypoints):
-            time = self.master.space.calculate_min_time(waypoint)
+            time = self.master.space.calculate_min_time(waypoint, three_point)
             waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10,
                                                       text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
                                                       fg_color="transparent", text_color="gray90", hover_color="gray30",
