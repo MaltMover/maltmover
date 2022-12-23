@@ -11,13 +11,17 @@ class FakePulley:
         if "length" in data and "time" in data:
             self.prep_length = data["length"]
             self.prep_time = data["time"]
-            return {"success": True}
         elif "run" in data:
             if data["run"]:
                 self.length = self.prep_length
                 self.prep_length = 0.0
                 self.prep_time = -1
-                return {"success": True}
+            else:
+                self.prep_length = self.length
+                self.prep_time = -1
         elif "send_length" in data:
             return {"success": True, "length": self.length}
-        return {"success": False}
+        else:
+            return {"success": False}
+
+        return {"success": True}

@@ -1,5 +1,6 @@
 import customtkinter
 import os
+import re
 import threading
 import time
 from PIL import Image
@@ -30,23 +31,24 @@ class App(customtkinter.CTk):
         self.alive = True
 
     def update_values(self):
+        self.update_length()
         self.data_list.update_value("prep_length", self.fp.prep_length)
         self.data_list.update_value("prep_time", self.fp.prep_time)
-        self.update_length()
 
     def update_length(self):
         self.update_thread = threading.Thread(target=self.fade_length)
         self.update_thread.start()
 
     def fade_length(self):
-        start = time.time()
-        start_length = self.fp.length
-        end_length = self.fp.prep_length
+        start_time = time.time()
+        start_length = float(re.match(r"[\d.]*", self.data_list.length_data.cget("text")).group(0))
+        end_length = self.fp.length
         diff = end_length - start_length
+        prep_time = float(re.match(r"[\d.]*", self.data_list.prep_time_data.cget("text")).group(0))
         self.pulley_frame.run()
-        while time.time() - start < self.fp.prep_time and self.alive:
-            self.data_list.update_value("length", abs(start_length + diff * ((time.time() - start) / self.fp.prep_time)))
-            self.data_list.update_value("time", abs(self.fp.prep_time - (time.time() - start)))
+        while time.time() - start_time < prep_time and self.alive:
+            self.data_list.update_value("length", abs(start_length + diff * ((time.time() - start_time) / prep_time)))
+            self.data_list.update_value("time", abs(prep_time - (time.time() - start_time)))
         self.pulley_frame.stop()
 
     def kill(self):
