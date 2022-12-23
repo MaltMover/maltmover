@@ -54,9 +54,9 @@ class NavigationBar(customtkinter.CTkFrame):
         self.config_button.grid(row=3, column=0, sticky="ew")
 
         self.waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Waypoints",
-                                                         fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                         image=images["waypoint_image"], anchor="w",
-                                                         command=lambda: master.select_frame_by_name("waypoints"))
+                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                       image=images["waypoint_image"], anchor="w",
+                                                       command=lambda: master.select_frame_by_name("waypoints"))
         self.waypoint_button.grid(row=4, column=0, sticky="ew")
 
 
@@ -299,12 +299,56 @@ class ConfigPage(customtkinter.CTkFrame):
 class WaypointPage(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
+        self.master = master
+        self.waypoint_buttons = []
         self.configure(self, corner_radius=0, fg_color="transparent")
         customtkinter.CTkLabel(self, text="Waypoints", font=customtkinter.CTkFont(size=15, weight="bold")
                                ).place(relx=0.5, rely=0.05, anchor="center")
 
     def load(self):
-        pass
+        for button in self.waypoint_buttons:
+            button.destroy()
+        self.waypoint_buttons = []
+        for i, waypoint in enumerate(self.master.space.waypoints):
+            button = customtkinter.CTkButton(self, text=waypoint.name, font=customtkinter.CTkFont(size=15),
+                                             command=lambda i=i: self.edit_waypoint(i))
+            button.place(relx=0.2 + (i % 3) * 0.3, rely=0.2 + (i // 3) * 0.1, anchor="center")
+            self.waypoint_buttons.append(button)
+
+    def edit_waypoint(self, index: int):
+        waypoint = self.master.space.waypoints[index]
+        editor = customtkinter.CTkToplevel(self)
+        editor.title("Edit Waypoint")
+        editor.geometry("500x300")
+        editor.resizable(False, False)
+        editor.grab_set()
+        name_entry = customtkinter.CTkEntry(editor, width=200, font=customtkinter.CTkFont(size=15))
+        name_entry.insert(0, waypoint.name)
+        name_entry.place(relx=0.5, rely=0.1, anchor="center")
+        x_label = customtkinter.CTkLabel(editor, text="x", font=customtkinter.CTkFont(size=15))
+        x_entry = customtkinter.CTkEntry(editor, width=200, font=customtkinter.CTkFont(size=15))
+        x_entry.insert(0, waypoint.x)
+        x_label.place(relx=0.25, rely=0.3, anchor="center")
+        x_entry.place(relx=0.5, rely=0.3, anchor="center")
+        y_label = customtkinter.CTkLabel(editor, text="y", font=customtkinter.CTkFont(size=15))
+        y_entry = customtkinter.CTkEntry(editor, width=200, font=customtkinter.CTkFont(size=15))
+        y_entry.insert(0, waypoint.y)
+        y_label.place(relx=0.25, rely=0.5, anchor="center")
+        y_entry.place(relx=0.5, rely=0.5, anchor="center")
+        z_label = customtkinter.CTkLabel(editor, text="z", font=customtkinter.CTkFont(size=15))
+        z_entry = customtkinter.CTkEntry(editor, width=200, font=customtkinter.CTkFont(size=15))
+        z_entry.insert(0, waypoint.z)
+        z_label.place(relx=0.25, rely=0.7, anchor="center")
+        z_entry.place(relx=0.5, rely=0.7, anchor="center")
+        save_button = customtkinter.CTkButton(editor, text="Save", font=customtkinter.CTkFont(size=15),
+                                              command=lambda: self.save_waypoint(index, editor, x_entry.get(), y_entry.get(), z_entry.get(),
+                                                                                 name_entry.get()))
+        save_button.place(relx=0.5, rely=0.9, anchor="center")
+
+    def save_waypoint(self, index: int, editor: customtkinter.CTkToplevel, x, y, z, name):
+        self.master.space.waypoints[index] = Waypoint(float(x), float(y), float(z), name)
+        editor.destroy()
+        self.load()
 
 
 class App(customtkinter.CTk):
