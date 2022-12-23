@@ -246,6 +246,13 @@ class ConfigPage(customtkinter.CTkFrame):
         self.pulley_2_entry.place(relx=0.65, rely=0.75, anchor="se")
         self.pulley_3_label.place(relx=0.03, rely=0.85, anchor="sw")
         self.pulley_3_entry.place(relx=0.65, rely=0.85, anchor="se")
+        # 3-point move toggle
+        self.three_point_move_label = customtkinter.CTkLabel(self, text="3-point Move", font=big_font)
+        self.three_point_move_toggle = customtkinter.CTkButton(self, width=150, height=50, font=small_font, text="OFF", fg_color="#b52802",
+                                                               text_color="white", hover_color="#cc1608",
+                                                               command=self.toggle_3_point)
+        self.three_point_move_label.place(relx=.72, rely=0.48, anchor="sw")
+        self.three_point_move_toggle.place(relx=0.98, rely=0.60, anchor="se")
 
         self.read_config()
         self.save_button = customtkinter.CTkButton(self, text="Save Config", font=big_font, command=self.save_config)
@@ -253,6 +260,12 @@ class ConfigPage(customtkinter.CTkFrame):
 
     def load(self):
         self.read_config()
+
+    def toggle_3_point(self):
+        if self.three_point_move_toggle.cget("text") == "OFF":
+            self.three_point_move_toggle.configure(text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870")
+        else:
+            self.three_point_move_toggle.configure(text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608")
 
     def read_config(self):
         with open(self.config_path, "r") as f:
@@ -282,6 +295,10 @@ class ConfigPage(customtkinter.CTkFrame):
         self.pulley_2_entry.insert(0, config["ips"][2])
         self.pulley_3_entry.delete(0, customtkinter.END)
         self.pulley_3_entry.insert(0, config["ips"][3])
+        if config["three_point_move"]:
+            self.three_point_move_toggle.configure(text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870")
+        else:
+            self.three_point_move_toggle.configure(text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608")
 
     def save_config(self):
         with open(self.config_path, "r") as f:
@@ -296,8 +313,9 @@ class ConfigPage(customtkinter.CTkFrame):
         config["ips"][1] = self.pulley_1_entry.get()
         config["ips"][2] = self.pulley_2_entry.get()
         config["ips"][3] = self.pulley_3_entry.get()
+        config["three_point_move"] = self.three_point_move_toggle.cget("text") == "ON"
         with open(self.config_path, "w") as f:
-            json.dump(config, f, indent=4)
+            json.dump(config, f, indent=2)
         space = create_space(self.master.space.current_point)
         request_handler = create_request_handler()
         self.master.space = space

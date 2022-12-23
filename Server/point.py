@@ -67,7 +67,7 @@ def main():
     with open("waypoints.json", "r") as f:
         waypoints = Waypoint.waypoints_from_2d_list(json.load(f))
     print(waypoints)
-    print(json.dumps([w.to_list() for w in waypoints], indent=4))
+    print(json.dumps([w.to_list() for w in waypoints], indent=2))
 
 
 if __name__ == '__main__':
