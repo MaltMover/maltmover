@@ -92,6 +92,9 @@ class App(customtkinter.CTk):
         self.status_frame.get_lengths(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
+        with open('config.json', 'r') as f:
+            config = json.load(f)
+        delay = config["three_point_delay"]
         targets = [
             Point(self.space.current_point.x, self.space.current_point.y, self.space.size_z - self.space.edge_limit),
             Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
@@ -104,8 +107,8 @@ class App(customtkinter.CTk):
             success_map = self.request_handler.set_pulleys(self.space.pulleys, rtime)
             if not (all(success_map[0]) and all(success_map[1])):
                 return
-            sleep(rtime)
-        self.status_frame.get_lengths(timeout=1)
+            sleep(rtime + delay)
+        self.status_frame.get_lengths(timeout=4)
 
     def move_as_thread(self, target: Point | Waypoint, time: float, three_point=False):
         if three_point:

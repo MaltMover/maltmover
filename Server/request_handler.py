@@ -106,7 +106,8 @@ class RequestHandler:
         except (requests.exceptions.InvalidSchema,
                 requests.exceptions.ConnectTimeout,
                 requests.exceptions.ConnectionError,
-                requests.exceptions.JSONDecodeError) as e:
+                requests.exceptions.JSONDecodeError,
+                requests.exceptions.ReadTimeout) as e:
             print(e)
             self.response_count += 1
             return False
