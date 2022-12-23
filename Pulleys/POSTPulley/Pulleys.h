@@ -9,8 +9,10 @@ Stepper PulleyStepper(stepsPrRev, 14, 13, 12, 15);
 
 void runPulleys(double preparedLength, double preparedTime, double* mem_currentLength) {
   double lenToMove = preparedLength - *mem_currentLength;
-  
-  
+
+  if (lenToMove == 0){
+    return;
+  }
 
   double revAmount = revsPrDM * lenToMove;
   double stepAmount = revAmount * stepsPrRev;
@@ -28,8 +30,6 @@ void runPulleys(double preparedLength, double preparedTime, double* mem_currentL
       return;
   }  
 
-  
-
   Serial.print("current length: ");
   Serial.println(*mem_currentLength);
   Serial.print("len to move: ");
@@ -39,7 +39,6 @@ void runPulleys(double preparedLength, double preparedTime, double* mem_currentL
   Serial.print("steps to move: ");
   Serial.println(stepAmount);
   Serial.println();
-
   
   for (int i = 0; i < abs(stepAmount); i++) {
     PulleyStepper.step(rotDirection);
@@ -48,7 +47,6 @@ void runPulleys(double preparedLength, double preparedTime, double* mem_currentL
       yield();
     }
   }
-  
   
   *mem_currentLength = preparedLength;
   return;
