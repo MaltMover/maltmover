@@ -317,6 +317,9 @@ class WaypointPage(customtkinter.CTkFrame):
                                              command=lambda i=i: self.edit_waypoint(i))
             button.place(relx=0.2 + (i % 3) * 0.3, rely=0.2 + (i // 3) * 0.1, anchor="center")
             self.waypoint_buttons.append(button)
+        add_button = customtkinter.CTkButton(self, text="Add Waypoint", font=customtkinter.CTkFont(size=15),
+                                             command=self.add_waypoint)
+        add_button.place(relx=0.5, rely=0.9, anchor="center")
 
     def edit_waypoint(self, index: int):
         waypoint = self.master.space.waypoints[index]
@@ -343,13 +346,26 @@ class WaypointPage(customtkinter.CTkFrame):
         z_entry.insert(0, waypoint.z)
         z_label.place(relx=0.25, rely=0.7, anchor="center")
         z_entry.place(relx=0.5, rely=0.7, anchor="center")
-        save_button = customtkinter.CTkButton(editor, text="Save", font=customtkinter.CTkFont(size=15),
+        delete_button = customtkinter.CTkButton(editor, text="Delete", font=customtkinter.CTkFont(size=15), width=75, fg_color="#b52802",
+                                                command=lambda: self.delete_waypoint(index, editor))
+        delete_button.place(relx=0.4, rely=0.9, anchor="center")
+        save_button = customtkinter.CTkButton(editor, text="Save", font=customtkinter.CTkFont(size=15), width=75,
                                               command=lambda: self.save_waypoint(index, editor, x_entry.get(), y_entry.get(), z_entry.get(),
                                                                                  name_entry.get()))
-        save_button.place(relx=0.5, rely=0.9, anchor="center")
+        save_button.place(relx=0.6, rely=0.9, anchor="center")
 
     def save_waypoint(self, index: int, editor: customtkinter.CTkToplevel, x, y, z, name):
         self.master.space.waypoints[index] = Waypoint(float(x), float(y), float(z), name)
+        editor.destroy()
+        self.load()
+
+    def add_waypoint(self):
+        self.master.space.waypoints.append(Waypoint(0, 0, 0, "New Waypoint"))
+        self.load()
+        self.edit_waypoint(-1)
+
+    def delete_waypoint(self, index: int, editor: customtkinter.CTkToplevel):
+        self.master.space.waypoints.pop(index)
         editor.destroy()
         self.load()
 
