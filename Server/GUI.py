@@ -46,17 +46,17 @@ class NavigationBar(customtkinter.CTkFrame):
                                                      command=lambda: master.select_frame_by_name("pulleys"))
         self.pulley_button.grid(row=2, column=0, sticky="ew")
 
-        self.config_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Config",
-                                                     fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                     image=images["cog_image"], anchor="w",
-                                                     command=lambda: master.select_frame_by_name("config"))
-        self.config_button.grid(row=3, column=0, sticky="ew")
-
         self.waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Waypoints",
                                                        fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
                                                        image=images["waypoint_image"], anchor="w",
                                                        command=lambda: master.select_frame_by_name("waypoints"))
-        self.waypoint_button.grid(row=4, column=0, sticky="ew")
+        self.waypoint_button.grid(row=3, column=0, sticky="ew")
+
+        self.config_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Config",
+                                                     fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
+                                                     image=images["cog_image"], anchor="w",
+                                                     command=lambda: master.select_frame_by_name("config"))
+        self.config_button.grid(row=4, column=0, sticky="ew")
 
 
 class HomePage(customtkinter.CTkFrame):
@@ -67,9 +67,12 @@ class HomePage(customtkinter.CTkFrame):
         self.configure(fg_color="transparent")
 
     def load(self):
+        for button in self.waypoint_buttons:
+            button.destroy()
+        self.waypoint_buttons = []
         legal_waypoints = [w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)]
         illegal_waypoints = [w for w in self.master.space.waypoints if w not in legal_waypoints]
-        for i, waypoint in enumerate(legal_waypoints):
+        for i, waypoint in enumerate(legal_waypoints + illegal_waypoints):
             time = self.master.space.calculate_min_time(waypoint)
             waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10,
                                                       text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
@@ -80,6 +83,8 @@ class HomePage(customtkinter.CTkFrame):
                 waypoint_button.configure(state="disabled")
             waypoint_button.grid(row=i, column=0, sticky="ew")
             self.waypoint_buttons.append(waypoint_button)
+        for i in range(len(legal_waypoints), len(self.waypoint_buttons)):
+            self.waypoint_buttons[i].configure(state="disabled")
         print(self.master.space.current_point)
 
 
