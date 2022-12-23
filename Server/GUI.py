@@ -376,6 +376,7 @@ class App(customtkinter.CTk):
         self.space = space
         self.request_handler = request_handler
         self.title("Malt Mover")
+        self.iconbitmap(os.path.join(image_path, "crane.ico"))
         self.geometry("700x450")
 
         # set grid layout 1x2
