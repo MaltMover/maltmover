@@ -16,9 +16,19 @@ void runPulleys(double preparedLength, double preparedTime, double* mem_currentL
   double stepAmount = revAmount * stepsPrRev;
   double speed = (abs(revAmount) / abs(preparedTime)) * 60;
 
-
-
   PulleyStepper.setSpeed(round(speed));
+
+  int rotDirection = 1;
+
+  if (stepAmount > 0) {
+      rotDirection = 1;
+    } else if (stepAmount < 0) {
+      rotDirection = -1;
+    } else {
+      return;
+  }  
+
+  
 
   Serial.print("current length: ");
   Serial.println(*mem_currentLength);
@@ -32,23 +42,14 @@ void runPulleys(double preparedLength, double preparedTime, double* mem_currentL
 
   
   for (int i = 0; i < abs(stepAmount); i++) {
-    if (stepAmount > 0) {
-      PulleyStepper.step(1);
-    } else if (stepAmount < 0) {
-      PulleyStepper.step(-1);
-    } else {
-      break;
-    }     
+    PulleyStepper.step(rotDirection);
 
     if (i % 25 == 0) {
       yield();
-      delay(1);
     }
   }
   
   
-
   *mem_currentLength = preparedLength;
-  //delay(preparedTime * 1000);
   return;
 }
