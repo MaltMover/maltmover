@@ -33,6 +33,11 @@ class Pulley:
         :param length: The new length of the rope attached to the pulley.
         :param time: The time it should take to change the length of the rope.
         """
+        if time == -1:
+            if length > self.max_length:
+                raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
+            self.length = round(float(length), 2)
+            return
         if time == 0:
             raise ValueError('Time cannot be 0.')
         if length > self.max_length:

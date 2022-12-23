@@ -1,12 +1,11 @@
-import threading
-
 from point import Point, Waypoint
-from space import Space
-from request_handler import RequestHandler
+from space import Space, create_space
+from request_handler import RequestHandler, create_request_handler
 
-import json
 import customtkinter
+import json
 import os
+import threading
 from PIL import Image
 
 # load images with light and dark mode image
@@ -294,6 +293,10 @@ class ConfigPage(customtkinter.CTkFrame):
         config["ips"][3] = self.pulley_3_entry.get()
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=4)
+        space = create_space(self.master.space.current_point)
+        request_handler = create_request_handler()
+        self.master.space = space
+        self.master.request_handler = request_handler
 
 
 class WaypointPage(customtkinter.CTkFrame):
