@@ -43,6 +43,7 @@ class App(customtkinter.CTk):
         start_time = time.time()
         start_length = float(re.match(r"[\d.]*", self.data_list.length_data.cget("text")).group(0))
         end_length = self.fp.length
+        print(start_length, end_length)
         if start_length == end_length:
             return
         diff = end_length - start_length

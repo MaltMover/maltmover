@@ -94,11 +94,14 @@ class Space:
         :param three_point_move: If True, calculates the time for a three-point move
         :return: time in seconds, rounded to 2 decimal places
         """
+        with open('config.json', 'r') as f:
+            config = json.load(f)
         if three_point_move:
+            delay = config['three_point_delay']
             t1 = self.calculate_min_time(Point(self.current_point.x, self.current_point.y, self.size_z - self.edge_limit))
             t2 = self.calculate_min_time(Point(target.x, target.y, self.size_z - self.edge_limit))
             t3 = self.calculate_min_time(Point(target.x, target.y, target.z))
-            time = t1 + t2 + t3
+            time = t1 + t2 + t3 + (delay*2)
             return ceil(time * 100) / 100
         min_time = -1
         for pulley in self.pulleys:
