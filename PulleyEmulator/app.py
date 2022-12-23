@@ -43,8 +43,13 @@ class App(customtkinter.CTk):
         start_time = time.time()
         start_length = float(re.match(r"[\d.]*", self.data_list.length_data.cget("text")).group(0))
         end_length = self.fp.length
+        if start_length == end_length:
+            return
         diff = end_length - start_length
-        prep_time = float(re.match(r"[\d.]*", self.data_list.prep_time_data.cget("text")).group(0))
+        try:
+            prep_time = float(re.match(r"[\d.]*", self.data_list.prep_time_data.cget("text")).group(0))
+        except ValueError:
+            return
         self.pulley_frame.run()
         while time.time() - start_time < prep_time and self.alive:
             self.data_list.update_value("length", abs(start_length + diff * ((time.time() - start_time) / prep_time)))
