@@ -67,6 +67,7 @@ class RequestHandler:
         return self.success_map
 
     def send_requests(self, data: list[dict], timeout: int | float = 3, request_num=-1) -> bool:
+        self.threads = []
         self.response_count = 0
         self.responses = [""] * len(self.addresses)
         # Reset success map, for current and future requests

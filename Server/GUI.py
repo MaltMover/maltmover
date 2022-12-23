@@ -88,7 +88,8 @@ class App(customtkinter.CTk):
     def move_system(self, target: Point | Waypoint, time: float):
         self.space.update_lengths(target, time)
         self.request_handler.set_pulleys(self.space.pulleys, time)
-        self.status_frame.get_lengths(timeout=1)
+        sleep(time)
+        self.status_frame.get_lengths(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
         targets = [
