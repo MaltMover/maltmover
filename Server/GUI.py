@@ -321,6 +321,7 @@ class ConfigPage(customtkinter.CTkFrame):
         config["three_point_move"] = self.three_point_move_toggle.cget("text") == "ON"
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=2)
+        self.master.space.write_waypoints('waypoints.json')
         space = create_space(self.master.space.current_point)
         request_handler = create_request_handler()
         self.master.space = space
