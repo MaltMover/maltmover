@@ -28,6 +28,7 @@ def main():
     request_handler = RequestHandler(IPS)
     app = App(space, request_handler)
     app.mainloop()
+    space.write_waypoints("waypoints.json")
 
 
 if __name__ == '__main__':
