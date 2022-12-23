@@ -23,9 +23,35 @@ class App(customtkinter.CTk):
         self.geometry("960x540")
         self.iconbitmap(os.path.join(image_path, "crane.ico"))
         self.pulley_frame = PulleyDisplay(self)
-        self.information_list = LabelList(self)
+        self.data_list = DataList(self)
         self.pulley_frame.place(relx=0.03, rely=0.45, anchor="w")
-        self.information_list.place(relx=0.35, rely=0.45, anchor="w")
+        self.data_list.place(relx=0.35, rely=0.45, anchor="w")
+        self.update_thread = None
+        self.alive = True
+
+    def update_values(self):
+        self.data_list.update_value("prep_length", self.fp.prep_length)
+        self.data_list.update_value("prep_time", self.fp.prep_time)
+        self.update_length()
+
+    def update_length(self):
+        self.update_thread = threading.Thread(target=self.fade_length)
+        self.update_thread.start()
+
+    def fade_length(self):
+        start = time.time()
+        start_length = self.fp.length
+        end_length = self.fp.prep_length
+        diff = end_length - start_length
+        self.pulley_frame.run()
+        while time.time() - start < self.fp.prep_time and self.alive:
+            self.data_list.update_value("length", abs(start_length + diff * ((time.time() - start) / self.fp.prep_time)))
+            self.data_list.update_value("time", abs(self.fp.prep_time - (time.time() - start)))
+        self.pulley_frame.stop()
+
+    def kill(self):
+        self.alive = False
+        self.update_thread.join()
 
 
 class PulleyDisplay(customtkinter.CTkFrame):
@@ -42,7 +68,7 @@ class PulleyDisplay(customtkinter.CTkFrame):
         self.pulley_image_label.configure(image=images["white_pulley_image"])
 
 
-class LabelList(customtkinter.CTkFrame):
+class DataList(customtkinter.CTkFrame):
     def __init__(self, master: App):
         super().__init__(master)
         self.configure(height=300, width=500, fg_color="transparent")
@@ -65,7 +91,8 @@ class LabelList(customtkinter.CTkFrame):
         self.prep_length_data.place(relx=0.9, rely=0.5, anchor="e")
         self.prep_time_data.place(relx=0.9, rely=0.7, anchor="e")
 
-    def update_value(self, value: float, value_name: str):
+    def update_value(self, value_name: str, value: float):
+        value = round(value, 1)
         match value_name:
             case "length":
                 self.length_data.configure(text=f"{value} dm")
