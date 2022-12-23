@@ -474,7 +474,9 @@ class App(customtkinter.CTk):
 
         for rtarget, rtime in zip(targets, times):
             self.space.update_lengths(rtarget, rtime)
-            self.request_handler.set_pulleys(self.space.pulleys, rtime)
+            success_map = self.request_handler.set_pulleys(self.space.pulleys, rtime)
+            if not (all(success_map[0]) and all(success_map[1])):
+                return
             sleep(rtime)
         self.status_frame.get_lengths(timeout=1)
 
