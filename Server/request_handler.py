@@ -111,6 +111,14 @@ class RequestHandler:
         return False
 
 
+def create_request_handler():
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    ips = config["ips"]
+    return RequestHandler(ips)
+
+
 if __name__ == "__main__":
     handler = RequestHandler(IPS)
     print(handler)

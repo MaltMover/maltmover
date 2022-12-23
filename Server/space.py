@@ -47,11 +47,11 @@ class Space:
         else:
             limit = 0
 
-        if not limit < point.x < self.size_x - limit:
+        if not limit <= point.x <= self.size_x - limit:
             return False
-        if not limit < point.y < self.size_y - limit:
+        if not limit <= point.y <= self.size_y - limit:
             return False
-        if not limit < point.z < self.size_z - limit:
+        if not limit <= point.z <= self.size_z - limit:
             return False
         return True
 
@@ -73,13 +73,13 @@ class Space:
         self.pulleys.append(pulley)
         self.pulleys = sorted(self.pulleys)
 
-    def update_lengths(self, point: Point | Waypoint, time: int | float) -> None:
+    def update_lengths(self, point: Point | Waypoint, time: int | float, check_limit=True) -> None:
         """
         Updates the lengths of the ropes of the pulleys in the space.
         Raises ValueError if the point is not in the space.
         Raises ValueError if the time results in speed higher than a pulley max_speed.
         """
-        if not self.is_in_space(point):
+        if not self.is_in_space(point, check_limit=check_limit):
             raise ValueError(f'{point} is not within limits of the {self}')
         for pulley in self.pulleys:
             new_length = sqrt((pulley.x - point.x) ** 2 + (pulley.y - point.y) ** 2 + (pulley.z - point.z) ** 2)
@@ -101,3 +101,23 @@ class Space:
 
         print(min_time)
         return ceil(min_time * 100) / 100
+
+
+def create_space(current_point: Point = None):
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    size = config["size"]
+    rope_length = config["rope_length"]
+    max_speed = config["max_speed"]
+    edge_limit = config["edge_limit"]  # How close to the edge of the space, the object can be
+
+    space = Space(*size, edge_limit=edge_limit)
+    space.read_waypoints("waypoints.json")
+    space.add_pulley(Pulley(Point(0, 0, size[2]), rope_length, max_speed))
+    space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed))
+    space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed))
+    space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed))
+    if current_point:
+        space.update_lengths(current_point, -1, check_limit=False)
+    return space
