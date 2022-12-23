@@ -7,6 +7,7 @@ import json
 import os
 import threading
 from PIL import Image
+from time import sleep
 
 # load images with light and dark mode image
 image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
@@ -72,13 +73,17 @@ class HomePage(customtkinter.CTkFrame):
         self.waypoint_buttons = []
         legal_waypoints = [w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)]
         illegal_waypoints = [w for w in self.master.space.waypoints if w not in legal_waypoints]
+        with open('config.json', 'r') as f:
+            config = json.load(f)
+        three_point = config['three_point_move']
         for i, waypoint in enumerate(legal_waypoints + illegal_waypoints):
             time = self.master.space.calculate_min_time(waypoint)
             waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10,
                                                       text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
                                                       fg_color="transparent", text_color="gray90", hover_color="gray30",
                                                       image=images["waypoint_image"], anchor="w", font=(customtkinter.CTkFont, 18),
-                                                      command=lambda waypoint=waypoint, time=time: self.master.move_as_thread(waypoint, time))
+                                                      command=lambda waypoint=waypoint, time=time: self.master.move_as_thread(waypoint, time,
+                                                                                                                              three_point))
             if self.master.space.current_point == waypoint:
                 waypoint_button.configure(state="disabled")
             waypoint_button.grid(row=i, column=0, sticky="ew")
@@ -129,7 +134,7 @@ class StatusPage(customtkinter.CTkFrame):
                                                               command=self.get_lengths)
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                              command=lambda master=master: master.move_as_thread(master.space.center,
-                                                                                                                 init_time))
+                                                                                                                 init_time, False))
         self.test_connection_button.place(relx=0.5, rely=0.5, anchor="center")
         self.center_pulleys_button.place(relx=0.5, rely=0.6, anchor="center")
         self.load_pulley_info()
@@ -459,8 +464,25 @@ class App(customtkinter.CTk):
         self.request_handler.set_pulleys(self.space.pulleys, time)
         self.status_frame.get_lengths(timeout=1)
 
-    def move_as_thread(self, target: Point | Waypoint, time: float):
-        thread = threading.Thread(target=self.move_system, args=(target, time))
+    def move_system_three_point(self, target: Point | Waypoint):
+        targets = [
+            Point(self.space.current_point.x, self.space.current_point.y, self.space.size_z - self.space.edge_limit),
+            Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
+            Point(target.x, target.y, target.z)
+        ]
+        times = [self.space.calculate_min_time(t) for t in targets]
+
+        for rtarget, rtime in zip(targets, times):
+            self.space.update_lengths(rtarget, rtime)
+            self.request_handler.set_pulleys(self.space.pulleys, rtime)
+            sleep(rtime)
+        self.status_frame.get_lengths(timeout=1)
+
+    def move_as_thread(self, target: Point | Waypoint, time: float, three_point=False):
+        if three_point:
+            thread = threading.Thread(target=self.move_system_three_point, args=(target,))
+        else:
+            thread = threading.Thread(target=self.move_system, args=(target, time))
         thread.start()
         self.select_frame_by_name("pulleys")
 

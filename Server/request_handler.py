@@ -100,8 +100,13 @@ class RequestHandler:
         """
         try:
             response = requests.post(f"http://{address}/", json=data, timeout=timeout)
+            print(response.text)
             self.responses[pulley_num] = response.json()
-        except (requests.exceptions.InvalidSchema, requests.exceptions.ConnectTimeout, requests.exceptions.ConnectionError):
+        except (requests.exceptions.InvalidSchema,
+                requests.exceptions.ConnectTimeout,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.JSONDecodeError) as e:
+            print(e)
             self.response_count += 1
             return False
         self.response_count += 1
