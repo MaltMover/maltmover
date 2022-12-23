@@ -1,4 +1,5 @@
 from http.server import BaseHTTPRequestHandler, HTTPServer
+import sys
 import json
 
 
@@ -18,6 +19,7 @@ class TestHTTPHandler(BaseHTTPRequestHandler):
         content_length = int(self.headers["Content-Length"])  # Gets the size of data
         post_data = self.rfile.read(content_length)  # Gets the data itself
         post_data = json.loads(post_data.decode("utf-8"))  # Parse as json
+        print("Receive: ", post_data, "\n")
         response = FP.get_response(post_data)
         print(FP)
 
@@ -51,7 +53,10 @@ class FakePulley:
 
 
 def main():
-    server_address = ("", 80)
+    port = 80
+    if len(sys.argv) > 1:
+        port = int(sys.argv[1])
+    server_address = ("", port)
     httpd = HTTPServer(server_address, TestHTTPHandler)
     print("Starting server")
     httpd.serve_forever()

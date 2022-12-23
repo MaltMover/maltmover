@@ -4,15 +4,15 @@
     50.0,
     25.0
   ],
-  "rope_length": 75.0,
-  "max_speed": 10.0,
-  "edge_limit": 5.0,
+  "rope_length": 100.0,
+  "max_speed": 5.0,
+  "edge_limit": 4.0,
   "init_time": 15.0,
-  "three_point_move": false,
+  "three_point_move": true,
   "ips": [
     "192.168.1.69",
-    "192.168.1.69",
-    "192.168.1.69",
-    "127.0.0.1"
+    "127.0.0.1:8001",
+    "127.0.0.1:8002",
+    "127.0.0.1:8003"
   ]
 }
