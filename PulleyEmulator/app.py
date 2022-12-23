@@ -53,7 +53,10 @@ class App(customtkinter.CTk):
 
     def kill(self):
         self.alive = False
-        self.update_thread.join()
+        try:
+            self.update_thread.join()
+        except AttributeError:
+            pass
 
 
 class PulleyDisplay(customtkinter.CTkFrame):

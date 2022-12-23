@@ -32,13 +32,14 @@ class TestHTTPHandler(BaseHTTPRequestHandler):
 
 
 def run_server():
+    global HTTPD
     port = 80
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
     server_address = ("", port)
-    httpd = HTTPServer(server_address, TestHTTPHandler)
+    HTTPD = HTTPServer(server_address, TestHTTPHandler)
     print("Starting server")
-    httpd.serve_forever()
+    HTTPD.serve_forever()
 
 
 def start_server():
@@ -51,10 +52,12 @@ def main():
     start_server()
     APP.mainloop()
     APP.kill()
-    server_thread.join()
+    HTTPD.shutdown()
+    server_thread.join(2)
 
 
 if __name__ == '__main__':
+    HTTPD: HTTPServer = None
     server_thread = threading.Thread(target=run_server)
     FP = FakePulley()
     APP = App(FP)
