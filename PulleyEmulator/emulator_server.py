@@ -2,6 +2,8 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import sys
 import json
 
+from fake_pulley import FakePulley
+
 
 class TestHTTPHandler(BaseHTTPRequestHandler):
     def __init__(self, request, client_address, server):
@@ -25,31 +27,6 @@ class TestHTTPHandler(BaseHTTPRequestHandler):
 
         self._set_response()
         self.wfile.write(json.dumps(response).encode("utf-8"))  # Send response
-
-
-class FakePulley:
-    def __init__(self):
-        self.length = 0.0
-        self.prep_length = 0.0
-        self.prep_time = -1
-
-    def __str__(self):
-        return f"FakePulley(length={self.length}, prep_length={self.prep_length}, prep_time={self.prep_time})"
-
-    def get_response(self, data: dict) -> dict:
-        if "length" in data and "time" in data:
-            self.prep_length = data["length"]
-            self.prep_time = data["time"]
-            return {"success": True}
-        elif "run" in data:
-            if data["run"]:
-                self.length = self.prep_length
-                self.prep_length = 0.0
-                self.prep_time = -1
-                return {"success": True}
-        elif "send_length" in data:
-            return {"success": True, "length": self.length}
-        return {"success": False}
 
 
 def main():
