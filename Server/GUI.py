@@ -24,8 +24,99 @@ images = {
 }
 
 
+class App(customtkinter.CTk):
+    def __init__(self, space: Space, request_handler: RequestHandler):
+        super().__init__()
+        self.space = space
+        self.request_handler = request_handler
+        self.title("Malt Mover")
+        self.iconbitmap(os.path.join(image_path, "crane.ico"))
+        self.geometry("700x450")
+
+        # set grid layout 1x2
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(1, weight=1)
+
+        # create navigation frame
+        self.navigation_frame = NavigationBar(self)
+        self.navigation_frame.grid(row=0, column=0, sticky="nsew")
+
+        # create home frame
+        self.home_frame = HomePage(self)
+        self.home_frame.grid_columnconfigure(0, weight=1)
+
+        # create frame for status page
+        self.status_frame = StatusPage(self)
+
+        # create frame for config page
+        self.config_frame = ConfigPage(self, "config.json")
+
+        # create frame for waypoint page
+        self.waypoint_frame = WaypointPage(self)
+
+        # select default frame
+        self.select_frame_by_name("home")
+
+    def select_frame_by_name(self, name):
+        # set button color for selected button
+        self.navigation_frame.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
+        self.navigation_frame.pulley_button.configure(fg_color=("gray75", "gray25") if name == "pulleys" else "transparent")
+        self.navigation_frame.config_button.configure(fg_color=("gray75", "gray25") if name == "config" else "transparent")
+
+        # show selected frame
+        if name == "home":
+            self.home_frame.grid(row=0, column=1, sticky="nsew")
+            self.home_frame.load()
+        else:
+            self.home_frame.grid_forget()
+        if name == "pulleys":
+            self.status_frame.grid(row=0, column=1, sticky="nsew")
+            self.status_frame.load()
+        else:
+            self.status_frame.grid_forget()
+        if name == "config":
+            self.config_frame.grid(row=0, column=1, sticky="nsew")
+            self.config_frame.load()
+        else:
+            self.config_frame.grid_forget()
+        if name == "waypoints":
+            self.waypoint_frame.grid(row=0, column=1, sticky="nsew")
+            self.waypoint_frame.load()
+        else:
+            self.waypoint_frame.grid_forget()
+
+    def move_system(self, target: Point | Waypoint, time: float):
+        self.space.update_lengths(target, time)
+        self.request_handler.set_pulleys(self.space.pulleys, time)
+        self.status_frame.get_lengths(timeout=1)
+
+    def move_system_three_point(self, target: Point | Waypoint):
+        targets = [
+            Point(self.space.current_point.x, self.space.current_point.y, self.space.size_z - self.space.edge_limit),
+            Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
+            Point(target.x, target.y, target.z)
+        ]
+        times = [self.space.calculate_min_time(t) for t in targets]
+
+        for rtarget, rtime in zip(targets, times):
+            self.space.update_lengths(rtarget, rtime)
+            success_map = self.request_handler.set_pulleys(self.space.pulleys, rtime)
+            if not (all(success_map[0]) and all(success_map[1])):
+                return
+            sleep(rtime)
+        self.status_frame.get_lengths(timeout=1)
+
+    def move_as_thread(self, target: Point | Waypoint, time: float, three_point=False):
+        if three_point:
+            thread = threading.Thread(target=self.move_system_three_point, args=(target,))
+        else:
+            thread = threading.Thread(target=self.move_system, args=(target, time))
+        thread.start()
+        self.select_frame_by_name("pulleys")
+
+
 class NavigationBar(customtkinter.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master: App):
         super().__init__(master)
         self.configure(
             corner_radius=0,
@@ -61,9 +152,9 @@ class NavigationBar(customtkinter.CTkFrame):
 
 
 class HomePage(customtkinter.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master: App):
         super().__init__(master)
-        self.master = master
+        self.master: App = master
         self.waypoint_buttons = []
         self.configure(fg_color="transparent")
 
@@ -94,8 +185,9 @@ class HomePage(customtkinter.CTkFrame):
 
 
 class StatusPage(customtkinter.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master: App):
         super().__init__(master)
+        self.master: App = master
         self.configure(self, corner_radius=0, fg_color="transparent")
         self.pulley_0_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
         self.pulley_1_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
@@ -184,7 +276,7 @@ class StatusPage(customtkinter.CTkFrame):
 
 
 class ConfigPage(customtkinter.CTkFrame):
-    def __init__(self, master, config_path: str):
+    def __init__(self, master: App, config_path: str):
         super().__init__(master)
         self.config_path = config_path
         small_font = customtkinter.CTkFont(size=15)
@@ -329,9 +421,9 @@ class ConfigPage(customtkinter.CTkFrame):
 
 
 class WaypointPage(customtkinter.CTkFrame):
-    def __init__(self, master):
+    def __init__(self, master: App):
         super().__init__(master)
-        self.master = master
+        self.master: App = master
         self.waypoint_buttons = []
         self.configure(self, corner_radius=0, fg_color="transparent")
         customtkinter.CTkLabel(self, text="Waypoints", font=customtkinter.CTkFont(size=15, weight="bold")
@@ -397,97 +489,6 @@ class WaypointPage(customtkinter.CTkFrame):
         self.master.space.waypoints.pop(index)
         editor.destroy()
         self.load()
-
-
-class App(customtkinter.CTk):
-    def __init__(self, space: Space, request_handler: RequestHandler):
-        super().__init__()
-        self.space = space
-        self.request_handler = request_handler
-        self.title("Malt Mover")
-        self.iconbitmap(os.path.join(image_path, "crane.ico"))
-        self.geometry("700x450")
-
-        # set grid layout 1x2
-        self.grid_rowconfigure(0, weight=1)
-        self.grid_columnconfigure(1, weight=1)
-
-        # create navigation frame
-        self.navigation_frame = NavigationBar(self)
-        self.navigation_frame.grid(row=0, column=0, sticky="nsew")
-
-        # create home frame
-        self.home_frame = HomePage(self)
-        self.home_frame.grid_columnconfigure(0, weight=1)
-
-        # create frame for status page
-        self.status_frame = StatusPage(self)
-
-        # create frame for config page
-        self.config_frame = ConfigPage(self, "config.json")
-
-        # create frame for waypoint page
-        self.waypoint_frame = WaypointPage(self)
-
-        # select default frame
-        self.select_frame_by_name("home")
-
-    def select_frame_by_name(self, name):
-        # set button color for selected button
-        self.navigation_frame.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
-        self.navigation_frame.pulley_button.configure(fg_color=("gray75", "gray25") if name == "pulleys" else "transparent")
-        self.navigation_frame.config_button.configure(fg_color=("gray75", "gray25") if name == "config" else "transparent")
-
-        # show selected frame
-        if name == "home":
-            self.home_frame.grid(row=0, column=1, sticky="nsew")
-            self.home_frame.load()
-        else:
-            self.home_frame.grid_forget()
-        if name == "pulleys":
-            self.status_frame.grid(row=0, column=1, sticky="nsew")
-            self.status_frame.load()
-        else:
-            self.status_frame.grid_forget()
-        if name == "config":
-            self.config_frame.grid(row=0, column=1, sticky="nsew")
-            self.config_frame.load()
-        else:
-            self.config_frame.grid_forget()
-        if name == "waypoints":
-            self.waypoint_frame.grid(row=0, column=1, sticky="nsew")
-            self.waypoint_frame.load()
-        else:
-            self.waypoint_frame.grid_forget()
-
-    def move_system(self, target: Point | Waypoint, time: float):
-        self.space.update_lengths(target, time)
-        self.request_handler.set_pulleys(self.space.pulleys, time)
-        self.status_frame.get_lengths(timeout=1)
-
-    def move_system_three_point(self, target: Point | Waypoint):
-        targets = [
-            Point(self.space.current_point.x, self.space.current_point.y, self.space.size_z - self.space.edge_limit),
-            Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
-            Point(target.x, target.y, target.z)
-        ]
-        times = [self.space.calculate_min_time(t) for t in targets]
-
-        for rtarget, rtime in zip(targets, times):
-            self.space.update_lengths(rtarget, rtime)
-            success_map = self.request_handler.set_pulleys(self.space.pulleys, rtime)
-            if not (all(success_map[0]) and all(success_map[1])):
-                return
-            sleep(rtime)
-        self.status_frame.get_lengths(timeout=1)
-
-    def move_as_thread(self, target: Point | Waypoint, time: float, three_point=False):
-        if three_point:
-            thread = threading.Thread(target=self.move_system_three_point, args=(target,))
-        else:
-            thread = threading.Thread(target=self.move_system, args=(target, time))
-        thread.start()
-        self.select_frame_by_name("pulleys")
 
 
 if __name__ == "__main__":
