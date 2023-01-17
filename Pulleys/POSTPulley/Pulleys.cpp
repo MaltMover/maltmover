@@ -1,12 +1,9 @@
 #include "Arduino.h"
 #include <Stepper.h>
 #include <math.h>
+#include "Config.h"
 
-
-const double stepsPrRev = 2047; 
-const double revsPrDM = 2; 
-
-Stepper PulleyStepper(stepsPrRev, 14, 13, 12, 15);
+Stepper PulleyStepper(stepsPrRev, IN1, IN3, IN2, IN4);
 
 void runPulleys(double preparedLength, double preparedTime, double* mem_currentLength) {
   double lenToMove = preparedLength - *mem_currentLength;
@@ -39,6 +36,8 @@ void runPulleys(double preparedLength, double preparedTime, double* mem_currentL
   Serial.println(preparedLength);
   Serial.print("steps to move: ");
   Serial.println(stepAmount);
+  Serial.print("Speed: ");
+  Serial.println(speed);
   Serial.println();
   
   for (int i = 0; i < abs(stepAmount); i++) {

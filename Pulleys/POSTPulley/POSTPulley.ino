@@ -6,18 +6,12 @@
 #include "Helpers.h"
 #include "Pulleys.h"
 #include "Calibrate.h"
-
+#include "Config.h"
 
 // WiFi credentials
 #include "Secret.h"
 const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
-
-// Define LED's
-#define ALIVELED 16  // D0
-#define WIFILED 5  // D1
-#define CONFIGLED 4  // D2
-#define RUNNINGLED 0 // D3
 
 // Set static IP
 IPAddress subnet(255, 255, 0, 0);
