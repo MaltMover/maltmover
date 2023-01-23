@@ -27,18 +27,6 @@ void runPulleys(double preparedLength, double preparedTime, double* mem_currentL
     } else {
       return;
   }  
-
-  Serial.print("current length: ");
-  Serial.println(*mem_currentLength);
-  Serial.print("len to move: ");
-  Serial.println(lenToMove);
-  Serial.print("preparedLength to move: ");
-  Serial.println(preparedLength);
-  Serial.print("steps to move: ");
-  Serial.println(stepAmount);
-  Serial.print("Speed: ");
-  Serial.println(speed);
-  Serial.println();
   
   for (int i = 0; i < abs(stepAmount); i++) {
     PulleyStepper.step(rotDirection);
