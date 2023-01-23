@@ -98,9 +98,16 @@ void handleBody() {
   if (doc.containsKey("run")) {
     if (useQuadratic) {
 
-      return;
+      
 
-    } else {
+      response["success"] = true;
+      serializeJson(response, responseOut);
+
+      server.send(200, "application/json", responseOut);
+
+      return;
+    } 
+    else {
       if (doc["run"]) {
         Serial.println("Run pulleys \n");
 
