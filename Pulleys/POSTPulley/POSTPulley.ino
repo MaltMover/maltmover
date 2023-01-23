@@ -125,20 +125,25 @@ void handleBody() {
     return;
   }
 
-  else if (doc.containsKey("length") && doc.containsKey("time")) {
+  else if (doc.containsKey("length") && doc.containsKey("time") && doc.containsKey("force")) {
     double length = doc["length"];
     double time = doc["time"];
+    bool force = doc["force"];
 
+    if (force) {
+      setConfig(length, time, &preparedLength, &preparedTime);
 
-    setConfig(length, time, &preparedLength, &preparedTime);
+      response["success"] = true;
+      serializeJson(response, responseOut);
 
-    response["success"] = true;
+      server.send(200, "application/json", responseOut);
+
+      digitalWrite(CONFIGLED, HIGH);
+    }
+    response["success"] = false;
+    response["error"] = "Force must be true, otherwise deprecated.";
     serializeJson(response, responseOut);
-
     server.send(200, "application/json", responseOut);
-
-    digitalWrite(CONFIGLED, HIGH);
-
     return;
   }
 
