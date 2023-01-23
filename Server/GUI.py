@@ -90,6 +90,15 @@ class App(customtkinter.CTk):
         else:
             self.waypoint_frame.grid_forget()
 
+    def toggle_grabber(self):
+        new_state = not self.space.grabber.is_open
+        self.grabber_handler.set_state(new_state)
+        self.status_frame.get_mechanical_states(grabber_only=True)
+
+    def toggle_grabber_threaded(self):
+        toggle_thread = threading.Thread(target=self.toggle_grabber)
+        toggle_thread.start()
+
     def move_system(self, target: Point | Waypoint, time: float):
         self.space.update_lengths(target, time)
         self.request_handler.set_pulleys(self.space.pulleys, time)
@@ -230,6 +239,7 @@ class StatusPage(customtkinter.CTkFrame):
 
         self.grabber_image = customtkinter.CTkLabel(self, text="", image=images["grabber_or"])
         self.grabber_image.place(relx=0.5, rely=0.3, anchor="center")
+        self.grabber_image.bind("<Button-1>", lambda event: self.master.toggle_grabber_threaded())
 
         with open("config.json", "r") as f:
             config = json.load(f)
@@ -259,10 +269,15 @@ class StatusPage(customtkinter.CTkFrame):
         color = "g" if self.master.grabber_handler.success else "r"
         self.grabber_image.configure(image=images[f"grabber_{is_open}{color}"])
 
-    def get_mechanical_states(self, timeout=3):
+    def get_mechanical_states(self, timeout=3, grabber_only=False):
         """
         Get the states of the mechanical system and update the GUI accordingly
         """
+        if grabber_only:
+            self.master.space.grabber.is_open = self.master.grabber_handler.get_state()  # Get state of grabber
+            self.load_mechanical_info()
+            return
+
         lengths, success_map = self.master.request_handler.get_lengths(timeout=timeout)  # Get the lengths of the pulleys
         for success, image in zip(success_map, [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
             if success:

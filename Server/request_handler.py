@@ -129,8 +129,9 @@ class GrabberRequestHandler:
 
     def get_state(self) -> bool:
         self.send_request({"get_state": True})
-        print(self.response)
-        return self.response["is_open"]
+        if self.success:
+            return self.response["is_open"]
+        return
 
     def set_state(self, set_open: bool):
         self.send_request({"set_open": set_open})
