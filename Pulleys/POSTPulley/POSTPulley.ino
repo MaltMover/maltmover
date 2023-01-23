@@ -22,6 +22,9 @@ IPAddress local_IP(192, 168, 1, 69);  //Only change this
 double currentLength = 0;
 double preparedLength = -1;
 double preparedTime = -1;
+StaticJsonDocument<512> quadConfig;
+
+bool useQuadratic = true;
 
 ESP8266WebServer server(80);
 
@@ -93,36 +96,45 @@ void handleBody() {
   }
 
   if (doc.containsKey("run")) {
-    if (doc["run"]) {
-      Serial.println("Run pulleys \n");
+    if (useQuadratic) {
+
+      return;
+
+    } else {
+      if (doc["run"]) {
+        Serial.println("Run pulleys \n");
+
+        response["success"] = true;
+        serializeJson(response, responseOut);
+
+        server.send(200, "application/json", responseOut);
+
+        digitalWrite(RUNNINGLED, HIGH);
+        digitalWrite(CONFIGLED, LOW);
+        
+        runPulleys(preparedLength, preparedTime, &currentLength); // Is run later than success, since it holds up the execution of code
+
+        digitalWrite(RUNNINGLED, LOW);
+        
+        useQuadratic = true;
+
+        return;
+      }
+
+      Serial.println("Reverts config...");
+      revertConfig(currentLength, &preparedLength, &preparedTime);
 
       response["success"] = true;
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);
 
-      digitalWrite(RUNNINGLED, HIGH);
       digitalWrite(CONFIGLED, LOW);
-      
-      runPulleys(preparedLength, preparedTime, &currentLength); // Is run later than success, since it holds up the execution of code
 
-      digitalWrite(RUNNINGLED, LOW);
-      
+      useQuadratic = true;
 
       return;
     }
-
-    Serial.println("Reverts config...");
-    revertConfig(currentLength, &preparedLength, &preparedTime);
-
-    response["success"] = true;
-    serializeJson(response, responseOut);
-
-    server.send(200, "application/json", responseOut);
-
-    digitalWrite(CONFIGLED, LOW);
-
-    return;
   }
 
   else if (doc.containsKey("length") && doc.containsKey("time") && doc.containsKey("force")) {
@@ -139,9 +151,22 @@ void handleBody() {
       server.send(200, "application/json", responseOut);
 
       digitalWrite(CONFIGLED, HIGH);
+
+      useQuadratic = false;
     }
+
     response["success"] = false;
     response["error"] = "Force must be true, otherwise deprecated.";
+    serializeJson(response, responseOut);
+    server.send(200, "application/json", responseOut);
+    return;
+  }
+
+  else if (doc.containsKey("time") && doc["a"] && doc["b"] && doc["c"]) {
+    quadConfig = setQuadraticConfig(doc);
+    useQuadratic = true;
+
+    response["success"] = true;
     serializeJson(response, responseOut);
     server.send(200, "application/json", responseOut);
     return;

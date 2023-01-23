@@ -1,4 +1,17 @@
 #include "Arduino.h"
+#include "ArduinoJson.h"
+
+
+
+StaticJsonDocument<512> setQuadraticConfig(DynamicJsonDocument doc) {
+  StaticJsonDocument<512> quadConfig;
+  quadConfig["time"] = doc["time"];
+  quadConfig["a"] = doc["a"];
+  quadConfig["b"] = doc["b"];
+  quadConfig["c"] = doc["c"];
+  return quadConfig;
+
+}
 
 void revertConfig(double currentLength, double* mem_preparedLength, double* mem_preparedTime) {
   // Runs if receives "run": false.
