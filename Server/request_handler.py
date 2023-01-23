@@ -13,7 +13,7 @@ IPS = (
 )
 
 
-class RequestHandler:
+class PulleyRequestHandler:
     def __init__(self, addresses: tuple[str, ...] | list[str, ...]):
         self.addresses = addresses
         self.threads = []
@@ -25,7 +25,7 @@ class RequestHandler:
         ]
 
     def __repr__(self):
-        return f"RequestsHandler{self.addresses}"
+        return f"PulleyRequestsHandler{self.addresses}"
 
     def get_lengths(self, timeout=3) -> tuple[list[float], list[bool]]:
         data = [{"send_length": True} for _ in range(len(self.addresses))]
@@ -118,14 +118,55 @@ class RequestHandler:
         return False
 
 
+class GrabberRequestHandler:
+    def __init__(self, address: str):
+        self.address = address
+        self.success = False
+        self.response = {}
+
+    def __repr__(self):
+        return f"GrabberRequestHandler({self.address})"
+
+    def get_state(self) -> bool:
+        self.send_request({"get_state": True})
+        return self.response["state"]
+
+    def set_state(self, set_open: bool):
+        self.send_request({"set_open": set_open})
+
+    def send_request(self, data: dict):
+        try:
+            response = requests.post(f"http://{self.address}/", json=data, timeout=3)
+            self.response = response.json()
+        except (requests.exceptions.InvalidSchema,
+                requests.exceptions.ConnectTimeout,
+                requests.exceptions.ConnectionError,
+                requests.exceptions.JSONDecodeError,
+                requests.exceptions.ReadTimeout) as e:
+            print(e)
+            return False
+        if response.status_code == 200:
+            self.success = True
+            return True
+        return False
+
+
 def create_request_handler():
     with open("config.json", "r") as f:
         config = json.load(f)
 
     ips = config["ips"]
-    return RequestHandler(ips)
+    return PulleyRequestHandler(ips)
+
+
+def create_grabber_handler():
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    ip = config["grabber_ip"]
+    return GrabberRequestHandler(ip)
 
 
 if __name__ == "__main__":
-    handler = RequestHandler(IPS)
+    handler = PulleyRequestHandler(IPS)
     print(handler)
