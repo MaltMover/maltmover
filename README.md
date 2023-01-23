@@ -14,8 +14,8 @@ Lenght 10, in 12 seconds:<br>
 `{"run": True}`
 ### Cancel run from pulley:
 `{"run": False}`
-### Request pulley current lenght:
-`{"send_lenght": True}`
+### Request pulley current length:
+`{"send_length": True}`
 
 ### Set new state for grabber:
 For open:<br>
