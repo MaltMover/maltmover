@@ -9,7 +9,7 @@ Update over 12 seconds using this quadratic: 3x<sup>2</sup>+4x+1<br>
 
 ### Set new lenght in buffer:
 Lenght 10, in 12 seconds:<br>
-`{"set_length": 10, "time": 12.0, "force": True}`
+`{"length": 10, "time": 12.0, "force": True}`
 ### Move pulley to buffer lenght:
 `{"run": True}`
 ### Cancel run from pulley:
