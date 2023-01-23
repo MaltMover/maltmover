@@ -339,14 +339,18 @@ class ConfigPage(customtkinter.CTkFrame):
         self.pulley_2_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
         self.pulley_3_label = customtkinter.CTkLabel(self, text="Pulley 3", font=small_font)
         self.pulley_3_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
-        self.pulley_0_label.place(relx=0.03, rely=0.55, anchor="sw")
-        self.pulley_0_entry.place(relx=0.65, rely=0.55, anchor="se")
-        self.pulley_1_label.place(relx=0.03, rely=0.65, anchor="sw")
-        self.pulley_1_entry.place(relx=0.65, rely=0.65, anchor="se")
-        self.pulley_2_label.place(relx=0.03, rely=0.75, anchor="sw")
-        self.pulley_2_entry.place(relx=0.65, rely=0.75, anchor="se")
-        self.pulley_3_label.place(relx=0.03, rely=0.85, anchor="sw")
-        self.pulley_3_entry.place(relx=0.65, rely=0.85, anchor="se")
+        self.grabber_label = customtkinter.CTkLabel(self, text="Grabber", font=small_font)
+        self.grabber_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_0_label.place(relx=0.03, rely=0.54, anchor="sw")
+        self.pulley_0_entry.place(relx=0.65, rely=0.53, anchor="se")
+        self.pulley_1_label.place(relx=0.03, rely=0.62, anchor="sw")
+        self.pulley_1_entry.place(relx=0.65, rely=0.61, anchor="se")
+        self.pulley_2_label.place(relx=0.03, rely=0.70, anchor="sw")
+        self.pulley_2_entry.place(relx=0.65, rely=0.69, anchor="se")
+        self.pulley_3_label.place(relx=0.03, rely=0.78, anchor="sw")
+        self.pulley_3_entry.place(relx=0.65, rely=0.77, anchor="se")
+        self.grabber_label.place(relx=0.03, rely=0.86, anchor="sw")
+        self.grabber_entry.place(relx=0.65, rely=0.85, anchor="se")
         # 3-point move toggle
         self.three_point_move_label = customtkinter.CTkLabel(self, text="3-point Move", font=big_font)
         self.three_point_move_toggle = customtkinter.CTkButton(self, width=150, height=50, font=small_font, text="OFF", fg_color="#b52802",
@@ -396,6 +400,8 @@ class ConfigPage(customtkinter.CTkFrame):
         self.pulley_2_entry.insert(0, config["ips"][2])
         self.pulley_3_entry.delete(0, customtkinter.END)
         self.pulley_3_entry.insert(0, config["ips"][3])
+        self.grabber_entry.delete(0, customtkinter.END)
+        self.grabber_entry.insert(0, config["grabber_ip"])
         if config["three_point_move"]:
             self.three_point_move_toggle.configure(text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870")
         else:
@@ -414,6 +420,7 @@ class ConfigPage(customtkinter.CTkFrame):
         config["ips"][1] = self.pulley_1_entry.get()
         config["ips"][2] = self.pulley_2_entry.get()
         config["ips"][3] = self.pulley_3_entry.get()
+        config["grabber_ip"] = self.grabber_entry.get()
         config["three_point_move"] = self.three_point_move_toggle.cget("text") == "ON"
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=2)
