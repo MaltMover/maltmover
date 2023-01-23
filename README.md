@@ -22,6 +22,8 @@ For open:<br>
 `{"set_open": True}`<br>
 For close:<br>
 `{"set_open": False}`
+### Get state of grabber:
+`{"get_state": True}`
 
 
 
