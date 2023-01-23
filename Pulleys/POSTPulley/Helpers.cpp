@@ -13,6 +13,11 @@ StaticJsonDocument<512> setQuadraticConfig(DynamicJsonDocument doc) {
 
 }
 
+StaticJsonDocument<512> revertQuadraticConfig() {
+  StaticJsonDocument<512> quadConfig;
+  return quadConfig;
+}
+
 void revertConfig(double currentLength, double* mem_preparedLength, double* mem_preparedTime) {
   // Runs if receives "run": false.
   *mem_preparedLength = currentLength;

@@ -97,10 +97,23 @@ void handleBody() {
 
   if (doc.containsKey("run")) {
     if (useQuadratic) {
+      if (doc["run"]) {
+        
+        digitalWrite(RUNNINGLED, HIGH);
+        digitalWrite(CONFIGLED, LOW);
 
-      
+        // Run pulleys here
+
+        digitalWrite(RUNNINGLED, LOW);
+
+      } 
+      else {
+        quadConfig = revertQuadraticConfig();
+        digitalWrite(CONFIGLED, LOW);
+      }
 
       response["success"] = true;
+
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);
@@ -172,6 +185,8 @@ void handleBody() {
   else if (doc.containsKey("time") && doc["a"] && doc["b"] && doc["c"]) {
     quadConfig = setQuadraticConfig(doc);
     useQuadratic = true;
+
+    digitalWrite(CONFIGLED, HIGH);
 
     response["success"] = true;
     serializeJson(response, responseOut);
