@@ -1,7 +1,34 @@
 # maltmover
 A gantry system like the SpiderCam, that can lift stuff around a room using Inverse Kinematics
 
+## Request formats:
+
+### Set new lenght quadratic:
+Update over 12 seconds using this quadratic: 3x<sup>2</sup>+4x+1<br>
+`{"time": 12.0, "a": 3.0, "b": 4.0, "c": 1.0}`
+
+### Set new lenght in buffer:
+Lenght 10, in 12 seconds:<br>
+`{"length": 10, "time": 12.0, "force": True}`
+### Move pulley to buffer lenght:
+`{"run": True}`
+### Cancel run from pulley:
+`{"run": False}`
+### Request pulley current length:
+`{"send_length": True}`
+
+### Set new state for grabber:
+For open:<br>
+`{"set_open": True}`<br>
+For close:<br>
+`{"set_open": False}`
+### Get state of grabber:
+`{"get_state": True}`
+
+
+
 ## Grid layout
+Pulley nums:
 ![image](https://user-images.githubusercontent.com/32793938/209009362-444277ef-e5a5-4a44-9927-2049bb359b5d.png)
 
 
