@@ -129,12 +129,14 @@ class GrabberRequestHandler:
 
     def get_state(self) -> bool:
         self.send_request({"get_state": True})
-        return self.response["state"]
+        print(self.response)
+        return self.response["is_open"]
 
     def set_state(self, set_open: bool):
         self.send_request({"set_open": set_open})
 
     def send_request(self, data: dict):
+        self.success = False
         try:
             response = requests.post(f"http://{self.address}/", json=data, timeout=3)
             self.response = response.json()

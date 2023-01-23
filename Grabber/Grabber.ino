@@ -82,7 +82,7 @@ void handleBody() {
   } 
   else if (doc.containsKey("get_state")) {
     if(doc["get_state"]) {
-      response["isOpen"] = servoIsOpen;
+      response["is_open"] = servoIsOpen;
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);

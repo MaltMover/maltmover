@@ -1,6 +1,6 @@
 from point import Point, Waypoint
 from space import Space, create_space
-from request_handler import RequestHandler, create_request_handler
+from request_handler import PulleyRequestHandler, GrabberRequestHandler, create_request_handler, create_grabber_handler
 
 import customtkinter
 import json
@@ -21,14 +21,19 @@ images = {
     "white_pulley_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "whitepulley.png")), size=(25, 25)),
     "green_pulley_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "greenpulley.png")), size=(100, 100)),
     "red_pulley_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "redpulley.png")), size=(100, 100)),
+    "grabber_or": customtkinter.CTkImage(Image.open(os.path.join(image_path, "grabber_or.png")), size=(100, 100)),
+    "grabber_cr": customtkinter.CTkImage(Image.open(os.path.join(image_path, "grabber_cr.png")), size=(100, 100)),
+    "grabber_og": customtkinter.CTkImage(Image.open(os.path.join(image_path, "grabber_og.png")), size=(100, 100)),
+    "grabber_cg": customtkinter.CTkImage(Image.open(os.path.join(image_path, "grabber_cg.png")), size=(100, 100)),
 }
 
 
 class App(customtkinter.CTk):
-    def __init__(self, space: Space, request_handler: RequestHandler):
+    def __init__(self, space: Space, request_handler: PulleyRequestHandler, grabber_handler: GrabberRequestHandler):
         super().__init__()
         self.space = space
         self.request_handler = request_handler
+        self.grabber_handler = grabber_handler
         self.title("Malt Mover")
         self.iconbitmap(os.path.join(image_path, "crane.ico"))
         self.geometry("700x450")
@@ -89,7 +94,7 @@ class App(customtkinter.CTk):
         self.space.update_lengths(target, time)
         self.request_handler.set_pulleys(self.space.pulleys, time)
         sleep(time)
-        self.status_frame.get_lengths(timeout=4)
+        self.status_frame.get_mechanical_states(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
         with open('config.json', 'r') as f:
@@ -108,7 +113,7 @@ class App(customtkinter.CTk):
             if not (all(success_map[0]) and all(success_map[1])):
                 return
             sleep(rtime + delay)
-        self.status_frame.get_lengths(timeout=4)
+        self.status_frame.get_mechanical_states(timeout=4)
 
     def move_as_thread(self, target: Point | Waypoint, time: float, three_point=False):
         if three_point:
@@ -223,17 +228,20 @@ class StatusPage(customtkinter.CTkFrame):
         self.pulley_2_length.place(relx=0.12, rely=0.33, anchor="center")
         self.pulley_3_length.place(relx=0.88, rely=0.33, anchor="center")
 
+        self.grabber_image = customtkinter.CTkLabel(self, text="", image=images["grabber_or"])
+        self.grabber_image.place(relx=0.5, rely=0.3, anchor="center")
+
         with open("config.json", "r") as f:
             config = json.load(f)
             init_time = config["init_time"]
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                              command=self.get_lengths)
+                                                              command=self.get_mechanical_states)
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                              command=lambda master=master: master.move_as_thread(master.space.center,
                                                                                                                  init_time, False))
-        self.test_connection_button.place(relx=0.5, rely=0.5, anchor="center")
-        self.center_pulleys_button.place(relx=0.5, rely=0.6, anchor="center")
-        self.load_pulley_info()
+        self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
+        self.center_pulleys_button.place(relx=0.5, rely=0.7, anchor="center")
+        self.load_mechanical_info()
 
     def load(self):
         for success, image in zip(self.master.request_handler.success_map[0],
@@ -242,14 +250,20 @@ class StatusPage(customtkinter.CTkFrame):
                 image.configure(image=images["green_pulley_image"])
             else:
                 image.configure(image=images["red_pulley_image"])
-        self.load_pulley_info()
+        self.load_mechanical_info()
 
-    def load_pulley_info(self):
+    def load_mechanical_info(self):
         for pulley, label in zip(self.master.space.pulleys, [self.pulley_0_length, self.pulley_1_length, self.pulley_2_length, self.pulley_3_length]):
             label.configure(text=f"{pulley.length} dm")
+        is_open = "o" if self.master.space.grabber.is_open else "c"
+        color = "g" if self.master.grabber_handler.success else "r"
+        self.grabber_image.configure(image=images[f"grabber_{is_open}{color}"])
 
-    def get_lengths(self, timeout=3):
-        lengths, success_map = self.master.request_handler.get_lengths(timeout=timeout)
+    def get_mechanical_states(self, timeout=3):
+        """
+        Get the states of the mechanical system and update the GUI accordingly
+        """
+        lengths, success_map = self.master.request_handler.get_lengths(timeout=timeout)  # Get the lengths of the pulleys
         for success, image in zip(success_map, [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
             if success:
                 image.configure(image=images["green_pulley_image"])
@@ -258,7 +272,9 @@ class StatusPage(customtkinter.CTkFrame):
 
         for i, length in enumerate(lengths):
             self.master.space.pulleys[i].length = length
-        self.load_pulley_info()
+
+        self.master.space.grabber.is_open = self.master.grabber_handler.get_state()  # Get state of grabber
+        self.load_mechanical_info()
 
     def show_reset_dialog(self, pulley_id=0):
         toplevel = customtkinter.CTkToplevel()
@@ -427,8 +443,10 @@ class ConfigPage(customtkinter.CTkFrame):
         self.master.space.write_waypoints('waypoints.json')
         space = create_space(self.master.space.current_point)
         request_handler = create_request_handler()
+        grabber_handler = create_grabber_handler()
         self.master.space = space
         self.master.request_handler = request_handler
+        self.master.grabber_handler = grabber_handler
 
 
 class WaypointPage(customtkinter.CTkFrame):
