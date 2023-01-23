@@ -66,10 +66,12 @@ void handleBody() {
     if (doc["set_open"]) {
       servo.write(180);
       servoIsOpen = true;
+      Serial.println("opening");
 
     } else {
       servo.write(0);
       servoIsOpen = false;
+      Serial.println("closing");
     }
 
     response["success"] = true;
