@@ -22,7 +22,7 @@ bool servoIsOpen = false;
 
 void setup() {
   Serial.begin(9600);
-    if (WiFi.config(local_IP, gateway, subnet)) {
+  if (WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("Static IP Configured");
   } else {
     Serial.println("Static IP Configuration Failed");
