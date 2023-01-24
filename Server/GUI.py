@@ -93,6 +93,9 @@ class App(customtkinter.CTk):
     def toggle_grabber(self):
         new_state = not self.space.grabber.is_open
         self.grabber_handler.set_state(new_state)
+        if self.grabber_handler.success:
+            is_open = "o" if new_state else "c"
+            self.status_frame.grabber_image.configure(image=images[f"grabber_{is_open}g"])
         self.status_frame.get_mechanical_states(grabber_only=True)
 
     def toggle_grabber_threaded(self):
@@ -102,7 +105,6 @@ class App(customtkinter.CTk):
     def move_system(self, target: Point | Waypoint, time: float):
         self.space.update_lengths(target, time)
         self.request_handler.set_pulleys(self.space.pulleys, time)
-        sleep(time)
         self.status_frame.get_mechanical_states(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
