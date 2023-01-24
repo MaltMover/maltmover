@@ -3,7 +3,11 @@
 #include <ArduinoJson.h>
 #include <Servo.h>
 
-#define servoPin 2 //D4
+#define servoPin 13 //D7
+#ifdef F_CPU
+#undef F_CPU
+#define F_CPU 80000000UL
+#endif
 
 // WiFi credentials
 #include "Secret.h"
@@ -13,7 +17,7 @@ const char *password = SECRET_PASS;
 // Set static IP
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
-IPAddress local_IP(192, 168, 1, 68);  //Only change this
+IPAddress local_IP(192, 168, 141, 68);  //Only change this
 
 ESP8266WebServer server(80);
 Servo servo;
@@ -29,11 +33,21 @@ void setup() {
   }
 
   WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Waiting to connect...");
+    delay(250);
+  }
+
+  Serial.print("\nIP address: ");
+  Serial.println(WiFi.localIP());
+
   server.on("/", handleBody);
   server.begin();
 
   servo.attach(servoPin);
   servo.write(0);
+
 
 }
 
@@ -63,17 +77,19 @@ void handleBody() {
   }
 
   if (doc.containsKey("set_open")) {
-    if (doc["set_open"]) {
-      servo.write(180);
+    /*if (doc["set_open"]) {
+      toggleServo(180, true)
       servoIsOpen = true;
-      Serial.println("opening");
 
     } else {
-      servo.write(0);
+      toggleServo(180, false)
       servoIsOpen = false;
-      Serial.println("closing");
-    }
 
+    }*/
+    
+    toggleServo(180, doc["set_open"]);
+    servoIsOpen = doc["set_open"];
+  
     response["success"] = true;
     serializeJson(response, responseOut);
 
@@ -97,4 +113,19 @@ void handleBody() {
 
   server.send(400, "application/json", responseOut);
   return;
+}
+
+void toggleServo(int delayTime, bool setOpen) {
+  unsigned long calcDelay = delayTime/180;
+  if (setOpen) {
+    for (int pos = 0; pos <= 180; pos++){
+      servo.write(pos);
+      delay(calcDelay);
+    }
+    return;
+  } 
+  for (int pos = 180; pos >= 0; pos--){
+    servo.write(pos);
+    delay(calcDelay);
+  }
 }
