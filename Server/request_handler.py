@@ -128,7 +128,7 @@ class GrabberRequestHandler:
         return f"GrabberRequestHandler({self.address})"
 
     def get_state(self) -> bool:
-        self.send_request({"get_state": True})
+        self.send_request({"get_state": True}, timeout=10)
         if self.success:
             return self.response["is_open"]
         return
@@ -136,10 +136,10 @@ class GrabberRequestHandler:
     def set_state(self, set_open: bool):
         self.send_request({"set_open": set_open})
 
-    def send_request(self, data: dict):
+    def send_request(self, data: dict, timeout=3):
         self.success = False
         try:
-            response = requests.post(f"http://{self.address}/", json=data, timeout=3)
+            response = requests.post(f"http://{self.address}/", json=data, timeout=timeout)
             self.response = response.json()
         except (requests.exceptions.InvalidSchema,
                 requests.exceptions.ConnectTimeout,

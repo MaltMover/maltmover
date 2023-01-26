@@ -3,7 +3,11 @@
 #include <ArduinoJson.h>
 #include <Servo.h>
 
-#define servoPin 2 //D4
+#define servoPin 13 //D7
+#ifdef F_CPU
+#undef F_CPU
+#define F_CPU 80000000UL
+#endif
 
 // WiFi credentials
 #include "Secret.h"
@@ -13,7 +17,7 @@ const char *password = SECRET_PASS;
 // Set static IP
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
-IPAddress local_IP(192, 168, 1, 68);  //Only change this
+IPAddress local_IP(192, 168, 141, 68);  //Only change this
 
 ESP8266WebServer server(80);
 Servo servo;
@@ -21,20 +25,23 @@ Servo servo;
 bool servoIsOpen = false;
 
 void setup() {
-  Serial.begin(9600);
-  if (WiFi.config(local_IP, gateway, subnet)) {
-    Serial.println("Static IP Configured");
-  } else {
-    Serial.println("Static IP Configuration Failed");
-  }
+  WiFi.config(local_IP, gateway, subnet);
 
   WiFi.begin(ssid, password);
+  servo.attach(servoPin);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(400);
+    servo.write(120);
+    delay(400);
+    servo.write(90);
+
+  }
+
   server.on("/", handleBody);
   server.begin();
 
-  servo.attach(servoPin);
-  servo.write(0);
-
+  toggleServo(1, false);
 }
 
 void loop() {
@@ -63,21 +70,15 @@ void handleBody() {
   }
 
   if (doc.containsKey("set_open")) {
-    if (doc["set_open"]) {
-      servo.write(180);
-      servoIsOpen = true;
-      Serial.println("opening");
-
-    } else {
-      servo.write(0);
-      servoIsOpen = false;
-      Serial.println("closing");
-    }
 
     response["success"] = true;
     serializeJson(response, responseOut);
 
     server.send(200, "application/json", responseOut);
+    
+    toggleServo(0, doc["set_open"]);
+    servoIsOpen = doc["set_open"];
+  
     return;
   } 
   else if (doc.containsKey("get_state")) {
@@ -90,11 +91,23 @@ void handleBody() {
     }
   }
 
-  Serial.println("Error - request does not contain known key \n");
-
   response["error"] = "Unknown Key";
   serializeJson(response, responseOut);
 
   server.send(400, "application/json", responseOut);
   return;
+}
+
+void toggleServo(int delayTime, bool setOpen) {
+  if (setOpen) {
+    for (int pos = 0; pos <= 120; pos += 2){
+      servo.write(pos);
+      delay(delayTime);
+    }
+    return;
+  } 
+  for (int pos = 120; pos >= 0; pos -= 2){
+    servo.write(pos);
+    delay(delayTime);
+  }
 }
