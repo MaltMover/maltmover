@@ -25,30 +25,23 @@ Servo servo;
 bool servoIsOpen = false;
 
 void setup() {
-  Serial.begin(9600);
-  if (WiFi.config(local_IP, gateway, subnet)) {
-    Serial.println("Static IP Configured");
-  } else {
-    Serial.println("Static IP Configuration Failed");
-  }
+  WiFi.config(local_IP, gateway, subnet);
 
   WiFi.begin(ssid, password);
+  servo.attach(servoPin);
 
   while (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Waiting to connect...");
-    delay(250);
-  }
+    delay(400);
+    servo.write(120);
+    delay(400);
+    servo.write(90);
 
-  Serial.print("\nIP address: ");
-  Serial.println(WiFi.localIP());
+  }
 
   server.on("/", handleBody);
   server.begin();
 
-  servo.attach(servoPin);
-  servo.write(0);
-
-
+  toggleServo(1, false);
 }
 
 void loop() {
@@ -77,23 +70,15 @@ void handleBody() {
   }
 
   if (doc.containsKey("set_open")) {
-    /*if (doc["set_open"]) {
-      toggleServo(180, true)
-      servoIsOpen = true;
 
-    } else {
-      toggleServo(180, false)
-      servoIsOpen = false;
-
-    }*/
-    
-    toggleServo(180, doc["set_open"]);
-    servoIsOpen = doc["set_open"];
-  
     response["success"] = true;
     serializeJson(response, responseOut);
 
     server.send(200, "application/json", responseOut);
+    
+    toggleServo(0, doc["set_open"]);
+    servoIsOpen = doc["set_open"];
+  
     return;
   } 
   else if (doc.containsKey("get_state")) {
@@ -106,8 +91,6 @@ void handleBody() {
     }
   }
 
-  Serial.println("Error - request does not contain known key \n");
-
   response["error"] = "Unknown Key";
   serializeJson(response, responseOut);
 
@@ -116,16 +99,15 @@ void handleBody() {
 }
 
 void toggleServo(int delayTime, bool setOpen) {
-  unsigned long calcDelay = delayTime/180;
   if (setOpen) {
-    for (int pos = 0; pos <= 180; pos++){
+    for (int pos = 0; pos <= 120; pos += 2){
       servo.write(pos);
-      delay(calcDelay);
+      delay(delayTime);
     }
     return;
   } 
-  for (int pos = 180; pos >= 0; pos--){
+  for (int pos = 120; pos >= 0; pos -= 2){
     servo.write(pos);
-    delay(calcDelay);
+    delay(delayTime);
   }
 }
