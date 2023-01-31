@@ -55,6 +55,7 @@ class PulleyRequestHandler:
                 {
                     "length": pulley.length,
                     "speed": pulley.speed,
+                    "acceleration": pulley.acceleration,
                 }
             )
         # Send first request to all pulleys
