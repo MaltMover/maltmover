@@ -6,8 +6,5 @@
 
 
 void run_pulleys() {
-  Serial.println(stepper.acceleration());
-  Serial.println(stepper.speed());
-  Serial.println(stepper.targetPosition());
   stepper.runToPosition();
 }

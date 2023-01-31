@@ -5,7 +5,6 @@
 
 void revert_config() {
   stepper.setAcceleration(50);
-  Serial.println("Reverted config to original state \n");
 }
 
 void set_config(DynamicJsonDocument doc) {
