@@ -194,8 +194,8 @@ void handleBody() {
     return;
   }
 
-  else if (doc.containsKey("send_length")) {
-    if (doc["send_length"]) {
+  else if (doc.containsKey("get_length")) {
+    if (doc["get_length"]) {
       Serial.println("Send length \n");
 
       response["success"] = true;

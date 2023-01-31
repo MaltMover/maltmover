@@ -28,7 +28,7 @@ class PulleyRequestHandler:
         return f"PulleyRequestsHandler{self.addresses}"
 
     def get_lengths(self, timeout=3) -> tuple[list[float], list[bool]]:
-        data = [{"send_length": True} for _ in range(len(self.addresses))]
+        data = [{"get_length": True} for _ in range(len(self.addresses))]
         self.send_requests(data, request_num=0, timeout=timeout)
         lengths = [i["length"] if i else 0.0 for i in self.responses]
         return lengths, self.success_map[0]
