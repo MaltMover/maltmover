@@ -8,8 +8,8 @@ Update over 12 seconds using this quadratic: 3x<sup>2</sup>+4x+1<br>
 `{"time": 12.0, "a": 3.0, "b": 4.0, "c": 1.0}`
 
 ### Set new length in buffer:
-Lenght 10, in 12 seconds, with 10 dm/s^2 acceleration and 14 dm/s max speed:<br>
-`{"length": 10.0, "time": 12.0, "acceleration": 10.0, "max_speed": 14.0, "force": True}`
+Lenght 10, with 10 dm/s^2 acceleration and 14 dm/s max speed:<br>
+`{"length": 10.0, "acceleration": 10.0, "max_speed": 14.0, "force": True}`
 ### Move pulley to buffer length:
 `{"run": True}`
 ### Cancel run from pulley:
