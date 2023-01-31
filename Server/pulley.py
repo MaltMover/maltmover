@@ -43,10 +43,11 @@ class Pulley:
             raise ValueError('Time cannot be 0.')
         if length > self.max_length:
             raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
-        self.speed = round(abs(self.length - length) / time, 2)
-        print(self.speed, "dm/s")
-        if self.speed > self.max_speed:
-            raise ValueError(f"Pulley at {self.location} can't change length at {self.speed} dm/s, max speed is {self.max_speed} dm/s")
+        speed = round(abs(self.length - length) / time, 2)
+        print(speed, "dm/s")
+        if speed > self.max_speed:
+            raise ValueError(f"Pulley at {self.location} can't change length at {speed} dm/s, max speed is {self.max_speed} dm/s")
+        self.speed = speed
         self.length = round(float(length), 2)
 
 

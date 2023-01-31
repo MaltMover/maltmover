@@ -45,7 +45,7 @@ class PulleyRequestHandler:
         self.send_request(address, data, timeout=3, request_num=0, pulley_num=pulley_id)
         self.send_request(address, {"run": True}, timeout=3, request_num=0, pulley_num=pulley_id)
 
-    def set_pulleys(self, pulleys: list[Pulley], time: int | float) -> list[list[bool]]:
+    def set_pulleys(self, pulleys: list[Pulley]) -> list[list[bool]]:
         if len(pulleys) != len(self.addresses):
             raise ValueError("Number of pulleys must equal number of addresses")
         data = []
@@ -54,7 +54,7 @@ class PulleyRequestHandler:
             data.append(
                 {
                     "length": pulley.length,
-                    "time": time
+                    "speed": pulley.speed,
                 }
             )
         # Send first request to all pulleys
