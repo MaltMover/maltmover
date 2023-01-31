@@ -85,7 +85,7 @@ class Space:
     def set_grabber(self, grabber: Grabber) -> None:
         self.grabber = grabber
 
-    def update_lengths(self, point: Point | Waypoint, time: int | float, check_limit=True) -> None:
+    def update_lengths(self, point: Point | Waypoint, check_limit=True) -> None:
         """
         Updates the lengths of the ropes of the pulleys in the space.
         Raises ValueError if the point is not in the space.
@@ -93,9 +93,12 @@ class Space:
         """
         if not self.is_in_space(point, check_limit=check_limit):
             raise ValueError(f"{point} is not within limits of the {self}")
+        times = []
         for pulley in self.pulleys:
             new_length = sqrt((pulley.x - point.x) ** 2 + (pulley.y - point.y) ** 2 + (pulley.z - point.z) ** 2)
-            pulley.set_length(new_length, time)
+            times.append(pulley.set_length(new_length))
+        slow_time = max(times)  # Time of the slowest pulley
+
         self.current_point = point
         print(self.current_point)
 

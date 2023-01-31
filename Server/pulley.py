@@ -29,27 +29,32 @@ class Pulley:
     def __lt__(self, other):
         return self.location < other.location
 
-    def set_length(self, length: int | float, time: int | float):
+    def set_length(self, length: int | float) -> float:
         """
         Sets the length of the rope attached to the pulley.
         :param length: The new length of the rope attached to the pulley.
-        :param time: The time it should take to change the length of the rope.
+        :return: The minimum time needed to change the length of the rope.
         """
-        if time == -1:
-            if length > self.max_length:
-                raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
-            self.length = round(float(length), 2)
-            return
-        if time == 0:
-            raise ValueError('Time cannot be 0.')
         if length > self.max_length:
             raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
-        speed = round(abs(self.length - length) / time, 2)
-        print(speed, "dm/s")
-        if speed > self.max_speed:
-            raise ValueError(f"Pulley at {self.location} can't change length at {speed} dm/s, max speed is {self.max_speed} dm/s")
-        self.speed = speed
+        time = abs(self.length - length) / self.max_speed
         self.length = round(float(length), 2)
+        return time
+
+    def set_speed(self, speed: int | float):
+        """
+        Sets the speed of the pulley.
+        :param speed: The new speed of the pulley.
+        """
+        if speed > self.max_speed:
+            raise ValueError(f'Speed cannot be greater than {self.max_speed} dm/s.')
+        self.speed = round(float(speed), 2)
+
+    def set_time(self, time: int | float):
+        """
+        Sets the speed of the pulley, given the time to move.
+        :param time: The new time of the pulley.
+        """
 
 
 def main():
