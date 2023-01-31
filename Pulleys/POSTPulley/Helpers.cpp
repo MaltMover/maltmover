@@ -9,7 +9,6 @@ void revert_config() {
 }
 
 void set_config(DynamicJsonDocument doc) {
-  // TODO: Calculate these numbers
   double acceleration = (double) doc["acceleration"] * steps_dm;
   double speed = (double) doc["speed"] * steps_dm;
   double length = (double) doc["length"] * steps_dm;
