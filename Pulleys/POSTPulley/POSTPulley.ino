@@ -8,6 +8,7 @@
 #include "Pulleys.h"
 #include "Calibrate.h"
 #include "Config.h"
+#include "Globals.h"
 
 // WiFi credentials
 #include "Secret.h"
@@ -19,8 +20,7 @@ IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress local_IP(192, 168, 1, 69);  //Only change this
 
-AccelStepper Stepper(AccelStepper::FULL4WIRE, IN1, IN3, IN2, IN4);
-Stepper.setMaxSpeed(34000);
+AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN3, IN2, IN4);
 
 ESP8266WebServer server(80);
 
@@ -34,9 +34,8 @@ void setup() {
   pinMode(CONFIGLED, OUTPUT);
   pinMode(RUNNINGLED, OUTPUT);
 
-
   digitalWrite(ALIVELED, HIGH);
-
+  stepper.setMaxSpeed(1000);
 
   calibrate();  // stops execution of code until pulley is calibrated
 
@@ -67,7 +66,6 @@ void setup() {
 }
 
 void loop() {
-
   server.handleClient();
 }
 
@@ -103,7 +101,7 @@ void handleBody() {
       digitalWrite(RUNNINGLED, HIGH);
       digitalWrite(CONFIGLED, LOW);
       
-      runPulleys(preparedLength, preparedTime, &currentLength);
+      run_pulleys();
 
       digitalWrite(RUNNINGLED, LOW);
 
@@ -111,7 +109,7 @@ void handleBody() {
     }
 
     Serial.println("Reverts config...");
-    revert_config(Stepper);
+    revert_config();
 
     response["success"] = true;
     serializeJson(response, responseOut);
@@ -124,8 +122,8 @@ void handleBody() {
     
   }
 
-  else if (doc.containsKey("length") && doc.containsKey("time")) {
-    set_config(stepper, doc);
+  else if (doc.containsKey("length")) {
+    set_config(doc);
 
     response["success"] = true;
     serializeJson(response, responseOut);
@@ -141,7 +139,7 @@ void handleBody() {
       Serial.println("Send length \n");
 
       response["success"] = true;
-      response["length"] = Stepper.currentPosition();
+      response["length"] = stepper.currentPosition();
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);
