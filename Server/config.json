@@ -1,15 +1,16 @@
 {
+  "edge_limit": 4.0,
+  "init_time": 25.0,
+  "max_speed": 5.0,
+  "acceleration": 0.5,
+  "rope_length": 100.0,
+  "three_point_move": true,
+  "three_point_delay": 1,
   "size": [
     50.0,
     50.0,
     25.0
   ],
-  "rope_length": 100.0,
-  "max_speed": 5.0,
-  "edge_limit": 4.0,
-  "init_time": 25.0,
-  "three_point_move": false,
-  "three_point_delay": 1,
   "ips": [
     "127.0.0.1:8000",
     "127.0.0.1:8001",
