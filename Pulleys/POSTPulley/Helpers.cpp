@@ -2,6 +2,7 @@
 #include "Arduino.h"
 #include "ArduinoJson.h"
 #include "Globals.h"
+#include "Config.h"
 
 void revert_config() {
   stepper.setAcceleration(50);
@@ -9,11 +10,11 @@ void revert_config() {
 
 void set_config(DynamicJsonDocument doc) {
   // TODO: Calculate these numbers
-  double acceleration = doc["acceleration"];
-  double speed = doc["speed"];
-  double length = doc["length"];
+  double acceleration = (double) doc["acceleration"] * steps_dm;
+  double speed = (double) doc["speed"] * steps_dm;
+  double length = (double) doc["length"] * steps_dm;
 
   stepper.setAcceleration(acceleration);
-  stepper.moveTo(length);
   stepper.setSpeed(speed);
+  stepper.moveTo(length);
 }
