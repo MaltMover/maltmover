@@ -134,16 +134,17 @@ def create_space(current_point: Point = None):
     size = config["size"]
     rope_length = config["rope_length"]
     max_speed = config["max_speed"]
+    acceleration = config["acceleration"]
     edge_limit = config[
         "edge_limit"
     ]  # How close to the edge of the space, the object can be
 
     space = Space(*size, edge_limit=edge_limit)
     space.read_waypoints("waypoints.json")
-    space.add_pulley(Pulley(Point(0, 0, size[2]), rope_length, max_speed))
-    space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed))
-    space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed))
-    space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed))
+    space.add_pulley(Pulley(Point(0, 0, size[2]), rope_length, max_speed, acceleration))
+    space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed, acceleration))
+    space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed, acceleration))
+    space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed, acceleration))
     grabber = Grabber()
     space.set_grabber(grabber)
     if current_point:
