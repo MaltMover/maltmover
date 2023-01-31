@@ -1,41 +1,19 @@
+#include <AccelStepper.h>
 #include "Arduino.h"
 #include "ArduinoJson.h"
+#include "Globals.h"
+#include "Config.h"
 
-
-
-StaticJsonDocument<512> setQuadraticConfig(DynamicJsonDocument doc) {
-  StaticJsonDocument<512> quadConfig;
-  quadConfig["time"] = doc["time"];
-  quadConfig["a"] = doc["a"];
-  quadConfig["b"] = doc["b"];
-  quadConfig["c"] = doc["c"];
-  return quadConfig;
-
+void revert_config() {
+  stepper.setAcceleration(50);
 }
 
-StaticJsonDocument<512> revertQuadraticConfig() {
-  StaticJsonDocument<512> quadConfig;
-  return quadConfig;
-}
+void set_config(DynamicJsonDocument doc) {
+  double acceleration = (double) doc["acceleration"] * steps_pr_dm;
+  double speed = (double) doc["speed"] * steps_pr_dm;
+  double length = (double) doc["length"] * steps_pr_dm;
 
-void revertConfig(double currentLength, double* mem_preparedLength, double* mem_preparedTime) {
-  // Runs if receives "run": false.
-  *mem_preparedLength = currentLength;
-  *mem_preparedTime = -1;
-
-  Serial.println("Reverted config to original state \n");
-
-}
-
-void setConfig(double length, double time, double* mem_preparedLength, double* mem_preparedTime){
-
-  *mem_preparedLength = length;
-  *mem_preparedTime = time;
-
-  Serial.print("Prepared length: ");
-  Serial.println(*mem_preparedLength);
-  Serial.print("Prepared time: ");
-  Serial.println(*mem_preparedTime);
-  Serial.println();
-
+  stepper.setAcceleration(acceleration);
+  stepper.setSpeed(speed);
+  stepper.moveTo(length);
 }
