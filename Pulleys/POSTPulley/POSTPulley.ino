@@ -1,6 +1,7 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WebServer.h>
 #include <ArduinoJson.h>
+#include <AccelStepper.h>
 
 // Include other files
 #include "Helpers.h"
@@ -18,13 +19,8 @@ IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress local_IP(192, 168, 1, 69);  //Only change this
 
-// Global vars
-double currentLength = 0;
-double preparedLength = -1;
-double preparedTime = -1;
-StaticJsonDocument<512> quadConfig;
-
-bool useQuadratic = true;
+AccelStepper Stepper(AccelStepper::FULL4WIRE, IN1, IN3, IN2, IN4);
+Stepper.setMaxSpeed(34000);
 
 ESP8266WebServer server(80);
 
@@ -96,101 +92,47 @@ void handleBody() {
   }
 
   if (doc.containsKey("run")) {
-    if (useQuadratic) {
-      if (doc["run"]) {
-        
-        digitalWrite(RUNNINGLED, HIGH);
-        digitalWrite(CONFIGLED, LOW);
-
-        // Run pulleys here
-
-        digitalWrite(RUNNINGLED, LOW);
-
-      } 
-      else {
-        quadConfig = revertQuadraticConfig();
-        digitalWrite(CONFIGLED, LOW);
-      }
-
-      response["success"] = true;
-
-      serializeJson(response, responseOut);
-
-      server.send(200, "application/json", responseOut);
-
-      return;
-    } 
-    else {
-      if (doc["run"]) {
-        Serial.println("Run pulleys \n");
-
-        response["success"] = true;
-        serializeJson(response, responseOut);
-
-        server.send(200, "application/json", responseOut);
-
-        digitalWrite(RUNNINGLED, HIGH);
-        digitalWrite(CONFIGLED, LOW);
-        
-        runPulleys(preparedLength, preparedTime, &currentLength); // Is run later than success, since it holds up the execution of code
-
-        digitalWrite(RUNNINGLED, LOW);
-        
-        useQuadratic = true;
-
-        return;
-      }
-
-      Serial.println("Reverts config...");
-      revertConfig(currentLength, &preparedLength, &preparedTime);
+    if (doc["run"]) {
+      Serial.println("Run pulleys \n");
 
       response["success"] = true;
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);
 
+      digitalWrite(RUNNINGLED, HIGH);
       digitalWrite(CONFIGLED, LOW);
+      
+      runPulleys(preparedLength, preparedTime, &currentLength);
 
-      useQuadratic = true;
+      digitalWrite(RUNNINGLED, LOW);
 
       return;
     }
-  }
 
-  else if (doc.containsKey("length") && doc.containsKey("time") && doc.containsKey("force")) {
-    double length = doc["length"];
-    double time = doc["time"];
-    bool force = doc["force"];
-
-    if (force) {
-      setConfig(length, time, &preparedLength, &preparedTime);
-
-      response["success"] = true;
-      serializeJson(response, responseOut);
-
-      server.send(200, "application/json", responseOut);
-
-      digitalWrite(CONFIGLED, HIGH);
-
-      useQuadratic = false;
-    }
-
-    response["success"] = false;
-    response["error"] = "Force must be true, otherwise deprecated.";
-    serializeJson(response, responseOut);
-    server.send(200, "application/json", responseOut);
-    return;
-  }
-
-  else if (doc.containsKey("time") && doc["a"] && doc["b"] && doc["c"]) {
-    quadConfig = setQuadraticConfig(doc);
-    useQuadratic = true;
-
-    digitalWrite(CONFIGLED, HIGH);
+    Serial.println("Reverts config...");
+    revert_config(Stepper);
 
     response["success"] = true;
     serializeJson(response, responseOut);
+
     server.send(200, "application/json", responseOut);
+
+    digitalWrite(CONFIGLED, LOW);
+
+    return;
+    
+  }
+
+  else if (doc.containsKey("length") && doc.containsKey("time")) {
+    set_config(stepper, doc);
+
+    response["success"] = true;
+    serializeJson(response, responseOut);
+
+    server.send(200, "application/json", responseOut);
+
+    digitalWrite(CONFIGLED, HIGH);
     return;
   }
 
@@ -199,7 +141,7 @@ void handleBody() {
       Serial.println("Send length \n");
 
       response["success"] = true;
-      response["length"] = currentLength;
+      response["length"] = Stepper.currentPosition();
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);

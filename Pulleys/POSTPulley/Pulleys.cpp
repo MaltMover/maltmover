@@ -1,5 +1,5 @@
 #include "Arduino.h"
-#include <Stepper.h>
+#include <AccelStepper.h>
 #include <math.h>
 #include "Config.h"
 
