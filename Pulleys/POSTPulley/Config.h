@@ -5,7 +5,7 @@
 #define IN4 15
 
 // Stepper properties
-const double steps_dm = 53.0516; 
+const double steps_pr_dm = 53.0516; 
 
 // Define LED's
 #define ALIVELED 16  // D0
