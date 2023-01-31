@@ -8,9 +8,9 @@ class FakePulley:
         return f"FakePulley(length={self.length}, prep_length={self.prep_length}, prep_time={self.prep_time})"
 
     def get_response(self, data: dict) -> dict:
-        if "length" in data and "time" in data:
+        if "length" in data and "speed" in data:
             self.prep_length = data["length"]
-            self.prep_time = data["time"]
+            self.prep_time = round(abs(self.prep_length - self.length) / data["speed"], 2)
         elif "run" in data:
             if data["run"]:
                 self.length = self.prep_length

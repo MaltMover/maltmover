@@ -104,7 +104,7 @@ class App(customtkinter.CTk):
 
     def move_system(self, target: Point | Waypoint, time: float):
         self.space.update_lengths(target, time)
-        self.request_handler.set_pulleys(self.space.pulleys, time)
+        self.request_handler.set_pulleys(self.space.pulleys)
         self.status_frame.get_mechanical_states(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
@@ -120,7 +120,7 @@ class App(customtkinter.CTk):
 
         for rtarget, rtime in zip(targets, times):
             self.space.update_lengths(rtarget, rtime)
-            success_map = self.request_handler.set_pulleys(self.space.pulleys, rtime)
+            success_map = self.request_handler.set_pulleys(self.space.pulleys)
             if not (all(success_map[0]) and all(success_map[1])):
                 return
             sleep(rtime + delay)
