@@ -4,10 +4,6 @@
 #include <Servo.h>
 
 #define servoPin 13 //D7
-#ifdef F_CPU
-#undef F_CPU
-#define F_CPU 80000000UL
-#endif
 
 // WiFi credentials
 #include "Secret.h"
