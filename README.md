@@ -15,7 +15,7 @@ Lenght 10, with 10 dm/s^2 acceleration and 14 dm/s max speed:<br>
 ### Cancel run from pulley:
 `{"run": False}`
 ### Request pulley current length:
-`{"send_length": True}`
+`{"get_length": True}`
 
 ### Set new state for grabber:
 For open:<br>
@@ -33,4 +33,4 @@ Pulley nums:
 
 
 ## Led Layout
-![image](https://user-images.githubusercontent.com/25373105/209230035-8565d58e-e80b-4538-aedb-5c4ecf2fc1ee.png)
+![image](https://user-images.githubusercontent.com/32793938/221839271-6b0e50c0-ff64-4f22-bd8a-001ffda9d0f7.png)
