@@ -6,5 +6,8 @@
 
 
 void run_pulleys() {
-  stepper.runToPosition();
+  while (stepper.distanceToGo() != 0) {
+    stepper.run();
+    yield();
+  }
 }

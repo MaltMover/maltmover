@@ -9,8 +9,8 @@ void revert_config() {
 }
 
 void set_config(DynamicJsonDocument doc) {
-  double acceleration = (double) doc["acceleration"] * steps_pr_dm;
-  double speed = (double) doc["speed"] * steps_pr_dm;
+  double acceleration = (double) doc["acceleration"];
+  double speed = (double) doc["speed"];
   double length = (double) doc["length"] * steps_pr_dm;
 
   stepper.setAcceleration(acceleration);

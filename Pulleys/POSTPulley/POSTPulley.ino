@@ -16,18 +16,22 @@ const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
 // Set static IP
+/*
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
-IPAddress local_IP(192, 168, 1, 69);  //Only change this
+IPAddress local_IP(192, 168, 251, 69);  //Only change this
+*/
 
-AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN3, IN2, IN4);
+AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
+
 
 ESP8266WebServer server(80);
 
 void setup() {
 
   Serial.begin(9600);
-  
+  stepper.setMaxSpeed(500);
+
   //Setup LED's
   pinMode(WIFILED, OUTPUT);
   pinMode(ALIVELED, OUTPUT);
@@ -38,13 +42,13 @@ void setup() {
   stepper.setMaxSpeed(1000);
 
   calibrate();  // stops execution of code until pulley is calibrated
-
+  /*
   if (WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("Static IP Configured");
   } else {
     Serial.println("Static IP Configuration Failed");
   }
-
+*/
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
