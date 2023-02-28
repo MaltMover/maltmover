@@ -2,23 +2,23 @@ class FakePulley:
     def __init__(self):
         self.length = 0.0
         self.prep_length = 0.0
-        self.prep_time = -1
+        self.speed = 0
+        self.acceleration = 0
 
     def __str__(self):
-        return f"FakePulley(length={self.length}, prep_length={self.prep_length}, prep_time={self.prep_time})"
+        return f"FakePulley(length={self.length}, prep_length={self.prep_length})"
 
     def get_response(self, data: dict) -> dict:
-        if "length" in data and "speed" in data:
+        if "length" in data and "speed" in data and "acceleration" in data:
             self.prep_length = data["length"]
-            self.prep_time = round(abs(self.prep_length - self.length) / data["speed"], 2)
+            self.speed = data["speed"]
+            self.acceleration = data["acceleration"]
         elif "run" in data:
             if data["run"]:
                 self.length = self.prep_length
-                self.prep_length = 0.0
-                self.prep_time = -1
             else:
                 self.prep_length = self.length
-                self.prep_time = -1
+
         elif "get_length" in data:
             return {"success": True, "length": self.length}
         else:
