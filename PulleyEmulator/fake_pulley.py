@@ -1,7 +1,7 @@
 class FakePulley:
     def __init__(self):
         self.length = 0.0
-        self.prep_length = 0.0
+        self.prep_length = -1
         self.speed = 0
         self.acceleration = 0
 
@@ -10,14 +10,19 @@ class FakePulley:
 
     def get_response(self, data: dict) -> dict:
         if "length" in data and "speed" in data and "acceleration" in data:
+            if not data["speed"] or not data["acceleration"]:  # If speed or acceleration is 0
+                return {"success": False}
             self.prep_length = data["length"]
             self.speed = data["speed"]
             self.acceleration = data["acceleration"]
         elif "run" in data:
+            if self.prep_length == -1:  # If length is not set
+                return {"success": False}
             if data["run"]:
                 self.length = self.prep_length
+                self.prep_length = -1
             else:
-                self.prep_length = self.length
+                self.prep_length = -1
 
         elif "get_length" in data:
             return {"success": True, "length": self.length}

@@ -120,6 +120,9 @@ class DataList(customtkinter.CTkFrame):
             case "time":
                 self.time_data.configure(text=f"{value} s")
             case "prep_length":
+                if value == -1:
+                    self.prep_length_data.configure(text=f"N/A")
+                    return
                 self.prep_length_data.configure(text=f"{value} dm")
             case "speed":
                 self.speed_data.configure(text=f"{value} dm/s")

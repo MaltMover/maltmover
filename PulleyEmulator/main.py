@@ -50,6 +50,7 @@ def start_server():
 def main():
     global APP
     start_server()
+    APP.update_values()
     APP.mainloop()
     APP.kill()
     HTTPD.shutdown()
