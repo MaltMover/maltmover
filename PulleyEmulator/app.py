@@ -131,16 +131,18 @@ def calc_current_length(move_length: float, speed: float, acceleration: float, c
     if move_length <= 0:
         raise ValueError("Move length must be greater than 0")
     time_to_max_speed = speed / acceleration  # Time to reach max speed
-    if current_time <= time_to_max_speed:  # If max speed has not been reached
-        return 0.5 * acceleration * current_time ** 2
     distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
 
     if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
         total_time = calc_move_time(move_length, speed, acceleration)  # Time to complete move
         if current_time <= total_time / 2:  # If it hasn't started breaking yet
             return 0.5 * acceleration * current_time ** 2
-        breaking_time = current_time - total_time / 2  # Time spent breaking
-        return move_length - speed * breaking_time - 0.5 * acceleration * breaking_time ** 2
+        breaking_time = current_time - (total_time / 2)  # Time spent breaking
+        max_speed = total_time/2 * acceleration  # Max speed reached
+        return move_length/2 + max_speed * breaking_time + 0.5 * -acceleration * breaking_time ** 2
+
+    if current_time <= time_to_max_speed:  # If max speed has not been reached
+        return 0.5 * acceleration * current_time ** 2
 
     time_at_max_speed = (move_length - (distance_to_max_speed * 2)) / speed  # Time spent at max speed
     if current_time <= time_to_max_speed + time_at_max_speed:  # If max speed has been reached
@@ -163,20 +165,22 @@ def calc_move_time(move_length: float, speed: float, acceleration: float) -> flo
     time_to_max_speed = speed / acceleration  # Time to reach max speed
     distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
     if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
-        return (move_length * 2 / acceleration) ** 0.5  # Time formula (t = sqrt(2 * d / a))
+        return ((move_length / acceleration) ** 0.5) * 2  # Time formula (t = sqrt(2 * d / a))
     max_speed_move_time = (move_length - distance_to_max_speed * 2) / speed  # Time spent at max speed
     return 2 * time_to_max_speed + max_speed_move_time  # Times two because it has to break as well
 
 
-if __name__ == '__main__':
-    t = calc_move_time(move_length=50, speed=5, acceleration=2)
+def _draw_graph(move_length: float, speed: float, acceleration: float):
+    from matplotlib import pyplot as plt
+    t = calc_move_time(move_length=move_length, speed=speed, acceleration=acceleration)
     print(t)
-    # print(calc_current_length(move_length=50, speed=5, acceleration=2, current_time=10))
     data = []
     for i in range(int(t * 100)):
-        data.append(calc_current_length(move_length=50, speed=5, acceleration=2, current_time=i / 100))
-
-    from matplotlib import pyplot as plt
+        data.append(calc_current_length(move_length=move_length, speed=speed, acceleration=acceleration, current_time=i / 100))
 
     plt.plot(data)
     plt.show()
+
+
+if __name__ == '__main__':
+    _draw_graph(move_length=50, speed=5, acceleration=0.2)
