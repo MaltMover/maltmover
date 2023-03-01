@@ -103,11 +103,16 @@ class App(customtkinter.CTk):
         toggle_thread.start()
 
     def move_system(self, target: Point | Waypoint, time: float):
+        # TODO: Make accel
         self.space.update_lengths(target, time)
         self.request_handler.set_pulleys(self.space.pulleys)
-        self.status_frame.get_mechanical_states(timeout=4)
+        print(self.request_handler.success_map)
+        if all(all(self.request_handler.success_map[i]) for i in [0, 1]):
+            # If everything is successful, read the current values
+            self.status_frame.get_mechanical_states(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
+        # TODO: Make accel
         with open('config.json', 'r') as f:
             config = json.load(f)
         delay = config["three_point_delay"]
@@ -127,6 +132,7 @@ class App(customtkinter.CTk):
         self.status_frame.get_mechanical_states(timeout=4)
 
     def move_as_thread(self, target: Point | Waypoint, time: float, three_point=False):
+        # TODO: Make accel
         if three_point:
             thread = threading.Thread(target=self.move_system_three_point, args=(target,))
         else:
@@ -245,7 +251,7 @@ class StatusPage(customtkinter.CTkFrame):
 
         with open("config.json", "r") as f:
             config = json.load(f)
-            init_time = config["init_time"]
+            init_time = config["init_speed"]
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                               command=self.get_mechanical_states)
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
@@ -322,7 +328,7 @@ class ConfigPage(customtkinter.CTkFrame):
         # Room Size
         self.acceleration_label = customtkinter.CTkLabel(self, text="Acceleration", font=big_font)
         self.acceleration_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
-        self.acceleration_unit_label = customtkinter.CTkLabel(self, text="[dm/s^2] (10 cm/s/s)", font=small_font)
+        self.acceleration_unit_label = customtkinter.CTkLabel(self, text="[dm/s²] (10 cm/s/s)", font=small_font)
         self.acceleration_label.place(relx=0.03, rely=0.08, anchor="sw")
         self.acceleration_entry.place(relx=0.65, rely=0.08, anchor="se")
         self.acceleration_unit_label.place(relx=0.69, rely=0.08, anchor="sw")
@@ -400,7 +406,7 @@ class ConfigPage(customtkinter.CTkFrame):
             config = json.load(f)
         # Acceleration
         self.acceleration_entry.delete(0, customtkinter.END)
-        self.acceleration_entry.insert(0, config["acceleration"])
+        self.acceleration_entry.insert(0, config["max_acceleration"])
         # Rope Length
         self.rope_length_entry.delete(0, customtkinter.END)
         self.rope_length_entry.insert(0, config["rope_length"])
@@ -429,7 +435,7 @@ class ConfigPage(customtkinter.CTkFrame):
     def save_config(self):
         with open(self.config_path, "r") as f:
             config = json.load(f)
-        config["acceleration"] = float(self.acceleration_entry.get())
+        config["max_acceleration"] = float(self.acceleration_entry.get())
         config["rope_length"] = float(self.rope_length_entry.get())
         config["max_speed"] = float(self.max_speed_entry.get())
         config["edge_limit"] = float(self.edge_limit_entry.get())

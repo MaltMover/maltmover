@@ -6,7 +6,7 @@ class Pulley:
     Pulley class is used to represent a pulley with a location in 3D space.
     """
 
-    def __init__(self, location: Point, max_length: int | float, max_speed: int | float, acceleration: int | float):
+    def __init__(self, location: Point, max_length: int | float, max_speed: int | float, max_acceleration: int | float):
         """
         :param location: The location of the pulley in 3D space.
         :param max_length: The length of the rope attached to the pulley.
@@ -18,9 +18,10 @@ class Pulley:
         self.z = location.z
         self.max_length = round(float(max_length), 2)  # in decimeters (10 cm)
         self.max_speed = round(float(max_speed), 2)  # in decimeters per second (10 cm/s)
-        self.acceleration = round(float(acceleration), 2)  # in decimeters per second squared (10 cm/s^2)
-        self.speed = 0  # in decimeters per second (10 cm/s)
+        self.max_acceleration = round(float(max_acceleration), 2)  # in decimeters per second squared (10 cm/s^2)
         self.length = 0  # in decimeters (10 cm)
+        self.speed = 0  # in decimeters per second (10 cm/s)
+        self.acceleration = 0  # in decimeters per second squared (10 cm/s^2)
 
     def __repr__(self):
         return f'Pulley(Location: ({self.x}, {self.y}, {self.z}), length: {self.length},' \
