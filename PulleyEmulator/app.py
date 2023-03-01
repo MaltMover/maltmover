@@ -49,13 +49,18 @@ class App(customtkinter.CTk):
             return
         diff = end_length - start_length
         try:
-            prep_time = float(re.match(r"[\d.]*", self.data_list.speed_data.cget("text")).group(0))
+            speed = float(re.match(r"[\d.]*", self.data_list.speed_data.cget("text")).group(0))
+            acceleration = float(re.match(r"[\d.]*", self.data_list.acceleration_data.cget("text")).group(0))
+            move_time = calc_move_time(move_length=abs(diff), speed=speed, acceleration=acceleration)
         except ValueError:
             return
         self.pulley_frame.run()
-        while time.time() - start_time < prep_time and self.alive:
-            self.data_list.update_value("length", abs(start_length + diff * ((time.time() - start_time) / prep_time)))
-            self.data_list.update_value("time", abs(prep_time - (time.time() - start_time)))
+        while time.time() - start_time < move_time and self.alive:
+            move_size = calc_current_length(move_length=abs(diff), speed=speed, acceleration=acceleration, current_time=time.time() - start_time)
+            if diff < 0:
+                move_size = -move_size
+            self.data_list.update_value("length", start_length + move_size)
+            self.data_list.update_value("time", abs(move_time - (time.time() - start_time)))
         self.pulley_frame.stop()
 
     def kill(self):
@@ -88,7 +93,7 @@ class DataList(customtkinter.CTkFrame):
         self.length_label = customtkinter.CTkLabel(self, text="Length:", font=self.font)
         self.time_label = customtkinter.CTkLabel(self, text="Time:", font=self.font)
         self.prep_length_label = customtkinter.CTkLabel(self, text="Prep Length:", font=self.font)
-        self.speed_label = customtkinter.CTkLabel(self, text="Prep Time:", font=self.font)
+        self.speed_label = customtkinter.CTkLabel(self, text="Speed:", font=self.font)
         self.acceleration_label = customtkinter.CTkLabel(self, text="Acceleration:", font=self.font)
         self.length_label.place(relx=0.1, rely=0.1, anchor="w")
         self.time_label.place(relx=0.1, rely=0.3, anchor="w")
@@ -117,12 +122,14 @@ class DataList(customtkinter.CTkFrame):
             case "prep_length":
                 self.prep_length_data.configure(text=f"{value} dm")
             case "speed":
-                self.speed_data.configure(text=f"{value} s")
+                self.speed_data.configure(text=f"{value} dm/s")
             case "acceleration":
                 self.acceleration_data.configure(text=f"{value} dm/s²")
 
 
 def calc_current_length(move_length: float, speed: float, acceleration: float, current_time: float) -> float:
+    if move_length <= 0:
+        raise ValueError("Move length must be greater than 0")
     time_to_max_speed = speed / acceleration  # Time to reach max speed
     if current_time <= time_to_max_speed:  # If max speed has not been reached
         return 0.5 * acceleration * current_time ** 2
@@ -168,9 +175,8 @@ if __name__ == '__main__':
     data = []
     for i in range(int(t * 100)):
         data.append(calc_current_length(move_length=50, speed=5, acceleration=2, current_time=i / 100))
-    for i in range(int(t * 100), 0, -1):
-        data.append(calc_current_length(move_length=50, speed=5, acceleration=2, current_time=i / 100))
 
     from matplotlib import pyplot as plt
+
     plt.plot(data)
     plt.show()
