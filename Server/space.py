@@ -103,20 +103,20 @@ class Space:
         self.current_point = target
         return min_time
 
-    def calculate_min_move_time(self, target: Point, three_point_move=False) -> float:
+    def calculate_min_move_time(self, target: Point, three_point_move=False, origin=None) -> float:
         """
-        Calculates the minimum time it takes to move from current position to target point, given the max_speed of the pulleys.
+        Calculates the minimum time it takes to move from current position (or another origin) to target point,
+         given the max_speed and max_acceleration of the pulleys.
         :param target: Target point
         :param three_point_move: If True, calculates the time for a three-point move
+        :param origin: Origin point for the move, if current point is not the origin
         :return: time in seconds, rounded to 2 decimal places
         """
         with open("config.json", "r") as f:
             config = json.load(f)
         if three_point_move:
             delay = config["three_point_delay"]
-            t1 = self.calculate_min_move_time(
-                Point(self.current_point.x, self.current_point.y, self.size_z - self.edge_limit)
-            )
+            t1 = self.calculate_min_move_time(Point(self.current_point.x, self.current_point.y, self.size_z - self.edge_limit))
             t2 = self.calculate_min_move_time(Point(target.x, target.y, self.size_z - self.edge_limit))
             t3 = self.calculate_min_move_time(Point(target.x, target.y, target.z))
             time = t1 + t2 + t3 + (delay * 2)
@@ -124,7 +124,12 @@ class Space:
         min_time = -1
         for pulley in self.pulleys:
             end_length = sqrt((pulley.x - target.x) ** 2 + (pulley.y - target.y) ** 2 + (pulley.z - target.z) ** 2)
-            move_size = abs(pulley.length - end_length)
+            if origin is not None:
+                # If origin is given, calculate the length from the origin to the pulley
+                start_length = sqrt((pulley.x - origin.x) ** 2 + (pulley.y - origin.y) ** 2 + (pulley.z - origin.z) ** 2)
+            else:
+                start_length = pulley.length
+            move_size = abs(start_length - end_length)
             pulley_time = self.calculate_move_time(move_size, pulley.max_speed, pulley.max_acceleration)
             if pulley_time > min_time:
                 min_time = pulley_time

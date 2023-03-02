@@ -106,7 +106,7 @@ class App(customtkinter.CTk):
         move_time = self.space.update_lengths(target)
         self.request_handler.set_pulleys(self.space.pulleys)
         print(self.request_handler.success_map)
-        sleep(move_time)
+        sleep(move_time + 1)  # Wait for the system to move
         if all(all(self.request_handler.success_map[i]) for i in [0, 1]):
             # If everything is successful, read the current values
             self.status_frame.get_mechanical_states(timeout=4)
@@ -120,7 +120,11 @@ class App(customtkinter.CTk):
             Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
             target
         ]
-        times = [self.space.calculate_min_move_time(t) for t in targets]
+        times = [
+            self.space.calculate_min_move_time(targets[0]),
+            self.space.calculate_min_move_time(targets[1], origin=targets[0]),
+            self.space.calculate_min_move_time(targets[2], origin=targets[1])
+        ]
 
         for rtarget, rtime in zip(targets, times):
             self.space.update_lengths(rtarget, rtime)
