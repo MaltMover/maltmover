@@ -37,7 +37,7 @@ void setup() {
 
   stepper.setMaxSpeed(1000);
 
-  calibrate();  // stops execution of code until pulley is calibrated
+  calibrate_pulley();  // stops execution of code until pulley is calibrated
   
   if (WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("Static IP Configured");
@@ -101,7 +101,7 @@ void handleBody() {
       digitalWrite(RUNNINGLED, HIGH);
       digitalWrite(CONFIGLED, LOW);
       
-      run_pulleys();
+      run_pulley();
 
       digitalWrite(RUNNINGLED, LOW);
 
@@ -122,7 +122,7 @@ void handleBody() {
     
   }
 
-  else if (doc.containsKey("length")) {
+  else if (doc.containsKey("length") && doc.containsKey("speed") && doc.containsKey("acceleration")) {
     set_config(doc);
 
     response["success"] = true;

@@ -1,10 +1,74 @@
 #include <AccelStepper.h>
 #include "Arduino.h"
 #include "Config.h"
+#include "Globals.h"
 
-void calibrate() {
-  // add code to calibrate length of wire
-  //delay(5000);
+#define CALISPEED 40
 
+int getButtonNum(int analogVal){
+  if (analogVal >= 1020){
+    return 0;
+  }
+  else if (analogVal >= 450){
+    return 1;
+  }
+  else if (analogVal >= 80){
+    return 2;
+  }
+  else{
+    return 3;
+  }
+}
+
+void final_calibrate(){
+  bool hallValue = !digitalRead(HALLEFFECT);  // Inverted output
+  stepper.setSpeed(-CALISPEED);
+  while (!hallValue){
+    stepper.runSpeed();
+    hallValue = !digitalRead(HALLEFFECT);  // Inverted output
+    yield();
+    delayMicroseconds(100);
+  }
+  stepper.setCurrentPosition(0);  // Finish calibration
+}
+
+void calibrate_pulley() {
+  int buttonNum;
+  while (1){
+    buttonNum = getButtonNum(analogRead(A0));  // Read buttons from A0
+    switch (buttonNum){
+      case 0:
+        digitalWrite(RUNNINGLED, LOW);
+        digitalWrite(WIFILED, LOW);
+        break;
+      case 1:
+        stepper.setSpeed(-CALISPEED);
+        stepper.runSpeed();
+        digitalWrite(RUNNINGLED, HIGH);  // Top led
+        digitalWrite(WIFILED, LOW);
+        break;
+      case 2:
+        digitalWrite(RUNNINGLED, LOW);
+        digitalWrite(WIFILED, LOW);
+        delay(50);  // Make sure it was not a mistake
+        buttonNum = getButtonNum(analogRead(A0));  // Read again
+        if (buttonNum != 2){
+          break;
+        }
+        final_calibrate();
+        return;  // Exit calibration
+        break;       
+      case 3:
+        stepper.setSpeed(CALISPEED);
+        stepper.runSpeed();
+        digitalWrite(WIFILED, HIGH); // Bottom LED
+        digitalWrite(RUNNINGLED, LOW);
+        break;
+    }
+    delay(1);  // Delay for stability
+    yield();
+    bool hallValue = !digitalRead(HALLEFFECT);  // Inverted output
+    digitalWrite(CONFIGLED, hallValue); // Show hall-effect value
+  }
   return;
 }

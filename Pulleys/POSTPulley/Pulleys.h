@@ -1,1 +1,1 @@
-void run_pulleys();
+void run_pulley();

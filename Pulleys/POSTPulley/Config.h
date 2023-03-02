@@ -11,3 +11,6 @@ const double steps_pr_dm = 97.94; //53.0516
 #define WIFILED 5  // D1
 #define CONFIGLED 4  // D2
 #define RUNNINGLED 0 // D3
+
+// Hall-effect sensor
+#define HALLEFFECT 16  // D0

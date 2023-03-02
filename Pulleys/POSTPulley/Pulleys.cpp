@@ -5,7 +5,7 @@
 #include "Globals.h"
 
 
-void run_pulleys() {
+void run_pulley() {
   while (stepper.distanceToGo() != 0) {
     stepper.run();
     yield();
