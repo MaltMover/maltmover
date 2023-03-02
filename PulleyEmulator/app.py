@@ -169,6 +169,7 @@ def calc_move_time(move_length: float, speed: float, acceleration: float) -> flo
     distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
     if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
         return ((move_length / acceleration) ** 0.5) * 2  # Time formula (t = sqrt(2 * d / a))
+    print("Top speed")
     max_speed_move_time = (move_length - distance_to_max_speed * 2) / speed  # Time spent at max speed
     return 2 * time_to_max_speed + max_speed_move_time  # Times two because it has to break as well
 
@@ -186,4 +187,4 @@ def _draw_graph(move_length: float, speed: float, acceleration: float):
 
 
 if __name__ == '__main__':
-    _draw_graph(move_length=50, speed=5, acceleration=0.2)
+    _draw_graph(move_length=13, speed=7, acceleration=5)
