@@ -121,7 +121,7 @@ class App(customtkinter.CTk):
             Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
             Point(target.x, target.y, target.z)
         ]
-        times = [self.space.calculate_min_time(t) for t in targets]
+        times = [self.space.calculate_min_move_time(t) for t in targets]
 
         for rtarget, rtime in zip(targets, times):
             self.space.update_lengths(rtarget, rtime)
@@ -194,7 +194,7 @@ class HomePage(customtkinter.CTkFrame):
             config = json.load(f)
         three_point = config['three_point_move']
         for i, waypoint in enumerate(legal_waypoints + illegal_waypoints):
-            time = self.master.space.calculate_min_time(waypoint, three_point)
+            time = self.master.space.calculate_min_move_time(waypoint, three_point)
             waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10,
                                                       text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
                                                       fg_color="transparent", text_color="gray90", hover_color="gray30",
