@@ -1,10 +1,13 @@
 {
   "edge_limit": 4.0,
-  "init_speed": 1.0,
+  "init": {
+    "speed": 1.0,
+    "acceleration": 0.5
+  },
   "max_speed": 3.0,
   "max_acceleration": 0.5,
   "rope_length": 100.0,
-  "three_point_move": false,
+  "three_point_move": true,
   "three_point_delay": 1,
   "size": [
     50.0,

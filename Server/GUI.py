@@ -34,6 +34,7 @@ class App(customtkinter.CTk):
         self.space = space
         self.request_handler = request_handler
         self.grabber_handler = grabber_handler
+        self.connection_threads = []  # List of all threads with connections to pulleys
         self.title("Malt Mover")
         self.iconbitmap(os.path.join(image_path, "crane.ico"))
         self.geometry("700x450")
@@ -90,6 +91,11 @@ class App(customtkinter.CTk):
         else:
             self.waypoint_frame.grid_forget()
 
+    def join_connection_threads(self):
+        for thread in self.connection_threads:
+            thread.join()
+        self.connection_threads = []
+
     def toggle_grabber(self):
         new_state = not self.space.grabber.is_open
         self.grabber_handler.set_state(new_state)
@@ -101,6 +107,21 @@ class App(customtkinter.CTk):
     def toggle_grabber_threaded(self):
         toggle_thread = threading.Thread(target=self.toggle_grabber)
         toggle_thread.start()
+
+    def center_system(self):
+        with open("config.json", "r") as f:
+            config = json.load(f)
+        self.space.update_lengths(self.space.center)
+        speed = config["init"]["speed"]
+        acceleration = config["init"]["acceleration"]
+        for i, pulley in enumerate(self.space.pulleys):
+            pulley.speed = speed
+            pulley.acceleration = acceleration
+            self.space.pulleys[i] = pulley
+
+        print(self.space.pulleys)
+        self.request_handler.set_pulleys(self.space.pulleys)
+        print(self.request_handler.success_map)
 
     def move_system(self, target: Point | Waypoint):
         move_time = self.space.update_lengths(target)
@@ -134,12 +155,16 @@ class App(customtkinter.CTk):
                 return
         self.status_frame.get_mechanical_states(timeout=4)
 
-    def move_as_thread(self, target: Point | Waypoint, three_point=False):
-        if three_point:
+    def move_as_thread(self, target: Point | Waypoint, three_point=False, center=False):
+        self.join_connection_threads()  # Join any previous threads
+        if center:
+            thread = threading.Thread(target=self.center_system)
+        elif three_point:
             thread = threading.Thread(target=self.move_system_three_point, args=(target,))
         else:
             thread = threading.Thread(target=self.move_system, args=(target,))
         thread.start()
+        self.connection_threads.append(thread)
         self.select_frame_by_name("pulleys")
 
 
@@ -253,7 +278,7 @@ class StatusPage(customtkinter.CTkFrame):
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                               command=self.get_mechanical_states)
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                             command=lambda master=master: master.move_as_thread(master.space.center, False))
+                                                             command=lambda master=master: master.move_as_thread(master.space.center, False, True))
         self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
         self.center_pulleys_button.place(relx=0.5, rely=0.7, anchor="center")
         self.load_mechanical_info()
