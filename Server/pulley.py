@@ -72,19 +72,21 @@ class Pulley:
             raise ValueError(f'Acceleration cannot be greater than {self.max_acceleration} dm/s^2.')
         self._acceleration = round(float(acceleration), 2)
 
-    def make_move(self, new_length: int | float, time: int | float) -> tuple:
+    def make_move(self, target: Point, time: int | float) -> tuple:
         """
         Makes a move with the pulley, and calculates the new speed and acceleration.
-        :param new_length: The new rope length.
+        :param target: The new rope length.
         :param time: The time to move.
         """
+        new_length = self.location.distance_to(target)
         if new_length > self.max_length:
             raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
         if time <= 0:
             raise ValueError(f'Time must be greater than 0.')
 
+        move_size = abs(new_length - self.length)
         # Calculate the new speed with cool math
-        self.speed = -((self.max_acceleration * (self.max_acceleration * time ** 2 - 4 * new_length)) ** 0.5 - self.max_acceleration * time) / 2
+        self.speed = -((self.max_acceleration * (self.max_acceleration * time ** 2 - 4 * move_size)) ** 0.5 - self.max_acceleration * time) / 2
         self.acceleration = self.max_acceleration
         self.length = new_length
 

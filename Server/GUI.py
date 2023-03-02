@@ -102,41 +102,39 @@ class App(customtkinter.CTk):
         toggle_thread = threading.Thread(target=self.toggle_grabber)
         toggle_thread.start()
 
-    def move_system(self, target: Point | Waypoint, time: float):
-        # TODO: Make accel
-        self.space.update_lengths(target, time)
+    def move_system(self, target: Point | Waypoint):
+        move_time = self.space.update_lengths(target)
         self.request_handler.set_pulleys(self.space.pulleys)
         print(self.request_handler.success_map)
+        sleep(move_time)
         if all(all(self.request_handler.success_map[i]) for i in [0, 1]):
             # If everything is successful, read the current values
             self.status_frame.get_mechanical_states(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
-        # TODO: Make accel
         with open('config.json', 'r') as f:
             config = json.load(f)
         delay = config["three_point_delay"]
         targets = [
             Point(self.space.current_point.x, self.space.current_point.y, self.space.size_z - self.space.edge_limit),
             Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
-            Point(target.x, target.y, target.z)
+            target
         ]
         times = [self.space.calculate_min_move_time(t) for t in targets]
 
         for rtarget, rtime in zip(targets, times):
             self.space.update_lengths(rtarget, rtime)
             success_map = self.request_handler.set_pulleys(self.space.pulleys)
+            sleep(rtime + delay)
             if not (all(success_map[0]) and all(success_map[1])):
                 return
-            sleep(rtime + delay)
         self.status_frame.get_mechanical_states(timeout=4)
 
-    def move_as_thread(self, target: Point | Waypoint, time: float, three_point=False):
-        # TODO: Make accel
+    def move_as_thread(self, target: Point | Waypoint, three_point=False):
         if three_point:
             thread = threading.Thread(target=self.move_system_three_point, args=(target,))
         else:
-            thread = threading.Thread(target=self.move_system, args=(target, time))
+            thread = threading.Thread(target=self.move_system, args=(target,))
         thread.start()
         self.select_frame_by_name("pulleys")
 
@@ -199,8 +197,7 @@ class HomePage(customtkinter.CTkFrame):
                                                       text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
                                                       fg_color="transparent", text_color="gray90", hover_color="gray30",
                                                       image=images["waypoint_image"], anchor="w", font=(customtkinter.CTkFont, 18),
-                                                      command=lambda waypoint=waypoint, time=time: self.master.move_as_thread(waypoint, time,
-                                                                                                                              three_point))
+                                                      command=lambda waypoint=waypoint, time=time: self.master.move_as_thread(waypoint, three_point))
             if self.master.space.current_point == waypoint:
                 waypoint_button.configure(state="disabled")
             waypoint_button.grid(row=i, column=0, sticky="ew")
@@ -249,14 +246,10 @@ class StatusPage(customtkinter.CTkFrame):
         self.grabber_image.place(relx=0.5, rely=0.3, anchor="center")
         self.grabber_image.bind("<Button-1>", lambda event: self.master.toggle_grabber_threaded())
 
-        with open("config.json", "r") as f:
-            config = json.load(f)
-            init_time = config["init_speed"]
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                               command=self.get_mechanical_states)
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                             command=lambda master=master: master.move_as_thread(master.space.center,
-                                                                                                                 init_time, False))
+                                                             command=lambda master=master: master.move_as_thread(master.space.center, False))
         self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
         self.center_pulleys_button.place(relx=0.5, rely=0.7, anchor="center")
         self.load_mechanical_info()

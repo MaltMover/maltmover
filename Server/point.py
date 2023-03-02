@@ -26,6 +26,9 @@ class Point:
             return self.x < other.x
         return self.y < other.y
 
+    def distance_to(self, other) -> float:
+        return ((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2) ** 0.5
+
 
 class Waypoint(Point):
     def __init__(self, x: int | float, y: int | float, z: int | float, name: str):
