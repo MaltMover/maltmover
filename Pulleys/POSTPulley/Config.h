@@ -5,7 +5,7 @@
 #define IN4 15
 
 // Stepper properties
-const double steps_pr_dm = 100; //53.0516
+const double steps_pr_dm = 97.94; //53.0516
 
 // Define LED's
 #define WIFILED 5  // D1

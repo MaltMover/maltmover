@@ -16,11 +16,10 @@ const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
 // Set static IP
-/*
+
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
 IPAddress local_IP(192, 168, 251, 69);  //Only change this
-*/
 
 AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
 
@@ -39,13 +38,13 @@ void setup() {
   stepper.setMaxSpeed(1000);
 
   calibrate();  // stops execution of code until pulley is calibrated
-  /*
+  
   if (WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("Static IP Configured");
   } else {
     Serial.println("Static IP Configuration Failed");
   }
-  */
+  
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -140,7 +139,7 @@ void handleBody() {
       Serial.println("Send length \n");
 
       response["success"] = true;
-      response["length"] = stepper.currentPosition();
+      response["length"] = stepper.currentPosition() / steps_pr_dm;
       serializeJson(response, responseOut);
 
       server.send(200, "application/json", responseOut);

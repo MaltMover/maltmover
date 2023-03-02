@@ -16,15 +16,21 @@ void setup() {
 }
 
 void loop() {
-  stepper.move(1000);
+ 
+  stepper.moveTo(1000);
+  run_pulleys();
+
+  delay(5000);
+
+  stepper.moveTo(0);
+  run_pulleys();
+  delay(5000);
+ 
+}
+
+void run_pulleys() {
   while (stepper.distanceToGo() != 0) {
     stepper.run();
     yield();
   }
-
-  delay(5000);
-
-  stepper.move(-1000);
-  stepper.runToPosition();
-  delay(5000);
 }
