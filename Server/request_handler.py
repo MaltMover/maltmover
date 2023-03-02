@@ -40,8 +40,8 @@ class PulleyRequestHandler:
         address = self.addresses[pulley_id]
         with open("config.json", "r") as f:
             config = json.load(f)
-            time = config["init_time"]
-        data = {"length": 0.0, "time": time}
+            speed = config["init_speed"]
+        data = {"length": 0.0, "speed": speed, "acceleration": 0.5}
         self.send_request(address, data, timeout=3, request_num=0, pulley_num=pulley_id)
         self.send_request(address, {"run": True}, timeout=3, request_num=0, pulley_num=pulley_id)
 
@@ -55,6 +55,7 @@ class PulleyRequestHandler:
                 {
                     "length": pulley.length,
                     "speed": pulley.speed,
+                    "acceleration": pulley.acceleration,
                 }
             )
         # Send first request to all pulleys
@@ -113,7 +114,7 @@ class PulleyRequestHandler:
             return False
         self.response_count += 1
         if response.status_code == 200:
-            self.success_map[request_num][pulley_num] = True
+            self.success_map[request_num][pulley_num] = self.responses[pulley_num]["success"]
             return True
         return False
 
@@ -127,11 +128,10 @@ class GrabberRequestHandler:
     def __repr__(self):
         return f"GrabberRequestHandler({self.address})"
 
-    def get_state(self) -> bool:
-        self.send_request({"get_state": True}, timeout=10)
+    def get_state(self, timeout=3) -> bool:
+        self.send_request({"get_state": True}, timeout=timeout)
         if self.success:
             return self.response["is_open"]
-        return
 
     def set_state(self, set_open: bool):
         self.send_request({"set_open": set_open})

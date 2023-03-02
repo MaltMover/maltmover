@@ -33,7 +33,7 @@ class TestHTTPHandler(BaseHTTPRequestHandler):
 
 def run_server():
     global HTTPD
-    port = 80
+    port = 8000
     if len(sys.argv) > 1:
         port = int(sys.argv[1])
     server_address = ("", port)

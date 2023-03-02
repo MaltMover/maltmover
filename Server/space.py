@@ -85,46 +85,72 @@ class Space:
     def set_grabber(self, grabber: Grabber) -> None:
         self.grabber = grabber
 
-    def update_lengths(self, point: Point | Waypoint, time: int | float, check_limit=True) -> None:
+    def update_lengths(self, target: Point | Waypoint, check_limit=True) -> float:
         """
         Updates the lengths of the ropes of the pulleys in the space.
-        Raises ValueError if the point is not in the space.
+        Raises ValueError if the target is not in the space.
         Raises ValueError if the time results in speed higher than a pulley max_speed.
+        :return: Time to make the move in seconds
         """
-        if not self.is_in_space(point, check_limit=check_limit):
-            raise ValueError(f"{point} is not within limits of the {self}")
-        for pulley in self.pulleys:
-            new_length = sqrt((pulley.x - point.x) ** 2 + (pulley.y - point.y) ** 2 + (pulley.z - point.z) ** 2)
-            pulley.set_length(new_length, time)
-        self.current_point = point
-        print(self.current_point)
+        if not self.is_in_space(target, check_limit=check_limit):
+            raise ValueError(f"{target} is not within limits of the {self}")
 
-    def calculate_min_time(self, target: Point, three_point_move=False) -> float:
+        min_time = self.calculate_min_move_time(target)
+        for pulley in self.pulleys:
+            pulley.make_move(target, min_time)
+
+        print(self.current_point)
+        self.current_point = target
+        return min_time
+
+    def calculate_min_move_time(self, target: Point, three_point_move=False, origin=None) -> float:
         """
-        Calculates the minimum time it takes to move from current position to target point, given the max_speed of the pulleys.
+        Calculates the minimum time it takes to move from current position (or another origin) to target point,
+         given the max_speed and max_acceleration of the pulleys.
         :param target: Target point
         :param three_point_move: If True, calculates the time for a three-point move
+        :param origin: Origin point for the move, if current point is not the origin
         :return: time in seconds, rounded to 2 decimal places
         """
         with open("config.json", "r") as f:
             config = json.load(f)
         if three_point_move:
             delay = config["three_point_delay"]
-            t1 = self.calculate_min_time(
-                Point(self.current_point.x, self.current_point.y, self.size_z - self.edge_limit)
-            )
-            t2 = self.calculate_min_time(Point(target.x, target.y, self.size_z - self.edge_limit))
-            t3 = self.calculate_min_time(Point(target.x, target.y, target.z))
+            t1 = self.calculate_min_move_time(Point(self.current_point.x, self.current_point.y, self.size_z - self.edge_limit))
+            t2 = self.calculate_min_move_time(Point(target.x, target.y, self.size_z - self.edge_limit))
+            t3 = self.calculate_min_move_time(Point(target.x, target.y, target.z))
             time = t1 + t2 + t3 + (delay * 2)
-            return ceil(time * 100) / 100
+            return ceil(time * 100) / 100  # Round up to 2 decimal places
         min_time = -1
         for pulley in self.pulleys:
             end_length = sqrt((pulley.x - target.x) ** 2 + (pulley.y - target.y) ** 2 + (pulley.z - target.z) ** 2)
-            pulley_time = abs(pulley.length - end_length) / pulley.max_speed
+            if origin is not None:
+                # If origin is given, calculate the length from the origin to the pulley
+                start_length = sqrt((pulley.x - origin.x) ** 2 + (pulley.y - origin.y) ** 2 + (pulley.z - origin.z) ** 2)
+            else:
+                start_length = pulley.length
+            move_size = abs(start_length - end_length)
+            pulley_time = self.calculate_move_time(move_size, pulley.max_speed, pulley.max_acceleration)
             if pulley_time > min_time:
                 min_time = pulley_time
 
-        return ceil(min_time * 100) / 100
+        return ceil(min_time * 100) / 100  # Round up to 2 decimal places
+
+    @staticmethod
+    def calculate_move_time(move_length: float, speed: float, acceleration: float) -> float:
+        """
+        Calculates the time it takes to move a certain distance at a certain speed with a certain acceleration
+        :param move_length: The length to move
+        :param speed: The speed to move at
+        :param acceleration: The acceleration to use
+        :return: The time it takes to move the length
+        """
+        time_to_max_speed = speed / acceleration  # Time to reach max speed
+        distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
+        if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
+            return ((move_length / acceleration) ** 0.5) * 2  # Time formula (t = sqrt(2 * d / a))
+        max_speed_move_time = (move_length - distance_to_max_speed * 2) / speed  # Time spent at max speed
+        return 2 * time_to_max_speed + max_speed_move_time  # Times two because it has to break as well
 
 
 def create_space(current_point: Point = None):
@@ -134,18 +160,19 @@ def create_space(current_point: Point = None):
     size = config["size"]
     rope_length = config["rope_length"]
     max_speed = config["max_speed"]
+    max_acceleration = config["max_acceleration"]
     edge_limit = config[
         "edge_limit"
     ]  # How close to the edge of the space, the object can be
 
     space = Space(*size, edge_limit=edge_limit)
     space.read_waypoints("waypoints.json")
-    space.add_pulley(Pulley(Point(0, 0, size[2]), rope_length, max_speed))
-    space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed))
-    space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed))
-    space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed))
+    space.add_pulley(Pulley(Point(0, 0, size[2]), rope_length, max_speed, max_acceleration))
+    space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed, max_acceleration))
+    space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed, max_acceleration))
+    space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed, max_acceleration))
     grabber = Grabber()
     space.set_grabber(grabber)
     if current_point:
-        space.update_lengths(current_point, -1, check_limit=False)
+        space.update_lengths(current_point, check_limit=False)
     return space
