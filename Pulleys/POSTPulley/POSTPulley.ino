@@ -24,7 +24,6 @@ IPAddress local_IP(192, 168, 251, 69);  //Only change this
 
 AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
 
-
 ESP8266WebServer server(80);
 
 void setup() {
@@ -34,11 +33,9 @@ void setup() {
 
   //Setup LED's
   pinMode(WIFILED, OUTPUT);
-  pinMode(ALIVELED, OUTPUT);
   pinMode(CONFIGLED, OUTPUT);
   pinMode(RUNNINGLED, OUTPUT);
 
-  digitalWrite(ALIVELED, HIGH);
   stepper.setMaxSpeed(1000);
 
   calibrate();  // stops execution of code until pulley is calibrated
@@ -48,7 +45,7 @@ void setup() {
   } else {
     Serial.println("Static IP Configuration Failed");
   }
-*/
+  */
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
