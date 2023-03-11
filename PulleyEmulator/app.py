@@ -51,7 +51,7 @@ class App(customtkinter.CTk):
         try:
             speed = float(re.match(r"[\d.]*", self.data_list.speed_data.cget("text")).group(0))
             acceleration = float(re.match(r"[\d.]*", self.data_list.acceleration_data.cget("text")).group(0))
-            move_time = calc_move_time(move_length=abs(diff), max_speed=speed, acceleration=acceleration)
+            move_time = calc_move_time(move_length=abs(diff), speed=speed, acceleration=acceleration)
         except ValueError:
             return
         self.pulley_frame.run()
@@ -157,30 +157,26 @@ def calc_current_length(move_length: float, speed: float, acceleration: float, c
     return move_length
 
 
-def calc_move_time(move_length: float, max_speed: float, acceleration: float) -> float:
+def calc_move_time(move_length: float, speed: float, acceleration: float) -> float:
     """
     Calculates the time it takes to move a certain distance at a certain speed with a certain acceleration
     :param move_length: The length to move
-    :param max_speed: The speed to move at
+    :param speed: The speed to move at
     :param acceleration: The acceleration to use
     :return: The time it takes to move the length
     """
-    time_to_max_speed = max_speed / acceleration  # Time to reach max speed
+    time_to_max_speed = speed / acceleration  # Time to reach max speed
     distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
-    breaking_distance = (max_speed * time_to_max_speed + 0.5 * -acceleration * time_to_max_speed)  # Distance travelled while breaking
     if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
-        # TODO: Make this work
-        time_to_max_speed = acceleration
-        max_speed = time_to_max_speed * acceleration
-        breaking_distance = (max_speed * time_to_max_speed + 0.5 * -acceleration * time_to_max_speed)
+        return ((move_length / acceleration) ** 0.5) * 2  # Time formula (t = sqrt(2 * d / a))
     print("Top speed")
-    max_speed_move_time = (move_length - distance_to_max_speed - breaking_distance) / max_speed  # Time spent at max speed
+    max_speed_move_time = (move_length - distance_to_max_speed * 2) / speed  # Time spent at max speed
     return 2 * time_to_max_speed + max_speed_move_time  # Times two because it has to break as well
 
 
 def _draw_graph(move_length: float, speed: float, acceleration: float):
     from matplotlib import pyplot as plt
-    t = calc_move_time(move_length=move_length, max_speed=speed, acceleration=acceleration)
+    t = calc_move_time(move_length=move_length, speed=speed, acceleration=acceleration)
     print(t)
     data = []
     for i in range(int(t * 100)):
