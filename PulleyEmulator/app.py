@@ -187,4 +187,4 @@ def _draw_graph(move_length: float, speed: float, acceleration: float):
 
 
 if __name__ == '__main__':
-    _draw_graph(move_length=13, speed=7, acceleration=5)
+    _draw_graph(move_length=29, speed=10, acceleration=4)

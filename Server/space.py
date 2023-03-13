@@ -149,7 +149,8 @@ class Space:
         distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
         if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
             return ((move_length / acceleration) ** 0.5) * 2  # Time formula (t = sqrt(2 * d / a))
-        max_speed_move_time = (move_length - distance_to_max_speed * 2) / speed  # Time spent at max speed
+        max_speed_distance = move_length - distance_to_max_speed * 2  # Distance travelled at max speed
+        max_speed_move_time = max_speed_distance / speed  # Time spent at max speed
         return 2 * time_to_max_speed + max_speed_move_time  # Times two because it has to break as well
 
 
