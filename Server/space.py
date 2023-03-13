@@ -123,7 +123,7 @@ class Space:
             return ceil(time * 100) / 100  # Round up to 2 decimal places
         min_time = -1
         for pulley in self.pulleys:
-            end_length = sqrt((pulley.x - target.x) ** 2 + (pulley.y - target.y) ** 2 + (pulley.z - target.z) ** 2)
+            end_length = sqrt((pulley.x - target.x) ** 2 + (pulley.y - target.y) ** 2 + (pulley.z - target.z) ** 2) - config["length_offset"]
             if origin is not None:
                 # If origin is given, calculate the length from the origin to the pulley
                 start_length = sqrt((pulley.x - origin.x) ** 2 + (pulley.y - origin.y) ** 2 + (pulley.z - origin.z) ** 2)

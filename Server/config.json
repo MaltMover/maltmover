@@ -7,15 +7,16 @@
   "max_speed": 3.0,
   "max_acceleration": 0.5,
   "rope_length": 100.0,
-  "three_point_move": true,
+  "three_point_move": false,
   "three_point_delay": 1,
+  "length_offset": 0.65,
   "size": [
     50.0,
     50.0,
     25.0
   ],
   "ips": [
-    "127.0.0.1:8000",
+    "192.168.1.69",
     "127.0.0.1:8001",
     "127.0.0.1:8002",
     "127.0.0.1:8003"

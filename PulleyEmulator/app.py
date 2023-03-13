@@ -141,8 +141,8 @@ def calc_current_length(move_length: float, speed: float, acceleration: float, c
         if current_time <= total_time / 2:  # If it hasn't started breaking yet
             return 0.5 * acceleration * current_time ** 2
         breaking_time = current_time - (total_time / 2)  # Time spent breaking
-        max_speed = total_time/2 * acceleration  # Max speed reached
-        return move_length/2 + max_speed * breaking_time + 0.5 * -acceleration * breaking_time ** 2
+        max_speed = total_time / 2 * acceleration  # Max speed reached
+        return move_length / 2 + max_speed * breaking_time + 0.5 * -acceleration * breaking_time ** 2
 
     if current_time <= time_to_max_speed:  # If max speed has not been reached
         return 0.5 * acceleration * current_time ** 2
@@ -169,7 +169,7 @@ def calc_move_time(move_length: float, speed: float, acceleration: float) -> flo
     distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
     if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
         return ((move_length / acceleration) ** 0.5) * 2  # Time formula (t = sqrt(2 * d / a))
-    print("Top speed")
+    print("Top speed reached")
     max_speed_move_time = (move_length - distance_to_max_speed * 2) / speed  # Time spent at max speed
     return 2 * time_to_max_speed + max_speed_move_time  # Times two because it has to break as well
 
@@ -177,7 +177,7 @@ def calc_move_time(move_length: float, speed: float, acceleration: float) -> flo
 def _draw_graph(move_length: float, speed: float, acceleration: float):
     from matplotlib import pyplot as plt
     t = calc_move_time(move_length=move_length, speed=speed, acceleration=acceleration)
-    print(t)
+    print("time: ", t)
     data = []
     for i in range(int(t * 100)):
         data.append(calc_current_length(move_length=move_length, speed=speed, acceleration=acceleration, current_time=i / 100))
@@ -187,4 +187,4 @@ def _draw_graph(move_length: float, speed: float, acceleration: float):
 
 
 if __name__ == '__main__':
-    _draw_graph(move_length=29, speed=10, acceleration=4)
+    _draw_graph(move_length=1.9, speed=1, acceleration=0.5)

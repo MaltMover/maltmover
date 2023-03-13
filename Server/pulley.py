@@ -1,5 +1,8 @@
 from point import Point
 
+import json
+from math import sqrt
+
 
 class Pulley:
     """
@@ -78,15 +81,18 @@ class Pulley:
         :param target: The new rope length.
         :param time: The time to move.
         """
-        new_length = self.location.distance_to(target)
+        with open("config.json", "r") as f:
+            config = json.load(f)
+            length_offset = config["length_offset"]
+        new_length = self.location.distance_to(target) - length_offset
+        move_size = abs(new_length - self.length)
         if new_length > self.max_length:
             raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
-        if time <= 0:
+        if time <= 0 and move_size != 0:
             raise ValueError(f'Time must be greater than 0.')
 
-        move_size = abs(new_length - self.length)
         # Calculate the new speed with cool math
-        self.speed = -((self.max_acceleration * (self.max_acceleration * time ** 2 - 4 * move_size)) ** 0.5 - self.max_acceleration * time) / 2
+        self.speed = -(sqrt(self.max_acceleration * (self.max_acceleration * time ** 2 - 4 * move_size)) - self.max_acceleration * time) / 2
         self.acceleration = self.max_acceleration
         self.length = new_length
 
