@@ -19,7 +19,7 @@ const char *password = SECRET_PASS;
 
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
-IPAddress local_IP(192, 168, 251, 69);  //Only change this
+IPAddress local_IP(192, 168, 1, 69);  //Only change this
 
 AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
 
@@ -37,7 +37,7 @@ void setup() {
 
   stepper.setMaxSpeed(1000);
 
-  calibrate_pulley();  // stops execution of code until pulley is calibrated
+  //calibrate_pulley();  // stops execution of code until pulley is calibrated
   
   if (WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("Static IP Configured");
