@@ -20,6 +20,19 @@ int getButtonNum(int analogVal){
   }
 }
 
+int getButtonSafe(int pinNum){
+  int buttonNum = getButtonNum(analogRead(pinNum));
+  if (buttonNum == 0){
+    return 0;
+  }
+  delay(300);  // Wait because unstable signal
+  if (getButtonNum(analogRead(pinNum)) == buttonNum){
+    // Make sure same button is still pressed
+    return buttonNum;
+  }
+  return 0;
+}
+
 void final_calibrate(){
   bool hallValue = !digitalRead(HALLEFFECT);  // Inverted output
   stepper.setSpeed(-CALISPEED);
@@ -35,7 +48,7 @@ void final_calibrate(){
 void calibrate_pulley() {
   int buttonNum;
   while (1){
-    buttonNum = getButtonNum(analogRead(A0));  // Read buttons from A0
+    buttonNum = getButtonSafe(analogRead(A0));  // Read buttons from A0
     switch (buttonNum){
       case 0:
         digitalWrite(RUNNINGLED, LOW);
@@ -51,8 +64,7 @@ void calibrate_pulley() {
         digitalWrite(RUNNINGLED, LOW);
         digitalWrite(WIFILED, LOW);
         delay(50);  // Make sure it was not a mistake
-        buttonNum = getButtonNum(analogRead(A0));  // Read again
-        if (buttonNum != 2){
+        if (getButtonSafe(analogRead(A0)) != 2){
           break;
         }
         final_calibrate();
