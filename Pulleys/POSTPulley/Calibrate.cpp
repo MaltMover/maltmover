@@ -9,7 +9,7 @@ int getButtonNum(int analogVal){
   if (analogVal >= 1020){
     return 0;
   }
-  else if (analogVal >= 450){
+  else if (analogVal >= 130){
     return 1;
   }
   else if (analogVal >= 80){
@@ -22,8 +22,27 @@ int getButtonNum(int analogVal){
 
 int getButtonSafe(int pinNum){
   int buttonNum = getButtonNum(analogRead(pinNum));
+  Serial.print("Button: ");
+  Serial.println(buttonNum);
   if (buttonNum == 0){
     return 0;
+  }
+  delay(300);  // Wait because unstable signal
+  if (getButtonNum(analogRead(pinNum)) == buttonNum){
+    // Make sure same button is still pressed
+    return buttonNum;
+  }
+  return 0;
+}
+
+
+int getButtonSafe(int pinNum, int prevNum){
+  int buttonNum = getButtonNum(analogRead(pinNum));
+  if (buttonNum == 0){
+    return 0;
+  }
+  if (buttonNum == prevNum){
+    return buttonNum;
   }
   delay(300);  // Wait because unstable signal
   if (getButtonNum(analogRead(pinNum)) == buttonNum){
@@ -36,19 +55,24 @@ int getButtonSafe(int pinNum){
 void final_calibrate(){
   bool hallValue = !digitalRead(HALLEFFECT);  // Inverted output
   stepper.setSpeed(-CALISPEED);
+  digitalWrite(RUNNINGLED, HIGH);
+  digitalWrite(WIFILED, HIGH);
   while (!hallValue){
     stepper.runSpeed();
     hallValue = !digitalRead(HALLEFFECT);  // Inverted output
     yield();
     delayMicroseconds(100);
   }
+  digitalWrite(RUNNINGLED, LOW);
+  digitalWrite(WIFILED, LOW);
+  digitalWrite(CONFIGLED, LOW);
   stepper.setCurrentPosition(0);  // Finish calibration
 }
 
 void calibrate_pulley() {
-  int buttonNum;
+  int buttonNum = 0;
   while (1){
-    buttonNum = getButtonSafe(analogRead(A0));  // Read buttons from A0
+    buttonNum = getButtonSafe(A0, buttonNum);  // Read buttons from A0
     switch (buttonNum){
       case 0:
         digitalWrite(RUNNINGLED, LOW);
@@ -64,7 +88,7 @@ void calibrate_pulley() {
         digitalWrite(RUNNINGLED, LOW);
         digitalWrite(WIFILED, LOW);
         delay(50);  // Make sure it was not a mistake
-        if (getButtonSafe(analogRead(A0)) != 2){
+        if (getButtonSafe(A0) != 2){
           break;
         }
         final_calibrate();
