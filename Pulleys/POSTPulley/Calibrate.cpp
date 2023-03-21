@@ -63,6 +63,11 @@ void final_calibrate(){
     yield();
     delayMicroseconds(100);
   }
+  // Move by the offset
+  stepper.setAcceleration(1000);
+  stepper.move(LENGTH_OFFSET);
+  stepper.setAcceleration(100);
+  stepper.runToPosition();
   digitalWrite(RUNNINGLED, LOW);
   digitalWrite(WIFILED, LOW);
   digitalWrite(CONFIGLED, LOW);

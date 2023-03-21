@@ -4,6 +4,9 @@
 #define IN3 13
 #define IN4 15
 
+// Offset from where the hall-effect triggers (in steps) (in steps)
+#define LENGTH_OFFSET -80
+
 // Stepper properties
 const double steps_pr_dm = 141.47106;
 
