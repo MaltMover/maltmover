@@ -19,7 +19,7 @@ const char *password = SECRET_PASS;
 
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
-IPAddress local_IP(192, 168, 229, 69);  //Only change this
+IPAddress local_IP(192, 168, 4, 70);  //Only change this
 
 AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
 

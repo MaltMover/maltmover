@@ -13,7 +13,7 @@ const char *password = SECRET_PASS;
 // Set static IP
 IPAddress subnet(255, 255, 0, 0);
 IPAddress gateway(192, 168, 1, 1);
-IPAddress local_IP(192, 168, 141, 68);  //Only change this
+IPAddress local_IP(192, 168, 4, 68);  //Only change this
 
 ESP8266WebServer server(80);  // Init server on port 80
 Servo servo;

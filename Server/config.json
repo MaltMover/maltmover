@@ -1,25 +1,25 @@
 {
   "edge_limit": 4.0,
   "init": {
-    "speed": 1.0,
-    "acceleration": 0.5
+    "speed": 0.3,
+    "acceleration": 0.2
   },
-  "max_speed": 3.0,
+  "max_speed": 0.5,
   "max_acceleration": 0.5,
   "rope_length": 100.0,
   "three_point_move": false,
   "three_point_delay": 1,
   "length_offset": 0.65,
   "size": [
-    50.0,
-    50.0,
+    20.0,
+    30.0,
     25.0
   ],
   "ips": [
-    "192.168.1.69",
-    "127.0.0.1:8001",
+    "127.0.0.1:8000",
+    "192.168.4.70",
     "127.0.0.1:8002",
     "127.0.0.1:8003"
   ],
-  "grabber_ip": "127.0.0.1:8004"
+  "grabber_ip": "192.168.4.68"
 }
