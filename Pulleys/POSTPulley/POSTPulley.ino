@@ -17,25 +17,22 @@ const char *password = SECRET_PASS;
 
 // Set static IP
 
+IPAddress gateway(192, 168, 4, 1);
+IPAddress local_IP(192, 168, 4, 69);  //Only change this
 IPAddress subnet(255, 255, 0, 0);
-IPAddress gateway(192, 168, 1, 1);
-IPAddress local_IP(192, 168, 4, 70);  //Only change this
 
 AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
-
 ESP8266WebServer server(80);
 
 void setup() {
-
   Serial.begin(9600);
-  stepper.setMaxSpeed(500);
 
   //Setup LED's
   pinMode(WIFILED, OUTPUT);
   pinMode(CONFIGLED, OUTPUT);
   pinMode(RUNNINGLED, OUTPUT);
 
-  stepper.setMaxSpeed(1000);
+  revert_config();  // Set default config, with low speed and accel
 
   calibrate_pulley();  // stops execution of code until pulley is calibrated
   
@@ -44,7 +41,6 @@ void setup() {
   } else {
     Serial.println("Static IP Configuration Failed");
   }
-  
   WiFi.begin(ssid, password);
 
   while (WiFi.status() != WL_CONNECTED) {
@@ -145,6 +141,20 @@ void handleBody() {
       server.send(200, "application/json", responseOut);
       return;
     }
+  }
+
+  else if (doc.containsKey("move_steps")) {
+      stepper.move(doc["move_steps"]);
+
+      response["success"] = true;
+      serializeJson(response, responseOut);
+      server.send(200, "application/json", responseOut);
+
+      digitalWrite(RUNNINGLED, HIGH);
+      run_pulley();
+      digitalWrite(RUNNINGLED, LOW);
+
+      return;
   }
 
   Serial.println("Error - request does not contain known key \n");
