@@ -8,7 +8,7 @@
 #define LENGTH_OFFSET -80
 
 // Stepper properties
-const double steps_pr_dm = 130.7;
+const double steps_pr_dm = 133;
 
 // Define LED's
 #define WIFILED 5  // D1
