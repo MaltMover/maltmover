@@ -42,7 +42,7 @@ class PulleyRequestHandler:
             config = json.load(f)
             speed = config["init"]["speed"]
             acceleration = config["init"]["acceleration"]
-        data = {"length": 0.0, "speed": speed, "acceleration": acceleration}
+        data = {"length": 0.5, "speed": speed, "acceleration": acceleration}
         self.send_request(address, data, timeout=3, request_num=0, pulley_num=pulley_id)
         self.send_request(address, {"run": True}, timeout=3, request_num=0, pulley_num=pulley_id)
 
