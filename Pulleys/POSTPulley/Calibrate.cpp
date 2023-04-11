@@ -52,7 +52,7 @@ int getButtonSafe(int pinNum, int prevNum){
   return 0;
 }
 
-void final_calibrate(){
+void finalCalibrate(){
   bool hallValue = !digitalRead(HALLEFFECT);  // Inverted output
   stepper.setSpeed(-CALISPEED);
   digitalWrite(RUNNINGLED, HIGH);
@@ -64,7 +64,6 @@ void final_calibrate(){
     delayMicroseconds(100);
   }
   // Move by the offset
-  stepper.setAcceleration(1000);
   stepper.move(LENGTH_OFFSET);
   stepper.setAcceleration(100);
   stepper.runToPosition();
@@ -74,7 +73,7 @@ void final_calibrate(){
   stepper.setCurrentPosition(0);  // Finish calibration
 }
 
-void calibrate_pulley() {
+void calibratePulley() {
   int buttonNum = 0;
   while (1){
     buttonNum = getButtonSafe(A0, buttonNum);  // Read buttons from A0
@@ -96,7 +95,7 @@ void calibrate_pulley() {
         if (getButtonSafe(A0) != 2){
           break;
         }
-        final_calibrate();
+        finalCalibrate();
         return;  // Exit calibration
         break;       
       case 3:

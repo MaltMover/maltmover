@@ -34,7 +34,7 @@ void setup() {
 
   revert_config();  // Set default config, with low speed and accel
 
-  calibrate_pulley();  // stops execution of code until pulley is calibrated
+  calibratePulley();  // stops execution of code until pulley is calibrated
   
   if (WiFi.config(local_IP, gateway, subnet)) {
     Serial.println("Static IP Configured");
