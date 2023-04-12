@@ -34,7 +34,7 @@ The settings can be found in `Server/config.json`
 | rope_length       | dm         | Length of rope attached to the pulleys, insures no fatal error                                                   |
 | three_point_move  | bool       | True if the system should move to three different points, instead of a straight line from a to b                 |
 | three_point_delay | s          | Delay between each of the three moves, if three_point_move is set to true                                        |
-| length_offset     | dm         | Difference between actual length of the ropes, and percieved length by the system (size of the grabber)          |
+| length_offset     | dm         | Difference between actual length of the ropes, and percieved length by the system (size of the carabiner)        |
 | size              | dm\*dm\*dm | Size of the area, the MaltMover works within. (x, y, z)                                                          |
 | ips               | string     | IP addresses of the four pulleys                                                                                 |
 | grabber_ip        | string     | IP address if the MaltGrabber                                                                                    |
