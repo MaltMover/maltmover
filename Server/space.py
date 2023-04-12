@@ -55,11 +55,11 @@ class Space:
         else:
             limit = 0
 
-        if not limit <= point.x <= self.size_x - limit:
+        if not limit <= point.x <= self.size_x - limit:  # Doesn't allow touching walls
             return False
-        if not limit <= point.y <= self.size_y - limit:
+        if not limit <= point.y <= self.size_y - limit:  # Doesn't allow touching walls
             return False
-        if not limit <= point.z <= self.size_z - limit:
+        if not 0 <= point.z <= self.size_z - limit:  # Always allow touching floor
             return False
         return True
 
