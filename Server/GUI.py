@@ -293,8 +293,10 @@ class StatusPage(customtkinter.CTkFrame):
         self.load_mechanical_info()
 
     def load_mechanical_info(self):
+        # Load the lengths of the pulleys
         for pulley, label in zip(self.master.space.pulleys, [self.pulley_0_length, self.pulley_1_length, self.pulley_2_length, self.pulley_3_length]):
             label.configure(text=f"{pulley.length} dm")
+        # Load the state of the grabber
         is_open = "o" if self.master.space.grabber.is_open else "c"
         color = "g" if self.master.grabber_handler.success else "r"
         self.grabber_image.configure(image=images[f"grabber_{is_open}{color}"])
@@ -303,22 +305,33 @@ class StatusPage(customtkinter.CTkFrame):
         """
         Get the states of the mechanical system and update the GUI accordingly
         """
-        if grabber_only:
-            self.master.space.grabber.is_open = self.master.grabber_handler.get_state()  # Get state of grabber
-            self.load_mechanical_info()
-            return
+        threads = [threading.Thread(target=self.get_grabber_state, args=(timeout,))]
+        if not grabber_only:
+            threads.append(threading.Thread(target=self.get_pulley_states, args=(timeout,)))
 
+        for thread in threads:
+            thread.start()
+
+    def get_grabber_state(self, timeout: float):
+        self.master.space.grabber.is_open = self.master.grabber_handler.get_state(timeout=timeout)  # Get state of grabber
+        self.load_mechanical_info()  # Reload the state of the grabber
+
+    def get_pulley_states(self, timeout: float):
         lengths, success_map = self.master.request_handler.get_lengths(timeout=timeout)  # Get the lengths of the pulleys
+        # Update the images of the pulleys
         for success, image in zip(success_map, [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
             if success:
+                # Green if the pulley is connected
                 image.configure(image=images["green_pulley_image"])
             else:
+                # Red if the pulley is not connected
                 image.configure(image=images["red_pulley_image"])
 
+        # Update the lengths of the pulleys
         for i, length in enumerate(lengths):
             self.master.space.pulleys[i].length = length
 
-        self.master.space.grabber.is_open = self.master.grabber_handler.get_state()  # Get state of grabber
+        # Reload the lengths of the pulleys
         self.load_mechanical_info()
 
     def show_reset_dialog(self, pulley_id=0):
