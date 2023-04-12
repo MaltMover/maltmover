@@ -15,8 +15,8 @@ class Grabber:
         self.corners = [
             Point(self.location.x - self.corner_distance, self.location.y - self.corner_distance, self.location.z),
             Point(self.location.x + self.corner_distance, self.location.y - self.corner_distance, self.location.z),
-            Point(self.location.x + self.corner_distance, self.location.y + self.corner_distance, self.location.z),
-            Point(self.location.x - self.corner_distance, self.location.y + self.corner_distance, self.location.z)
+            Point(self.location.x - self.corner_distance, self.location.y + self.corner_distance, self.location.z),
+            Point(self.location.x + self.corner_distance, self.location.y + self.corner_distance, self.location.z)
         ]
 
     @property

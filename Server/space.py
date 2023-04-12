@@ -20,7 +20,7 @@ class Space:
         self.size_z = round(float(size_z), 1)  # in decimeter (10 cm)
         self.center = Point(self.size_x / 2, self.size_y / 2, self.size_z / 2)
         self.edge_limit = round(float(edge_limit), 1)  # in decimeter (10 cm)
-        self.grabber = None  # Grabber object
+        self.grabber: Grabber | None = None  # Grabber object
         self.pulleys = []  # List of pulleys in the space
         self.waypoints = []  # List of waypoints in the space
 
@@ -94,12 +94,13 @@ class Space:
         if not self.is_in_space(target, check_limit=check_limit):
             raise ValueError(f"{target} is not within limits of the {self}")
 
+        self.grabber.location = target
+
         min_time = self.calculate_min_move_time(target)
-        for pulley in self.pulleys:
-            pulley.make_move(target, min_time)
+        for i, pulley in enumerate(self.pulleys):
+            pulley.make_move(self.grabber.corners[i], min_time)
 
         print(self.grabber.location)
-        self.grabber.location = target
         return min_time
 
     def calculate_min_move_time(self, target: Point, three_point_move=False, origin=None) -> float:
