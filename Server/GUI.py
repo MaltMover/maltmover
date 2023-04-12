@@ -111,7 +111,7 @@ class App(customtkinter.CTk):
     def center_system(self):
         with open("config.json", "r") as f:
             config = json.load(f)
-        self.space.update_lengths(self.space.center)
+        self.space.move_grabber(self.space.center)
         speed = config["init"]["speed"]
         acceleration = config["init"]["acceleration"]
         for i, pulley in enumerate(self.space.pulleys):
@@ -124,7 +124,7 @@ class App(customtkinter.CTk):
         print(self.request_handler.success_map)
 
     def move_system(self, target: Point | Waypoint):
-        move_time = self.space.update_lengths(target)
+        move_time = self.space.move_grabber(target)
         self.request_handler.set_pulleys(self.space.pulleys)
         print(self.request_handler.success_map)
         sleep(move_time + 1)  # Wait for the system to move
@@ -137,7 +137,7 @@ class App(customtkinter.CTk):
             config = json.load(f)
         delay = config["three_point_delay"]
         targets = [
-            Point(self.space.current_point.x, self.space.current_point.y, self.space.size_z - self.space.edge_limit),
+            Point(self.space.grabber.location.x, self.space.grabber.location.y, self.space.size_z - self.space.edge_limit),
             Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
             target
         ]
@@ -148,7 +148,7 @@ class App(customtkinter.CTk):
         ]
 
         for rtarget, rtime in zip(targets, times):
-            self.space.update_lengths(rtarget, rtime)
+            self.space.move_grabber(rtarget, rtime)
             success_map = self.request_handler.set_pulleys(self.space.pulleys)
             sleep(rtime + delay)
             if not (all(success_map[0]) and all(success_map[1])):
@@ -227,13 +227,13 @@ class HomePage(customtkinter.CTkFrame):
                                                       fg_color="transparent", text_color="gray90", hover_color="gray30",
                                                       image=images["waypoint_image"], anchor="w", font=(customtkinter.CTkFont, 18),
                                                       command=lambda waypoint=waypoint, time=time: self.master.move_as_thread(waypoint, three_point))
-            if self.master.space.current_point == waypoint:
+            if self.master.space.grabber.location == waypoint:
                 waypoint_button.configure(state="disabled")
             waypoint_button.grid(row=i, column=0, sticky="ew")
             self.waypoint_buttons.append(waypoint_button)
         for i in range(len(legal_waypoints), len(self.waypoint_buttons)):
             self.waypoint_buttons[i].configure(state="disabled")
-        print(self.master.space.current_point)
+        print(self.master.space.grabber.location)
 
 
 class StatusPage(customtkinter.CTkFrame):
@@ -470,7 +470,7 @@ class ConfigPage(customtkinter.CTkFrame):
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=2)
         self.master.space.write_waypoints('waypoints.json')
-        space = create_space(self.master.space.current_point)
+        space = create_space(self.master.space.grabber.location)
         request_handler = create_request_handler()
         grabber_handler = create_grabber_handler()
         self.master.space = space
