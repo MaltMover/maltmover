@@ -26,6 +26,9 @@ class FakePulley:
 
         elif "get_length" in data:
             return {"success": True, "length": self.length}
+        elif "steps_pr_dm" in data:
+            print(f"Steps pr dm set to {data['steps_pr_dm']}")
+            return {"success": True}
         else:
             return {"success": False}
 
