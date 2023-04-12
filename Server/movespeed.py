@@ -28,7 +28,7 @@ for p in pulleys:
 start = Point(10, 20, 100)
 end = Point(90, 30, 100)
 
-space.update_lengths(start, -1, check_limit=False)
+space.move_grabber(start, -1, check_limit=False)
 for p in space.pulleys:
     print(p.length)
 
@@ -44,7 +44,7 @@ for i in range(point_count + 1):
     y = (start.y + ((end.y - start.y) * i / point_count))
     z = (start.z + ((end.z - start.z) * i / point_count))
     target = Point(x, y, z)
-    space.update_lengths(target, -1, check_limit=False)
+    space.move_grabber(target, -1, check_limit=False)
     len0.append(space.pulleys[0].length)
     len1.append(space.pulleys[1].length)
     len2.append(space.pulleys[2].length)

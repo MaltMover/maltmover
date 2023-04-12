@@ -19,7 +19,6 @@ class Space:
         self.size_y = round(float(size_y), 1)  # in decimeter (10 cm)
         self.size_z = round(float(size_z), 1)  # in decimeter (10 cm)
         self.center = Point(self.size_x / 2, self.size_y / 2, self.size_z / 2)
-        self.current_point = Point(0, 0, 0)
         self.edge_limit = round(float(edge_limit), 1)  # in decimeter (10 cm)
         self.grabber = None  # Grabber object
         self.pulleys = []  # List of pulleys in the space
@@ -85,7 +84,7 @@ class Space:
     def set_grabber(self, grabber: Grabber) -> None:
         self.grabber = grabber
 
-    def update_lengths(self, target: Point | Waypoint, check_limit=True) -> float:
+    def move_grabber(self, target: Point | Waypoint, check_limit=True) -> float:
         """
         Updates the lengths of the ropes of the pulleys in the space.
         Raises ValueError if the target is not in the space.
@@ -99,8 +98,8 @@ class Space:
         for pulley in self.pulleys:
             pulley.make_move(target, min_time)
 
-        print(self.current_point)
-        self.current_point = target
+        print(self.grabber.location)
+        self.grabber.location = target
         return min_time
 
     def calculate_min_move_time(self, target: Point, three_point_move=False, origin=None) -> float:
@@ -114,9 +113,10 @@ class Space:
         """
         with open("config.json", "r") as f:
             config = json.load(f)
+        current_point = self.grabber.location
         if three_point_move:
             delay = config["three_point_delay"]
-            t1 = self.calculate_min_move_time(Point(self.current_point.x, self.current_point.y, self.size_z - self.edge_limit))
+            t1 = self.calculate_min_move_time(Point(current_point.x, current_point.y, self.size_z - self.edge_limit))
             t2 = self.calculate_min_move_time(Point(target.x, target.y, self.size_z - self.edge_limit))
             t3 = self.calculate_min_move_time(Point(target.x, target.y, target.z))
             time = t1 + t2 + t3 + (delay * 2)
@@ -175,5 +175,5 @@ def create_space(current_point: Point = None):
     grabber = Grabber()
     space.set_grabber(grabber)
     if current_point:
-        space.update_lengths(current_point, check_limit=False)
+        space.move_grabber(current_point, check_limit=False)
     return space
