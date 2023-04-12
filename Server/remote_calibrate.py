@@ -55,8 +55,14 @@ class App:
         self.console.print(head)
         self.console.rule()
         choice = FloatPrompt.ask("Change by how much?", default=0.1, console=self.console)
-        self.update_pulley(pulley_num, self.target_length, choice)
-        self.show_confirm(pulley_num)
+        success = self.update_pulley(pulley_num, self.target_length, choice)
+        if success:
+            self.show_confirm(pulley_num)
+        else:
+            self.console.clear()
+            self.console.rule("Connection Error")
+            sleep(1)
+            self.show_calibrate_page(pulley_num)
 
     def show_confirm(self, pulley_num: int):
         self.console.rule()
@@ -66,14 +72,18 @@ class App:
             self.show_start_page()
         self.show_calibrate_page(pulley_num)
 
-    def update_pulley(self, pulley_num: int, target_length: float, step_change=0.0):
+    def update_pulley(self, pulley_num: int, target_length: float, step_change=0.0) -> bool:
         self.config["steps_pr_dm"][pulley_num] += step_change
         self.config["steps_pr_dm"][pulley_num] = round(self.config["steps_pr_dm"][pulley_num], 4)
         data = {"acceleration": 0.4, "speed": 0.8, "length": target_length}
         uri = "http://" + self.config["ips"][pulley_num]
-        res1 = requests.post(uri, json={"steps_pr_dm": self.config["steps_pr_dm"][pulley_num]})
-        res2 = requests.post(uri, json=data)
-        res3 = requests.post(uri, json={"run": True})
+        try:
+            res1 = requests.post(uri, json={"steps_pr_dm": self.config["steps_pr_dm"][pulley_num]}, timeout=0.5).json()
+            res2 = requests.post(uri, json=data, timeout=0.5).json()
+            res3 = requests.post(uri, json={"run": True}, timeout=0.5).json()
+        except requests.exceptions.ConnectTimeout:
+            return False
+        return True
 
 
 if __name__ == "__main__":
