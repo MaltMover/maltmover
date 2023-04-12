@@ -33,6 +33,14 @@ class PulleyRequestHandler:
         lengths = [i["length"] if i else 0.0 for i in self.responses]
         return lengths, self.success_map[0]
 
+    def set_steps_pr_dm(self, timeout=3) -> list[bool]:
+        with open("config.json", "r") as f:
+            config = json.load(f)
+            steps_pr_dm = config["init"]["steps_pr_dm"]
+        data = [{"steps_pr_dm": steps} for steps in steps_pr_dm]
+        self.send_requests(data, request_num=0, timeout=timeout)
+        return self.success_map[0]
+
     def reset_pulley(self, pulley_id: int):
         threading.Thread(target=self.send_reset_request, args=(pulley_id,)).start()
 
