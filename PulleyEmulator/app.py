@@ -186,5 +186,5 @@ def _draw_graph(move_length: float, speed: float, acceleration: float):
     plt.show()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     _draw_graph(move_length=1.9, speed=1, acceleration=0.5)

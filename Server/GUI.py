@@ -133,7 +133,7 @@ class App(customtkinter.CTk):
             self.status_frame.get_mechanical_states(timeout=4)
 
     def move_system_three_point(self, target: Point | Waypoint):
-        with open('config.json', 'r') as f:
+        with open("config.json", "r") as f:
             config = json.load(f)
         delay = config["three_point_delay"]
         targets = [
@@ -217,9 +217,9 @@ class HomePage(customtkinter.CTkFrame):
         self.waypoint_buttons = []
         legal_waypoints = [w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)]
         illegal_waypoints = [w for w in self.master.space.waypoints if w not in legal_waypoints]
-        with open('config.json', 'r') as f:
+        with open("config.json", "r") as f:
             config = json.load(f)
-        three_point = config['three_point_move']
+        three_point = config["three_point_move"]
         for i, waypoint in enumerate(legal_waypoints + illegal_waypoints):
             time = self.master.space.calculate_min_move_time(waypoint, three_point)
             waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10,
@@ -482,7 +482,7 @@ class ConfigPage(customtkinter.CTkFrame):
         config["three_point_move"] = self.three_point_move_toggle.cget("text") == "ON"
         with open(self.config_path, "w") as f:
             json.dump(config, f, indent=2)
-        self.master.space.write_waypoints('waypoints.json')
+        self.master.space.write_waypoints("waypoints.json")
         space = create_space(self.master.space.grabber.location)
         request_handler = create_request_handler()
         grabber_handler = create_grabber_handler()

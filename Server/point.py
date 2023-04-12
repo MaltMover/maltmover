@@ -10,7 +10,7 @@ class Point:
         self.z = round(float(z), 1)
 
     def __repr__(self):
-        return f'Point({self.x}, {self.y}, {self.z})'
+        return f"Point({self.x}, {self.y}, {self.z})"
 
     def __eq__(self, other):
         return self.x == other.x and self.y == other.y and self.z == other.z
@@ -36,7 +36,7 @@ class Waypoint(Point):
         self.name = name
 
     def __repr__(self):
-        return f'Waypoint({self.x}, {self.y}, {self.z}, {self.name})'
+        return f"Waypoint({self.x}, {self.y}, {self.z}, {self.name})"
 
     def to_list(self) -> list:
         return [self.x, self.y, self.z, self.name]
@@ -61,9 +61,9 @@ def main():
     p2 = Point(0, 1, 0)
     p3 = Point(1, 1, 0)
     print(sorted([p1, p3, p2, p0]))
-    w0 = Waypoint.from_point(p0, 'Start')
+    w0 = Waypoint.from_point(p0, "Start")
     w1 = Waypoint.from_list([4.0, 13.0, 12.0, "Den gode"])
-    w2 = Waypoint(1, 2, 3, 'End')
+    w2 = Waypoint(1, 2, 3, "End")
     print(w0)
     print(w1)
     print(w2)
@@ -73,5 +73,5 @@ def main():
     print(json.dumps([w.to_list() for w in waypoints], indent=2))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

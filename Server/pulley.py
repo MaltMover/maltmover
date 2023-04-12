@@ -27,8 +27,8 @@ class Pulley:
         self._acceleration = 0  # in decimeters per second squared (10 cm/s^2)
 
     def __repr__(self):
-        return f'Pulley(Location: ({self.x}, {self.y}, {self.z}), length: {self.length},' \
-               f' Max length: {self.max_length} dm, Max speed: {self.max_speed} dm/s)'
+        return f"Pulley(Location: ({self.x}, {self.y}, {self.z}), length: {self.length}," \
+               f" Max length: {self.max_length} dm, Max speed: {self.max_speed} dm/s)"
 
     def __lt__(self, other):
         return self.location < other.location
@@ -52,7 +52,7 @@ class Pulley:
         :param length: The new length of the rope attached to the pulley.
         """
         if length > self.max_length:
-            raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
+            raise ValueError(f"Length cannot be greater than {self.max_length} dm.")
         self._length = round(float(length), 2)
 
     @speed.setter
@@ -62,7 +62,7 @@ class Pulley:
         :param speed: The new speed of the pulley.
         """
         if speed > self.max_speed:
-            raise ValueError(f'Speed cannot be greater than {self.max_speed} dm/s.')
+            raise ValueError(f"Speed cannot be greater than {self.max_speed} dm/s.")
         self._speed = round(float(speed), 2)
 
     @acceleration.setter
@@ -72,7 +72,7 @@ class Pulley:
         :param acceleration: The new acceleration of the pulley.
         """
         if acceleration > self.max_acceleration:
-            raise ValueError(f'Acceleration cannot be greater than {self.max_acceleration} dm/s^2.')
+            raise ValueError(f"Acceleration cannot be greater than {self.max_acceleration} dm/s^2.")
         self._acceleration = round(float(acceleration), 2)
 
     def make_move(self, target: Point, time: int | float) -> tuple:
@@ -87,9 +87,9 @@ class Pulley:
         new_length = self.location.distance_to(target) - length_offset
         move_size = abs(new_length - self.length)
         if new_length > self.max_length:
-            raise ValueError(f'Length cannot be greater than {self.max_length} dm.')
+            raise ValueError(f"Length cannot be greater than {self.max_length} dm.")
         if time <= 0 and move_size != 0:
-            raise ValueError(f'Time must be greater than 0.')
+            raise ValueError(f"Time must be greater than 0.")
 
         # Calculate the new speed with cool math
         self.speed = -(sqrt(self.max_acceleration * (self.max_acceleration * time ** 2 - 4 * move_size)) - self.max_acceleration * time) / 2
@@ -108,5 +108,5 @@ def main():
     print(pulley.make_move(12.5, 5))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

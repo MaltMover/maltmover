@@ -39,6 +39,6 @@ def main():
     httpd.serve_forever()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     FG = FakeGrabber()
     main()

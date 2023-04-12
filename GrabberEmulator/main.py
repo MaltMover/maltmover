@@ -55,7 +55,7 @@ def main():
     server_thread.join(2)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     HTTPD: HTTPServer = None
     server_thread = threading.Thread(target=run_server)
     FG = FakeGrabber()

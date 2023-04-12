@@ -12,5 +12,5 @@ def main():
     space.write_waypoints("waypoints.json")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
