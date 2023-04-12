@@ -279,8 +279,11 @@ class StatusPage(customtkinter.CTkFrame):
                                                               command=self.get_mechanical_states)
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                              command=lambda master=master: master.move_as_thread(master.space.center, False, True))
+        self.set_steps_button = customtkinter.CTkButton(self, text="Set steps pr dm", font=customtkinter.CTkFont(size=19, weight="bold"),
+                                                             command=lambda master=master: master.request_handler.set_steps_pr_dm())
         self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
         self.center_pulleys_button.place(relx=0.5, rely=0.7, anchor="center")
+        self.set_steps_button.place(relx=0.5, rely=0.8, anchor="center")
         self.load_mechanical_info()
 
     def load(self):

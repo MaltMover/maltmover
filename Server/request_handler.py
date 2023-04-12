@@ -36,7 +36,7 @@ class PulleyRequestHandler:
     def set_steps_pr_dm(self, timeout=3) -> list[bool]:
         with open("config.json", "r") as f:
             config = json.load(f)
-            steps_pr_dm = config["init"]["steps_pr_dm"]
+            steps_pr_dm = config["steps_pr_dm"]
         data = [{"steps_pr_dm": steps} for steps in steps_pr_dm]
         self.send_requests(data, request_num=0, timeout=timeout)
         return self.success_map[0]
