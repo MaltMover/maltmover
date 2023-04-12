@@ -1,8 +1,8 @@
 {
   "edge_limit": 0.0,
   "init": {
-    "speed": 0.3,
-    "acceleration": 0.2
+    "speed": 0.8,
+    "acceleration": 0.1
   },
   "max_speed": 0.8,
   "max_acceleration": 0.2,
