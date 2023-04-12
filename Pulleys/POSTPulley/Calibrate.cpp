@@ -53,6 +53,7 @@ int getButtonSafe(int pinNum, int prevNum){
 }
 
 void finalCalibrate(){
+  /*
   bool hallValue = !digitalRead(HALLEFFECT);  // Inverted output
   stepper.setSpeed(-CALISPEED);
   digitalWrite(RUNNINGLED, HIGH);
@@ -67,10 +68,12 @@ void finalCalibrate(){
   stepper.move(LENGTH_OFFSET);
   stepper.setAcceleration(100);
   stepper.runToPosition();
+  */
+
   digitalWrite(RUNNINGLED, LOW);
   digitalWrite(WIFILED, LOW);
   digitalWrite(CONFIGLED, LOW);
-  stepper.setCurrentPosition(0);  // Finish calibration
+  stepper.setCurrentPosition(0);  // Set current position as 0
 }
 
 void calibratePulley() {

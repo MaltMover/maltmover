@@ -18,7 +18,7 @@ const char *password = SECRET_PASS;
 // Set static IP
 
 IPAddress gateway(192, 168, 4, 1);
-IPAddress local_IP(192, 168, 4, 69);  //Only change this
+IPAddress local_IP(192, 168, 4, 72);  //Only change this
 IPAddress subnet(255, 255, 0, 0);
 
 AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
