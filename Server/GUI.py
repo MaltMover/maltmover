@@ -127,7 +127,7 @@ class App(customtkinter.CTk):
         move_time = self.space.move_grabber(target)
         self.request_handler.set_pulleys(self.space.pulleys)
         print(self.request_handler.success_map)
-        sleep(move_time + 1)  # Wait for the system to move
+        sleep(move_time)  # Wait for the system to move
         if all(all(self.request_handler.success_map[i]) for i in [0, 1]):
             # If everything is successful, read the current values
             self.status_frame.get_mechanical_states(timeout=4)
