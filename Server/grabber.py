@@ -5,7 +5,7 @@ class Grabber:
     def __init__(self, corner_distance=0.0):
         self.is_open = False
         self.corner_distance = corner_distance
-        self._location: Point | Waypoint | None = None
+        self._location: Point | Waypoint = Point(0, 0, 0)
         self.corners: list[Point, ...] = []
 
     def _update_corners(self):
