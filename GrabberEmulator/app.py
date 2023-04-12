@@ -1,8 +1,5 @@
 import customtkinter
 import os
-import re
-import threading
-import time
 from PIL import Image
 from fake_grabber import FakeGrabber
 

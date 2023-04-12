@@ -1,9 +1,6 @@
-import pandas as pd
-import numpy
 import matplotlib.pyplot as plt
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
-from sklearn.metrics import r2_score
 import pyperclip
 
 from space import Space
