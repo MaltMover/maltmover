@@ -8,12 +8,12 @@
 #define LENGTH_OFFSET -45
 
 // Stepper properties
-const double steps_pr_dm = 127;
+double steps_pr_dm = 130;
 
 // Define LED's
 #define WIFILED 5  // D1
 #define CONFIGLED 4  // D2
-#define RUNNINGLED 0 // D3
+#define RUNNINGLED 0  // D3
 
 // Hall-effect sensor
 #define HALLEFFECT 16  // D0

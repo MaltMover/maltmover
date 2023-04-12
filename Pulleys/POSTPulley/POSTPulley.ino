@@ -157,6 +157,14 @@ void handleBody() {
       return;
   }
 
+  else if (doc.containsKey("steps_pr_dm")) {
+      steps_pr_dm = (double) doc["steps_pr_dm"];
+      response["success"] = true;
+      serializeJson(response, responseOut);
+      server.send(200, "application/json", responseOut);
+      return;
+  }
+
   Serial.println("Error - request does not contain known key \n");
 
   response["error"] = "Unknown Key";
