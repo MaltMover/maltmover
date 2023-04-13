@@ -38,6 +38,7 @@ The settings can be found in `Server/config.json`
 | size              | dm\*dm\*dm | Size of the area, the MaltMover works within. (x, y, z)                                                          |
 | ips               | string     | IP addresses of the four pulleys                                                                                 |
 | grabber_ip        | string     | IP address if the MaltGrabber                                                                                    |
+| steps_pr_dm       | float      | calibrated steps_pr_dm value for each pulley.                                                                     |
 
 ## Grid layout
 Pulley nums:
