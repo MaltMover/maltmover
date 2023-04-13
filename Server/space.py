@@ -94,9 +94,9 @@ class Space:
         if not self.is_in_space(target, check_limit=check_limit):
             raise ValueError(f"{target} is not within limits of the {self}")
 
-        self.grabber.location = target
-
         min_time = self.calculate_min_move_time(target)
+
+        self.grabber.location = target
         for i, pulley in enumerate(self.pulleys):
             pulley.make_move(self.grabber.corners[i], min_time)
 
@@ -123,13 +123,18 @@ class Space:
             time = t1 + t2 + t3 + (delay * 2)
             return ceil(time * 100) / 100  # Round up to 2 decimal places
         min_time = -1
-        for pulley in self.pulleys:
-            end_length = sqrt((pulley.x - target.x) ** 2 + (pulley.y - target.y) ** 2 + (pulley.z - target.z) ** 2) - config["length_offset"]
-            if origin is not None:
-                # If origin is given, calculate the length from the origin to the pulley
-                start_length = sqrt((pulley.x - origin.x) ** 2 + (pulley.y - origin.y) ** 2 + (pulley.z - origin.z) ** 2)
+        grabber = Grabber(corner_distance=self.grabber.corner_distance)  # Create grabber object for calculations
+        grabber.location = target
+        for i, pulley in enumerate(self.pulleys):
+            end_length = pulley.location.distance_to(grabber.corners[i])
+            if origin is None:
+                start_length = pulley.length + config["length_offset"]
             else:
-                start_length = pulley.length
+                # If origin is given, calculate the length from the origin to the pulley
+                origin_grabber = Grabber(corner_distance=self.grabber.corner_distance)
+                origin_grabber.location = origin
+                start_length = pulley.location.distance_to(origin_grabber.corners[i])
+
             move_size = abs(start_length - end_length)
             pulley_time = self.calculate_move_time(move_size, pulley.max_speed, pulley.max_acceleration)
             if pulley_time > min_time:
@@ -163,9 +168,7 @@ def create_space(current_point: Point = None):
     rope_length = config["rope_length"]
     max_speed = config["max_speed"]
     max_acceleration = config["max_acceleration"]
-    edge_limit = config[
-        "edge_limit"
-    ]  # How close to the edge of the space, the object can be
+    edge_limit = config["edge_limit"]  # How close to the edge of the space, the object can be
 
     space = Space(*size, edge_limit=edge_limit)
     space.read_waypoints("waypoints.json")
@@ -173,7 +176,7 @@ def create_space(current_point: Point = None):
     space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed, max_acceleration))
     space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed, max_acceleration))
     space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed, max_acceleration))
-    grabber = Grabber()
+    grabber = Grabber(corner_distance=0.6)
     space.set_grabber(grabber)
     if current_point:
         space.move_grabber(current_point, check_limit=False)
