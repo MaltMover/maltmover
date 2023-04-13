@@ -115,11 +115,12 @@ class App:
         """
         self.config["steps_pr_dm"][pulley_num] += step_change
         self.config["steps_pr_dm"][pulley_num] = round(self.config["steps_pr_dm"][pulley_num], 4)
-        data = {"acceleration": 0.4, "speed": 0.8, "length": target_length}
+        config_data = {"steps_pr_dm": self.config["steps_pr_dm"][pulley_num]}
+        move_data = {"acceleration": 0.4, "speed": 0.8, "length": target_length}
         uri = "http://" + self.config["ips"][pulley_num]
         try:
-            res1 = requests.post(uri, json={"steps_pr_dm": self.config["steps_pr_dm"][pulley_num]}, timeout=0.5).json()
-            res2 = requests.post(uri, json=data, timeout=0.5).json()
+            res1 = requests.post(uri, json=config_data, timeout=0.5).json()
+            res2 = requests.post(uri, json=move_data, timeout=0.5).json()
             res3 = requests.post(uri, json={"run": True}, timeout=0.5).json()
         except requests.exceptions.ConnectTimeout:
             return False
