@@ -1,3 +1,4 @@
+from math import sqrt
 class Point:
     """
     Point class is used to represent a point in 3D space.
@@ -27,7 +28,7 @@ class Point:
         return self.y < other.y
 
     def distance_to(self, other) -> float:
-        return ((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2) ** 0.5
+        return abs(sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2))
 
 
 class Waypoint(Point):
