@@ -557,6 +557,7 @@ class WaypointPage(customtkinter.CTkFrame):
 
     def save_waypoint(self, index: int, editor: customtkinter.CTkToplevel, x, y, z, name):
         self.master.space.waypoints[index] = Waypoint(float(x), float(y), float(z), name)
+        self.master.space.write_waypoints("waypoints.json")
         editor.destroy()
         self.load()
 
