@@ -20,7 +20,7 @@ class Space:
         self.size_z = round(float(size_z), 1)  # in decimeter (10 cm)
         self.center = Point(self.size_x / 2, self.size_y / 2, self.size_z / 2)
         self.edge_limit = round(float(edge_limit), 1)  # in decimeter (10 cm)
-        self.grabber: Grabber | None = None  # Grabber object
+        self.grabber: Grabber | None = grabber  # Grabber object
         self.pulleys = []  # List of pulleys in the space
         self.waypoints = []  # List of waypoints in the space
 
