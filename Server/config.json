@@ -22,6 +22,7 @@
         "192.168.4.72"
     ],
     "grabber_ip": "192.168.4.68",
+    "grabber_corner_distance": 0.45,
     "steps_pr_dm": [
         129.7,
         128.0,

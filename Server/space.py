@@ -176,7 +176,7 @@ def create_space(current_point: Point = None):
     space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed, max_acceleration))
     space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed, max_acceleration))
     space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed, max_acceleration))
-    grabber = Grabber(corner_distance=0.6)
+    grabber = Grabber(corner_distance=config["grabber_corner_distance"])
     space.set_grabber(grabber)
     if current_point:
         space.move_grabber(current_point, check_limit=False)
