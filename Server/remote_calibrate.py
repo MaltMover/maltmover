@@ -68,7 +68,7 @@ class App:
         self.console.rule()
         prompt = f"Is the pulley at {self.target_length} dm?"
         if Confirm.ask(prompt, default=False, console=self.console):
-            self.update_pulley(pulley_num, 0)
+            self.update_pulley(pulley_num, 0.5)
             self.show_start_page()
         self.show_calibrate_page(pulley_num)
 
