@@ -484,7 +484,7 @@ class ConfigPage(customtkinter.CTkFrame):
         config["grabber_ip"] = self.grabber_entry.get()
         config["three_point_move"] = self.three_point_move_toggle.cget("text") == "ON"
         with open(self.config_path, "w") as f:
-            json.dump(config, f, indent=2)
+            json.dump(config, f, indent=4)
         self.master.space.write_waypoints("waypoints.json")
         space = create_space(self.master.space.grabber.location)
         request_handler = create_request_handler()

@@ -41,7 +41,7 @@ class Space:
         :param path: Path to the file
         """
         with open(path, "w") as f:
-            json.dump([waypoint.to_list() for waypoint in self.waypoints], f, indent=2)
+            json.dump([waypoint.to_list() for waypoint in self.waypoints], f, indent=4)
 
     def is_in_space(self, point: Point | Waypoint, check_limit=True) -> bool:
         """
