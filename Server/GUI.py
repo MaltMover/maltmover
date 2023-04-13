@@ -123,6 +123,12 @@ class App(customtkinter.CTk):
         self.request_handler.set_pulleys(self.space.pulleys)
         print(self.request_handler.success_map)
 
+    def set_steps_pr_dm(self):
+        self.request_handler.set_steps_pr_dm()
+        # Move to current position again, to read from new config
+        print(self.space.pulleys)
+        print(self.request_handler.set_pulleys(self.space.pulleys))
+
     def move_system(self, target: Point | Waypoint):
         move_time = self.space.move_grabber(target)
         self.request_handler.set_pulleys(self.space.pulleys)
@@ -130,7 +136,7 @@ class App(customtkinter.CTk):
         sleep(move_time)  # Wait for the system to move
         if all(all(self.request_handler.success_map[i]) for i in [0, 1]):
             # If everything is successful, read the current values
-            self.status_frame.get_mechanical_states(timeout=4)
+            self.status_frame.get_mechanical_states(timeout=3)
 
     def move_system_three_point(self, target: Point | Waypoint):
         with open("config.json", "r") as f:
@@ -280,7 +286,7 @@ class StatusPage(customtkinter.CTkFrame):
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                              command=lambda master=master: master.move_as_thread(master.space.center, False, True))
         self.set_steps_button = customtkinter.CTkButton(self, text="Set steps pr dm", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                             command=lambda master=master: master.request_handler.set_steps_pr_dm())
+                                                             command=lambda master=master: master.set_steps_pr_dm())
         self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
         self.center_pulleys_button.place(relx=0.5, rely=0.7, anchor="center")
         self.set_steps_button.place(relx=0.5, rely=0.8, anchor="center")
