@@ -27,8 +27,8 @@ class Pulley:
         self._acceleration = 0  # in decimeters per second squared (10 cm/s^2)
 
     def __repr__(self):
-        return f"Pulley(Location: ({self.x}, {self.y}, {self.z}), length: {self.length}," \
-               f" Max length: {self.max_length} dm, Max speed: {self.max_speed} dm/s)"
+        return f"Pulley(Location: ({self.x}, {self.y}, {self.z}), length: {self.length}, " \
+                f"Max speed: {self.max_speed} dm/s, Speed: {self._speed})"
 
     def __lt__(self, other):
         return self.location < other.location
@@ -78,7 +78,7 @@ class Pulley:
     def make_move(self, target: Point, time: int | float) -> tuple:
         """
         Makes a move with the pulley, and calculates the new speed and acceleration.
-        :param target: The new rope length.
+        :param target: The new rope location.
         :param time: The time to move.
         """
         with open("config.json", "r") as f:
