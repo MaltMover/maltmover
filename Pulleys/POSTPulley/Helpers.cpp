@@ -11,7 +11,7 @@ void revert_config() {
   stepper.moveTo(stepper.currentPosition());
 }
 
-void set_config(DynamicJsonDocument doc) {
+void set_config(DynamicJsonDocument doc, double steps_pr_dm) {
   double new_acceleration = (double) doc["acceleration"] * steps_pr_dm;
   double new_speed = (double) doc["speed"] * steps_pr_dm;
   double new_length = (double) doc["length"] * steps_pr_dm;

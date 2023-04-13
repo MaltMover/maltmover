@@ -7,9 +7,6 @@
 // Offset from where the hall-effect triggers (in steps) (in steps)
 #define LENGTH_OFFSET -45
 
-// Stepper properties
-double steps_pr_dm = 130;
-
 // Define LED's
 #define WIFILED 5  // D1
 #define CONFIGLED 4  // D2

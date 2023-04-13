@@ -18,11 +18,13 @@ const char *password = SECRET_PASS;
 // Set static IP
 
 IPAddress gateway(192, 168, 4, 1);
-IPAddress local_IP(192, 168, 4, 69);  //Only change this
+IPAddress local_IP(192, 168, 4, 71);  //Only change this
 IPAddress subnet(255, 255, 0, 0);
 
 AccelStepper stepper(AccelStepper::FULL4WIRE, IN1, IN2, IN3, IN4);
 ESP8266WebServer server(80);
+
+double steps_pr_dm = 130;  // Default value for steps_pr_dm, changed with POST requests
 
 void setup() {
   Serial.begin(9600);
@@ -119,7 +121,7 @@ void handleBody() {
   }
 
   else if (doc.containsKey("length") && doc.containsKey("speed") && doc.containsKey("acceleration")) {
-    set_config(doc);
+    set_config(doc, steps_pr_dm);
 
     response["success"] = true;
     serializeJson(response, responseOut);
