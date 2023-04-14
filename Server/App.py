@@ -85,6 +85,7 @@ class App(customtkinter.CTk):
         """
         Show frame by name
         :param name: Name of frame to show
+        :return: None
         """
         self.hide_all_frames()  # Hide all frames
         frames = {
@@ -106,87 +107,148 @@ class App(customtkinter.CTk):
         self.navigation_frame.waypoint_button.configure(fg_color=("gray75", "gray25") if name == "waypoints" else "transparent")
         self.navigation_frame.config_button.configure(fg_color=("gray75", "gray25") if name == "config" else "transparent")
 
-    def join_connection_threads(self):
+    def join_connection_threads(self) -> None:
+        """
+        Join all threads with connections to pulleys and clear list.
+        :return: None
+        """
         for thread in self.connection_threads:
             thread.join()
         self.connection_threads = []
 
-    def toggle_grabber(self):
+    def toggle_grabber(self) -> None:
+        """
+        Toggle grabber state and update image
+        :return: None
+        """
+        # New state is opposite of current state
         new_state = not self.space.grabber.is_open
         self.grabber_handler.set_state(new_state)
-        if self.grabber_handler.success:
+
+        if self.grabber_handler.success:  # If request was successful
             is_open = "o" if new_state else "c"
+            # Update image to open or closed based on new state
             self.status_frame.grabber_image.configure(image=images[f"grabber_{is_open}g"])
+        # Send request to verify grabber state
         self.status_frame.get_mechanical_states(grabber_only=True)
 
-    def toggle_grabber_threaded(self):
+    def toggle_grabber_as_thread(self) -> None:
+        """
+        Toggle grabber state in a new thread, to not block the main thread
+        :return: None
+        """
         toggle_thread = threading.Thread(target=self.toggle_grabber)
         toggle_thread.start()
 
-    def center_system(self):
+    def center_system(self) -> None:
+        """
+        Move all pulleys to center using the request handler
+        :return: None
+        """
         with open("config.json", "r") as f:
+            # Load config to get speed and acceleration for centering
             config = json.load(f)
-        self.space.move_grabber(self.space.center)
+
+        self.space.move_grabber(self.space.center)  # Move grabber to center
+        # Load speed and acceleration from config
         speed = config["init"]["speed"]
         acceleration = config["init"]["acceleration"]
         for i, pulley in enumerate(self.space.pulleys):
+            # Set speed and acceleration for all pulleys
             pulley.speed = speed
             pulley.acceleration = acceleration
-            self.space.pulleys[i] = pulley
+            self.space.pulleys[i] = pulley  # Update pulley in space
 
         print(self.space.pulleys)
-        self.request_handler.set_pulleys(self.space.pulleys)
+        self.request_handler.set_pulleys(self.space.pulleys)  # Send request to center system
         print(self.request_handler.success_map)
 
-    def set_steps_pr_dm(self):
-        self.request_handler.set_steps_pr_dm()
-        # Move to current position again, to read from new config
-        print(self.space.pulleys)
-        print(self.request_handler.set_pulleys(self.space.pulleys))
+    def center_system_as_thread(self) -> None:
+        """
+        Center system in a new thread, to not block the main thread
+        :return: None
+        """
+        center_thread = threading.Thread(target=self.center_system)
+        center_thread.start()
 
-    def move_system(self, target: Point | Waypoint):
-        move_time = self.space.move_grabber(target)
-        self.request_handler.set_pulleys(self.space.pulleys)
+    def set_steps_pr_dm(self) -> None:
+        """
+        Remotely update the "steps_pr_dm" parameter for all pulleys
+        :return: None
+        """
+        self.request_handler.set_steps_pr_dm()  # Send request to update steps_pr_dm
+        print(self.space.pulleys)
+        # Move to current position again, to update the pulleys
+        success_map = self.request_handler.set_pulleys(self.space.pulleys)
+        print(success_map)
+
+    def move_system(self, target: Point | Waypoint) -> None:
+        """
+        Move system to target
+        :param target: Target to move to
+        :return: None
+        """
+        move_time = self.space.move_grabber(target)  # Move grabber to target
+        self.request_handler.set_pulleys(self.space.pulleys)  # Send request to move system
         print(self.request_handler.success_map)
         sleep(move_time)  # Wait for the system to move
         if all(all(self.request_handler.success_map[i]) for i in [0, 1]):
-            # If everything is successful, read the current values
+            # If everything is successful, send request to verify states
             self.status_frame.get_mechanical_states(timeout=3)
 
     def move_system_three_point(self, target: Point | Waypoint):
+        """
+        Move system to target using three points.
+        First point is the top limit of the space above starting position.
+        Second point is the top limit of the space above target position.
+        Third point is the target position.
+        :param target: Target to move to
+        """
         with open("config.json", "r") as f:
-            config = json.load(f)
-        delay = config["three_point_delay"]
-        targets = [
+            # Load config to get three point delay
+            # This is the time to pause between each point
+            delay = json.load(f)["three_point_delay"]
+        targets = [  # Create list of targets
+            # First point is the top limit of the space above starting position
             Point(self.space.grabber.location.x, self.space.grabber.location.y, self.space.size_z - self.space.edge_limit),
+            # Second point is the top limit of the space above target position
             Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
+            # Third point is the target position
             target
         ]
-        times = [
+        times = [  # Calculate move times for each point
             self.space.calculate_min_move_time(targets[0]),
-            self.space.calculate_min_move_time(targets[1], origin=targets[0]),
-            self.space.calculate_min_move_time(targets[2], origin=targets[1])
+            self.space.calculate_min_move_time(targets[1], origin=targets[0]),  # Move from first point to second point
+            self.space.calculate_min_move_time(targets[2], origin=targets[1])  # Move from second point to third point
         ]
 
-        for rtarget, rtime in zip(targets, times):
-            self.space.move_grabber(rtarget, rtime)
+        # Iterate through targets and move to each one
+        for current_target, current_time in zip(targets, times):
+            # Move grabber to current target
+            self.space.move_grabber(current_target, current_time)
+            # Send request to move system
             success_map = self.request_handler.set_pulleys(self.space.pulleys)
-            sleep(rtime + delay)
+            sleep(current_time + delay)  # Wait for the system to move
             if not (all(success_map[0]) and all(success_map[1])):
+                # If any of the requests failed, stop moving
                 return
-        self.status_frame.get_mechanical_states(timeout=4)
+        self.status_frame.get_mechanical_states()  # Send request to verify states
 
-    def move_as_thread(self, target: Point | Waypoint, three_point=False, center=False):
+    def move_as_thread(self, target: Point | Waypoint, three_point=False) -> None:
+        """
+        Move system to target in a new thread, to not block the main thread
+        :param target: Target to move to
+        :param three_point: Whether to use three point movement
+        :return: None
+        """
         self.join_connection_threads()  # Join any previous threads
-        if center:
-            thread = threading.Thread(target=self.center_system)
-        elif three_point:
-            thread = threading.Thread(target=self.move_system_three_point, args=(target,))
-        else:
-            thread = threading.Thread(target=self.move_system, args=(target,))
-        thread.start()
-        self.connection_threads.append(thread)
-        self.select_frame_by_name("pulleys")
+
+        # Use three point movement if specified
+        thread_method = self.move_system_three_point if three_point else self.move_system
+        thread = threading.Thread(target=thread_method, args=(target,))  # Create thread
+        thread.start()  # Start thread
+        self.connection_threads.append(thread)  # Add thread to list of threads
+        self.select_frame_by_name("pulleys")  # Show pulleys frame, to show the system moving
 
 
 class NavigationBar(customtkinter.CTkFrame):
@@ -294,12 +356,12 @@ class StatusPage(customtkinter.CTkFrame):
 
         self.grabber_image = customtkinter.CTkLabel(self, text="", image=images["grabber_or"])
         self.grabber_image.place(relx=0.5, rely=0.3, anchor="center")
-        self.grabber_image.bind("<Button-1>", lambda event: self.master.toggle_grabber_threaded())
+        self.grabber_image.bind("<Button-1>", lambda event: self.master.toggle_grabber_as_thread())
 
         self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                               command=self.get_mechanical_states)
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                             command=lambda master=master: master.move_as_thread(master.space.center, False, True))
+                                                             command=lambda master=master: master.center_system_as_thread())
         self.set_steps_button = customtkinter.CTkButton(self, text="Set steps pr dm", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                         command=lambda master=master: master.set_steps_pr_dm())
         self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
