@@ -14,6 +14,25 @@
   <a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-black"></a>
 </p>
 
+# Installation
+Start by uploading the pulley code to all of the pulleys. We have to change the static IP address when uploading, so they don't all get the same address.
+To do this navigate to the pulley code:
+```bash
+cd Pulleys/POSTPulley/
+```
+and edit the last number on this line:
+```c++
+IPAddress local_IP(192, 168, 4, 69);  //Only change this
+```
+As long as a value in the range 0-255 is used, it does not matter, but the correct values should be stored in `Server/config.json`
+
+Now we are ready to install the python dependencies and run the program:
+```bash
+python -m pip install -r requirements.txt
+cd Server/
+python main.py
+```
+
 
 # Resources
 The MaltMover system consist of multiple parts. All models and diagrams are freely accessible [here](https://drive.google.com/drive/folders/1pCBQdqCMux7k-YYwpfTq4ijKMqQ0Y-yf?usp=share_link). Clicking any of the below pictures will let you download any resources used to create it.
