@@ -1,4 +1,6 @@
 from math import sqrt
+
+
 class Point:
     """
     Point class is used to represent a point in 3D space.
@@ -36,7 +38,10 @@ class Point:
         :param other: Point to calculate distance to.
         :return: The distance between the two points.
         """
-        return abs(sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2))
+        # Use extended Pythagorean theorem to calculate distance
+        return abs(
+            sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2)
+        )
 
 
 class Waypoint(Point):
