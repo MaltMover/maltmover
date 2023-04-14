@@ -115,12 +115,14 @@ class Space:
         :return: Time to make the move in seconds
         """
         if not self.is_in_space(target, check_limit=check_limit):
+            # If the target is not in the space, raise ValueError
             raise ValueError(f"{target} is not within limits of the {self}")
 
         min_time = self.calculate_min_move_time(target)
 
-        self.grabber.location = target
+        self.grabber.location = target  # Updates the corner locations of the grabber
         for i, pulley in enumerate(self.pulleys):
+            # Move pulley to respective corner of the grabber
             pulley.make_move(self.grabber.corners[i], min_time)
 
         print(self.grabber.location)
@@ -128,39 +130,46 @@ class Space:
 
     def calculate_min_move_time(self, target: Point, three_point_move=False, origin=None) -> float:
         """
-        Calculates the minimum time it takes to move from current position (or another origin) to target point,
-         given the max_speed and max_acceleration of the pulleys.
+        Calculates the minimum time it takes to move the slowest pulley from current position (or another origin) to target point,
+         using the max_speed and max_acceleration of the pulleys.
         :param target: Target point
         :param three_point_move: If True, calculates the time for a three-point move
-        :param origin: Origin point for the move, if current point is not the origin
+        :param origin: Origin point for the move (default is the current location of the grabber)
         :return: time in seconds, rounded to 2 decimal places
         """
         with open("config.json", "r") as f:
+            # Read config file
             config = json.load(f)
         current_point = self.grabber.location
         if three_point_move:
             delay = config["three_point_delay"]
-            t1 = self.calculate_min_move_time(Point(current_point.x, current_point.y, self.size_z - self.edge_limit))
-            t2 = self.calculate_min_move_time(Point(target.x, target.y, self.size_z - self.edge_limit))
-            t3 = self.calculate_min_move_time(Point(target.x, target.y, target.z))
+            t1 = self.calculate_min_move_time(Point(current_point.x, current_point.y, self.size_z - self.edge_limit))  # Ceiling above origin
+            t2 = self.calculate_min_move_time(Point(target.x, target.y, self.size_z - self.edge_limit))  # Ceiling above target
+            t3 = self.calculate_min_move_time(target)  # Target
             time = t1 + t2 + t3 + (delay * 2)
             return ceil(time * 100) / 100  # Round up to 2 decimal places
-        min_time = -1
+        min_time = -1  # Any calculated time will be larger than this
         grabber = Grabber(corner_distance=self.grabber.corner_distance)  # Create grabber object for calculations
-        grabber.location = target
+        grabber.location = target   # Calculate corners of new target
         for i, pulley in enumerate(self.pulleys):
+            # Length from pulley to the corresponding corner of the grabber
             end_length = pulley.location.distance_to(grabber.corners[i])
             if origin is None:
+                # If no origin is given
+                # pulley.length get offset subtracted, so we add it back
                 start_length = pulley.length + config["length_offset"]
             else:
                 # If origin is given, calculate the length from the origin to the pulley
+                # This is done by creating a temporary grabber object at the origin
                 origin_grabber = Grabber(corner_distance=self.grabber.corner_distance)
                 origin_grabber.location = origin
                 start_length = pulley.location.distance_to(origin_grabber.corners[i])
 
-            move_size = abs(start_length - end_length)
+            move_size = abs(start_length - end_length)  # Abs value since direction doesn't matter
+            # Calculate the time it takes to move the length
             pulley_time = self.calculate_move_time(move_size, pulley.max_speed, pulley.max_acceleration)
             if pulley_time > min_time:
+                # Change min if the calculated time is larger
                 min_time = pulley_time
 
         return ceil(min_time * 100) / 100  # Round up to 2 decimal places
@@ -183,24 +192,32 @@ class Space:
         return 2 * time_to_max_speed + max_speed_move_time  # Times two because it has to break as well
 
 
-def create_space(current_point: Point = None):
+def create_space(current_point: Point = None) -> Space:
+    """
+    Creates a space object from the config file
+    :param current_point: The current location of the grabber, defaults to None
+    :return: Space object
+    """
     with open("config.json", "r") as f:
         config = json.load(f)
 
+    # Read values from config
     size = config["size"]
     rope_length = config["rope_length"]
     max_speed = config["max_speed"]
     max_acceleration = config["max_acceleration"]
     edge_limit = config["edge_limit"]  # How close to the edge of the space, the object can be
 
-    space = Space(*size, edge_limit=edge_limit)
-    space.read_waypoints("waypoints.json")
+    space = Space(*size, edge_limit=edge_limit)  # Create space object
+    space.read_waypoints("waypoints.json")  # Read waypoints from file
+    # Add pulleys to the corners of the space
     space.add_pulley(Pulley(Point(0, 0, size[2]), rope_length, max_speed, max_acceleration))
     space.add_pulley(Pulley(Point(size[0], 0, size[2]), rope_length, max_speed, max_acceleration))
     space.add_pulley(Pulley(Point(0, size[1], size[2]), rope_length, max_speed, max_acceleration))
     space.add_pulley(Pulley(Point(size[0], size[1], size[2]), rope_length, max_speed, max_acceleration))
-    grabber = Grabber(corner_distance=config["grabber_corner_distance"])
-    space.set_grabber(grabber)
+    grabber = Grabber(corner_distance=config["grabber_corner_distance"])  # Create grabber object
+    space.set_grabber(grabber)  # Set grabber to space
     if current_point:
+        # If a current point is given, move the grabber to that point
         space.move_grabber(current_point, check_limit=False)
     return space
