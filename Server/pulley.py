@@ -12,18 +12,28 @@ class Pulley:
     :param max_speed: The maximum velocity of the pulley.
     """
 
-    def __init__(self, location: Point, max_length: int | float, max_speed: int | float, max_acceleration: int | float):
+    def __init__(
+        self,
+        location: Point,
+        max_length: int | float,
+        max_speed: int | float,
+        max_acceleration: int | float,
+    ):
         self.location = location
         self.max_length = round(float(max_length), 2)  # in decimeters (10 cm)
         self.max_speed = round(float(max_speed), 2)  # in decimeters per second (10 cm/s)
-        self.max_acceleration = round(float(max_acceleration), 2)  # in decimeters per second squared (10 cm/s^2)
+        self.max_acceleration = round(
+            float(max_acceleration), 2
+        )  # in dm per second squared (10 cm/s^2)
         self._length = 0  # in decimeters (10 cm)
         self._speed = 0  # in decimeters per second (10 cm/s)
         self._acceleration = 0  # in decimeters per second squared (10 cm/s^2)
 
     def __repr__(self):
-        return f"Pulley(Location: ({self.location}), length: {self.length}, " \
-               f"Max speed: {self.max_speed} dm/s, Speed: {self._speed})"
+        return (
+            f"Pulley(Location: ({self.location}), length: {self.length}, "
+            f"Max speed: {self.max_speed} dm/s, Speed: {self._speed})"
+        )
 
     def __lt__(self, other):
         return self.location < other.location
@@ -94,21 +104,11 @@ class Pulley:
             raise ValueError(f"Time must be greater than 0.")
 
         # Calculate the new speed with cool math
-        self.speed = -(sqrt(self.max_acceleration * (self.max_acceleration * time ** 2 - 4 * move_size)) - self.max_acceleration * time) / 2
-        self.acceleration = self.max_acceleration  # The acceleration is always the maximum acceleration
+        self.speed = (
+            -(sqrt(self.max_acceleration * (self.max_acceleration * time**2 - 4 * move_size)) - self.max_acceleration * time) / 2
+        )
+        # The acceleration is always the maximum acceleration
+        self.acceleration = self.max_acceleration
         self.length = target_length  # Update length
 
         return self.speed, self.acceleration  # Return the new speed and acceleration
-
-
-def main():
-    pulley = Pulley(Point(0, 0, 0), max_length=50, max_speed=10, max_acceleration=2)
-    print(pulley)
-    print(pulley.make_move(50, 12.5))
-    print(pulley.make_move(50, 10))
-    print(pulley.make_move(50, 20))
-    print(pulley.make_move(12.5, 5))
-
-
-if __name__ == "__main__":
-    main()
