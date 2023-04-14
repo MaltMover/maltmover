@@ -7,6 +7,15 @@ from math import sqrt, ceil
 
 
 class Space:
+    """
+    Space class represents the space in which the robot can move.
+    :param: size_x: The size of the space in the x direction.
+    :param: size_y: The size of the space in the y direction.
+    :param: size_z: The size of the space in the z direction.
+    :param: edge_limit: The distance from the edge of the space in which the robot cannot move. Default is 0.
+    :param: grabber: The grabber object, default is None.
+    """
+
     def __init__(
             self,
             size_x: int | float,
@@ -33,6 +42,7 @@ class Space:
         :param path: Path to the file
         """
         with open(path, "r") as f:
+            # Convert from json to list of lists, and parse to Waypoint constructor
             self.waypoints = Waypoint.waypoints_from_2d_list(json.load(f))
 
     def write_waypoints(self, path: str) -> None:
@@ -41,6 +51,7 @@ class Space:
         :param path: Path to the file
         """
         with open(path, "w") as f:
+            # Convert to list of lists, and write to file
             json.dump([waypoint.to_list() for waypoint in self.waypoints], f, indent=4)
 
     def is_in_space(self, point: Point | Waypoint, check_limit=True) -> bool:
@@ -50,16 +61,14 @@ class Space:
         :param check_limit: If True, checks if the point is within the edge_limit
         :return: True if the point is in the space, False otherwise
         """
-        if check_limit:
-            limit = self.edge_limit
-        else:
-            limit = 0
+        # Set limit to 0 if check_limit is False
+        limit = self.edge_limit if check_limit else 0
 
         if not limit <= point.x <= self.size_x - limit:  # Doesn't allow touching walls
             return False
         if not limit <= point.y <= self.size_y - limit:  # Doesn't allow touching walls
             return False
-        if not 0 <= point.z <= self.size_z - limit:  # Always allow touching floor
+        if not 0 <= point.z <= self.size_z - limit:  # Allow touching floor but not ceiling
             return False
         return True
 
@@ -71,17 +80,31 @@ class Space:
         """
         if not self.is_in_space(point):
             return False
-        for pulley in self.pulleys:
-            new_length = sqrt((pulley.x - point.x) ** 2 + (pulley.y - point.y) ** 2 + (pulley.z - point.z) ** 2)
-            if new_length > pulley.max_length:
+        # Create a temporary grabber object to check if the point is legal
+        grabber = Grabber(corner_distance=self.grabber.corner_distance)
+        # Set the location of the grabber to the point, so that the corners are calculated
+        grabber.location = point
+        for i, pulley in enumerate(self.pulleys):
+            # Check if the distance to the corresponding corner is longer than the max_length
+            if pulley.location.distance_to(grabber.corners[i]) > pulley.max_length:
                 return False
         return True
 
     def add_pulley(self, pulley: Pulley) -> None:
+        """
+        Adds a pulley to the space and sorts the pulleys by their location.
+        :param pulley: Pulley object to add
+        :return: None
+        """
         self.pulleys.append(pulley)
         self.pulleys = sorted(self.pulleys)
 
     def set_grabber(self, grabber: Grabber) -> None:
+        """
+        Sets the grabber of the space.
+        :param grabber: New grabber object
+        :return: None
+        """
         self.grabber = grabber
 
     def move_grabber(self, target: Point | Waypoint, check_limit=True) -> float:
