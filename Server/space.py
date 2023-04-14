@@ -112,6 +112,8 @@ class Space:
         Updates the lengths of the ropes of the pulleys in the space.
         Raises ValueError if the target is not in the space.
         Raises ValueError if the time results in speed higher than a pulley max_speed.
+        :param target: Target location of the grabber
+        :param check_limit: If True, checks if the target is within the edge_limit, default is True
         :return: Time to make the move in seconds
         """
         if not self.is_in_space(target, check_limit=check_limit):
