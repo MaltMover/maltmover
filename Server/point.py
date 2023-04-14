@@ -3,6 +3,9 @@ class Point:
     """
     Point class is used to represent a point in 3D space.
     1 unit is equal to 10 cm.
+    :param x: The x coordinate of the point.
+    :param y: The y coordinate of the point.
+    :param z: The z coordinate of the point.
     """
 
     def __init__(self, x: int | float, y: int | float, z: int | float):
@@ -28,10 +31,24 @@ class Point:
         return self.y < other.y
 
     def distance_to(self, other) -> float:
+        """
+        Calculates the distance between this point and another point.
+        :param other: Point to calculate distance to.
+        :return: The distance between the two points.
+        """
         return abs(sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2 + (self.z - other.z) ** 2))
 
 
 class Waypoint(Point):
+    """
+    Waypoint class is used to represent a waypoint in 3D space.
+    1 unit is equal to 10 cm.
+    :param x: The x coordinate of the waypoint.
+    :param y: The y coordinate of the waypoint.
+    :param z: The z coordinate of the waypoint.
+    :param name: The name of the waypoint.
+    """
+
     def __init__(self, x: int | float, y: int | float, z: int | float, name: str):
         super().__init__(x, y, z)
         self.name = name
@@ -40,39 +57,32 @@ class Waypoint(Point):
         return f"Waypoint({self.x}, {self.y}, {self.z}, {self.name})"
 
     def to_list(self) -> list:
+        """
+        Converts the waypoint to a list of its attributes.
+        """
         return [self.x, self.y, self.z, self.name]
 
     @classmethod
     def from_point(cls, point: Point, name: str):
+        """
+        Creates a waypoint from a point and a name.
+        :param point: The point to create the waypoint from.
+        :param name: The name of the waypoint.
+        """
         return cls(point.x, point.y, point.z, name)
 
     @classmethod
     def from_list(cls, lst: list):
-        return cls(lst[0], lst[1], lst[2], lst[3])
+        """
+        Creates a waypoint from a list of its attributes.
+        :param lst: The list of attributes.
+        """
+        return cls(*lst)
 
     @classmethod
     def waypoints_from_2d_list(cls, list2d: list):
+        """
+        Creates a list of waypoints from a 2D list of their attributes.
+        :param list2d: The 2D list of attributes.
+        """
         return [cls.from_list(lst) for lst in list2d]
-
-
-def main():
-    import json
-    p0 = Point(0, 0, 0)
-    p1 = Point(1, 0, 0)
-    p2 = Point(0, 1, 0)
-    p3 = Point(1, 1, 0)
-    print(sorted([p1, p3, p2, p0]))
-    w0 = Waypoint.from_point(p0, "Start")
-    w1 = Waypoint.from_list([4.0, 13.0, 12.0, "Den gode"])
-    w2 = Waypoint(1, 2, 3, "End")
-    print(w0)
-    print(w1)
-    print(w2)
-    with open("waypoints.json", "r") as f:
-        waypoints = Waypoint.waypoints_from_2d_list(json.load(f))
-    print(waypoints)
-    print(json.dumps([w.to_list() for w in waypoints], indent=4))
-
-
-if __name__ == "__main__":
-    main()
