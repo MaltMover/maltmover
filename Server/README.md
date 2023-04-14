@@ -1,38 +1,7 @@
-# maltmover
-A gantry system like the SpiderCam, that can lift stuff around a room using Inverse Kinematics
-
-<p align="left">
-  <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/MaltMover/maltmover?color=red">
-  <a href="https://github.com/MaltMover/maltmover/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/MaltMover/maltmover"></a>
-  <img alt="ESP8266" src="https://img.shields.io/badge/MicroController-ESP8266-rgb(255,%20215,%200)">
-  <img alt="C++" src="https://img.shields.io/badge/-C%2B%2B-rgb(219,%2055,%20203)">
-  <a href="https://python.org"><img alt="Python 3.10" src="https://img.shields.io/badge/python-3.10-blue"></a>
-  <a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-black"></a>
-</p>
-
-
-## Request formats:
-
-### Set new length in buffer:
-Length 10, with 10 dm/s^2 acceleration and 14 dm/s max speed:<br>
-`{"length": 10.0, "acceleration": 10.0, "speed": 14.0}`
-### Move pulley to buffer length:
-`{"run": True}`
-### Cancel run from pulley:
-`{"run": False}`
-### Request pulley current length:
-`{"get_length": True}`
-
-### Set new state for grabber:
-For open:<br>
-`{"set_open": True}`<br>
-For close:<br>
-`{"set_open": False}`
-### Get state of grabber:
-`{"get_state": True}`
+# Control interface
 
 ## Settings
-The settings can be found in `Server/config.json`
+The settings in `config.json` do this:
 | Option                  | Unit       | Function                                                                                                         |
 |-------------------------|------------|------------------------------------------------------------------------------------------------------------------|
 | edge_limit              | dm         | The closest the object is allowed to get to the edge of the defined area                                         |
@@ -57,8 +26,5 @@ The settings can be found in `Server/config.json`
 
 ## Grid layout
 Pulley nums:
-![image](https://user-images.githubusercontent.com/32793938/209009362-444277ef-e5a5-4a44-9927-2049bb359b5d.png)
 
-
-## Led Layout
-![image](https://user-images.githubusercontent.com/32793938/221839271-6b0e50c0-ff64-4f22-bd8a-001ffda9d0f7.png)
+![image](https://user-images.githubusercontent.com/32793938/231967942-2e032700-6813-4f61-8647-9a2259454ffb.png)
