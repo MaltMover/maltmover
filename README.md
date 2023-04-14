@@ -1,7 +1,7 @@
 # maltmover
 A gantry system like the SpiderCam, that can lift stuff around a room using Inverse Kinematics
 
-![Lines of code](https://img.shields.io/tokei/lines/github/MaltMover/maltmover)
+![Lines of code](https://img.shields.io/tokei/lines/github/MaltMover/maltmover?color=red)  ![GitHub](https://img.shields.io/github/license/MaltMover/maltmover) ![ESP](https://img.shields.io/badge/MicroController-ESP8266-rgb(255,%20215,%200)) ![Cpp](https://img.shields.io/badge/-C%2B%2B-rgb(219,%2055,%20203))  ![Version](https://img.shields.io/badge/python-3.10-blue)  ![Style](https://img.shields.io/badge/code%20style-black-black) 
 
 ## Request formats:
 
