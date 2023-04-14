@@ -20,6 +20,8 @@ The MaltMover system consist of multiple parts. All models and diagrams are free
 
 ## 3D Models
 The MaltMover hardware uses both steel and 3D printed parts. All parts colored blue on this render are 3D printed.
+
+
 <a href="bingbong.org"><img alt="MaltMover 3D model" src="https://user-images.githubusercontent.com/32793938/231972383-1a49fd21-c05f-41de-a45c-1aa60a1fcfde.png" style="width: 50%"></a>
 
 
