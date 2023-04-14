@@ -1,6 +1,6 @@
 from space import create_space
 from request_handler import create_request_handler, create_grabber_handler
-from GUI import App
+from App import App
 
 
 def main():
