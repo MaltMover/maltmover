@@ -9,8 +9,9 @@ import threading
 from PIL import Image
 from time import sleep
 
-# load images with light and dark mode image
+# Image path is /images
 image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "images")
+# Load images to dict for easy access
 images = {
     "logo_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "crane.png")), size=(26, 26)),
     "large_test_image": customtkinter.CTkImage(Image.open(os.path.join(image_path, "large_test_image.png")), size=(500, 150)),
@@ -29,6 +30,13 @@ images = {
 
 
 class App(customtkinter.CTk):
+    """
+    Main application class
+    :param space: Space object
+    :param request_handler: PulleyRequestHandler object
+    :param grabber_handler: GrabberRequestHandler object
+    """
+
     def __init__(self, space: Space, request_handler: PulleyRequestHandler, grabber_handler: GrabberRequestHandler):
         super().__init__()
         self.space = space
@@ -36,60 +44,67 @@ class App(customtkinter.CTk):
         self.grabber_handler = grabber_handler
         self.connection_threads = []  # List of all threads with connections to pulleys
         self.title("Malt Mover")
-        self.iconbitmap(os.path.join(image_path, "crane.ico"))
-        self.geometry("700x450")
+        self.iconbitmap(os.path.join(image_path, "crane.ico"))  # Set icon
+        self.geometry("700x450")  # Set window size
 
-        # set grid layout 1x2
+        # Set grid layout 1x2
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        # create navigation frame
+        # Create and place navigation bar
         self.navigation_frame = NavigationBar(self)
         self.navigation_frame.grid(row=0, column=0, sticky="nsew")
 
-        # create home frame
+        # Create and place home page
         self.home_frame = HomePage(self)
         self.home_frame.grid_columnconfigure(0, weight=1)
 
-        # create frame for status page
+        # Create and place status page
         self.status_frame = StatusPage(self)
 
-        # create frame for config page
+        # Create and place config page
         self.config_frame = ConfigPage(self, "config.json")
 
-        # create frame for waypoint page
+        # Create and place waypoint page
         self.waypoint_frame = WaypointPage(self)
 
-        # select default frame
+        # Select home page as default
         self.select_frame_by_name("home")
 
-    def select_frame_by_name(self, name):
-        # set button color for selected button
+    def hide_all_frames(self) -> None:
+        """
+        Hide all frames
+        :return: None
+        """
+        self.home_frame.grid_forget()
+        self.status_frame.grid_forget()
+        self.config_frame.grid_forget()
+        self.waypoint_frame.grid_forget()
+
+    def select_frame_by_name(self, name: str) -> None:
+        """
+        Show frame by name
+        :param name: Name of frame to show
+        """
+        self.hide_all_frames()  # Hide all frames
+        frames = {
+            "home": self.home_frame,
+            "pulleys": self.status_frame,
+            "waypoints": self.waypoint_frame,
+            "config": self.config_frame
+        }
+        # Pick selected frame
+        selected_frame = frames[name]
+
+        # Show selected frame
+        selected_frame.grid(row=0, column=1, sticky="nsew")
+        selected_frame.load()
+
+        # Color selected navbar button
         self.navigation_frame.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
         self.navigation_frame.pulley_button.configure(fg_color=("gray75", "gray25") if name == "pulleys" else "transparent")
+        self.navigation_frame.waypoint_button.configure(fg_color=("gray75", "gray25") if name == "waypoints" else "transparent")
         self.navigation_frame.config_button.configure(fg_color=("gray75", "gray25") if name == "config" else "transparent")
-
-        # show selected frame
-        if name == "home":
-            self.home_frame.grid(row=0, column=1, sticky="nsew")
-            self.home_frame.load()
-        else:
-            self.home_frame.grid_forget()
-        if name == "pulleys":
-            self.status_frame.grid(row=0, column=1, sticky="nsew")
-            self.status_frame.load()
-        else:
-            self.status_frame.grid_forget()
-        if name == "config":
-            self.config_frame.grid(row=0, column=1, sticky="nsew")
-            self.config_frame.load()
-        else:
-            self.config_frame.grid_forget()
-        if name == "waypoints":
-            self.waypoint_frame.grid(row=0, column=1, sticky="nsew")
-            self.waypoint_frame.load()
-        else:
-            self.waypoint_frame.grid_forget()
 
     def join_connection_threads(self):
         for thread in self.connection_threads:
@@ -286,7 +301,7 @@ class StatusPage(customtkinter.CTkFrame):
         self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
                                                              command=lambda master=master: master.move_as_thread(master.space.center, False, True))
         self.set_steps_button = customtkinter.CTkButton(self, text="Set steps pr dm", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                             command=lambda master=master: master.set_steps_pr_dm())
+                                                        command=lambda master=master: master.set_steps_pr_dm())
         self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
         self.center_pulleys_button.place(relx=0.5, rely=0.7, anchor="center")
         self.set_steps_button.place(relx=0.5, rely=0.8, anchor="center")
