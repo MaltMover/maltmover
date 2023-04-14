@@ -7,6 +7,7 @@ class Grabber:
     :param corner_distance: Perpendicular distance from the center of the grabber
      to the corners (see README.md).
     """
+
     def __init__(self, corner_distance=0.0):
         self.is_open = False  # True if the grabber is open, False if it is closed
         self.corner_distance = corner_distance
@@ -22,10 +23,26 @@ class Grabber:
             self.corners = [None] * 4
             return
         self.corners = [  # Offset the corners based on their position relative to the center
-            Point(self.location.x - self.corner_distance, self.location.y - self.corner_distance, self.location.z),
-            Point(self.location.x + self.corner_distance, self.location.y - self.corner_distance, self.location.z),
-            Point(self.location.x - self.corner_distance, self.location.y + self.corner_distance, self.location.z),
-            Point(self.location.x + self.corner_distance, self.location.y + self.corner_distance, self.location.z)
+            Point(  # Bottom left
+                self.location.x - self.corner_distance,
+                self.location.y - self.corner_distance,
+                self.location.z,
+            ),
+            Point(  # Bottom right
+                self.location.x + self.corner_distance,
+                self.location.y - self.corner_distance,
+                self.location.z,
+            ),
+            Point(  # Top left
+                self.location.x - self.corner_distance,
+                self.location.y + self.corner_distance,
+                self.location.z,
+            ),
+            Point(  # Top right
+                self.location.x + self.corner_distance,
+                self.location.y + self.corner_distance,
+                self.location.z,
+            ),
         ]
 
     @property
