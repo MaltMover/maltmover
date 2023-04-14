@@ -3,7 +3,7 @@ from point import Point, Waypoint
 from pulley import Pulley
 
 import json
-from math import sqrt, ceil
+from math import ceil
 
 
 class Space:
@@ -17,12 +17,12 @@ class Space:
     """
 
     def __init__(
-            self,
-            size_x: int | float,
-            size_y: int | float,
-            size_z: int | float,
-            edge_limit: int | float = 0,
-            grabber: Grabber = None,
+        self,
+        size_x: int | float,
+        size_y: int | float,
+        size_z: int | float,
+        edge_limit: int | float = 0,
+        grabber: Grabber = None,
     ):
         self.size_x = round(float(size_x), 1)  # in decimeter (10 cm)
         self.size_y = round(float(size_y), 1)  # in decimeter (10 cm)
@@ -143,14 +143,22 @@ class Space:
         current_point = self.grabber.location
         if three_point_move:
             delay = config["three_point_delay"]
-            t1 = self.calculate_min_move_time(Point(current_point.x, current_point.y, self.size_z - self.edge_limit))  # Ceiling above origin
-            t2 = self.calculate_min_move_time(Point(target.x, target.y, self.size_z - self.edge_limit))  # Ceiling above target
+            t1 = self.calculate_min_move_time(
+                Point(current_point.x, current_point.y, self.size_z - self.edge_limit)
+            )  # Ceiling above origin
+
+            t2 = self.calculate_min_move_time(
+                Point(target.x, target.y, self.size_z - self.edge_limit)
+            )  # Ceiling above target
+
             t3 = self.calculate_min_move_time(target)  # Target
             time = t1 + t2 + t3 + (delay * 2)
             return ceil(time * 100) / 100  # Round up to 2 decimal places
+
         min_time = -1  # Any calculated time will be larger than this
-        grabber = Grabber(corner_distance=self.grabber.corner_distance)  # Create grabber object for calculations
-        grabber.location = target   # Calculate corners of new target
+        # Create grabber object for calculations
+        grabber = Grabber(corner_distance=self.grabber.corner_distance)
+        grabber.location = target  # Calculate corners of new target
         for i, pulley in enumerate(self.pulleys):
             # Length from pulley to the corresponding corner of the grabber
             end_length = pulley.location.distance_to(grabber.corners[i])
@@ -184,7 +192,7 @@ class Space:
         :return: The time it takes to move the length
         """
         time_to_max_speed = speed / acceleration  # Time to reach max speed
-        distance_to_max_speed = 0.5 * acceleration * time_to_max_speed ** 2  # Distance travelled to reach max speed
+        distance_to_max_speed = 0.5 * acceleration * time_to_max_speed**2  # Distance travelled to reach max speed
         if distance_to_max_speed * 2 > move_length:  # If it is not possible to reach max speed
             return ((move_length / acceleration) ** 0.5) * 2  # Time formula (t = sqrt(2 * d / a))
         max_speed_distance = move_length - distance_to_max_speed * 2  # Distance travelled at max speed
