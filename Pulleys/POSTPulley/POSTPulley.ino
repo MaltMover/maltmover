@@ -16,7 +16,6 @@ const char *ssid = SECRET_SSID;
 const char *password = SECRET_PASS;
 
 // Set static IP
-
 IPAddress gateway(192, 168, 4, 1);
 IPAddress local_IP(192, 168, 4, 71);  //Only change this
 IPAddress subnet(255, 255, 0, 0);
@@ -45,6 +44,7 @@ void setup() {
   }
   WiFi.begin(ssid, password);
 
+  // Print "waiting to connect" and flashing LEDs until wifi is connected
   while (WiFi.status() != WL_CONNECTED) {
     digitalWrite(WIFILED, HIGH);
     delay(250);
@@ -52,14 +52,14 @@ void setup() {
     digitalWrite(WIFILED, LOW);
     delay(250);
   }
-  digitalWrite(WIFILED, HIGH);
+  digitalWrite(WIFILED, HIGH); // Makes sure the WIFILED is turned on when wifi
 
   Serial.print("\nIP address: ");
-  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.localIP()); // Prints ip
 
-  server.on("/", handleBody);
+  server.on("/", handleBody); // Configs webserver
 
-  server.begin();
+  server.begin(); // Starts webserver
   Serial.println("Server listening \n");
 }
 
@@ -70,8 +70,9 @@ void loop() {
 void handleBody() {
   DynamicJsonDocument doc(1024);       // Init json message buffer
   DynamicJsonDocument response(1024);  // Init json response buffer
-  String responseOut;
+  String responseOut;                  // Init response-string
 
+  // Returns if no body received
   if (server.hasArg("plain") == false) {
     server.send(200, "text/plain", "Body not received");
     return;
@@ -87,28 +88,31 @@ void handleBody() {
     return;
   }
 
-  if (doc.containsKey("run")) {
-    if (doc["run"]) {
+  if (doc.containsKey("run")) { // Checks if "run" is an json key
+    if (doc["run"]) { // Checks if the key "run" has a true value
       Serial.println("Run pulleys \n");
 
       response["success"] = true;
-      serializeJson(response, responseOut);
+      serializeJson(response, responseOut); // Serializes json object as string
 
-      server.send(200, "application/json", responseOut);
+      server.send(200, "application/json", responseOut); // Returns a success to the user/program
 
       digitalWrite(RUNNINGLED, HIGH);
       digitalWrite(CONFIGLED, LOW);
-      
+
+      // Calls run pulley func, that runs pulley to desired point, while still running webserver
       run_pulley();
 
+      // When not running, turns off RUNNINGLED
       digitalWrite(RUNNINGLED, LOW);
 
       return;
     }
 
     Serial.println("Reverts config...");
-    revert_config();
+    revert_config(); // If "run" was false, it reverts the config
 
+    // Returns success as JSON response
     response["success"] = true;
     serializeJson(response, responseOut);
 
@@ -120,9 +124,12 @@ void handleBody() {
     
   }
 
+  // Checks if received data has all 3 criteria below
   else if (doc.containsKey("length") && doc.containsKey("speed") && doc.containsKey("acceleration")) {
+    // Sets config with the received json and with steps_pr_dm
     set_config(doc, steps_pr_dm);
 
+    // Returns success as JSON response
     response["success"] = true;
     serializeJson(response, responseOut);
 
@@ -133,9 +140,10 @@ void handleBody() {
   }
 
   else if (doc.containsKey("get_length")) {
-    if (doc["get_length"]) {
+    if (doc["get_length"]) { // Checks if get_length is present and true
       Serial.println("Send length \n");
 
+      // Returns current length in dm and success as a JSON response
       response["success"] = true;
       response["length"] = stepper.currentPosition() / steps_pr_dm;
       serializeJson(response, responseOut);
@@ -145,20 +153,26 @@ void handleBody() {
     }
   }
 
+  // Checks if move steps is present
+  // Dev feature only and just used for testing/calibrating
+  // Moves the stepper without need for confirmation
   else if (doc.containsKey("move_steps")) {
       stepper.move(doc["move_steps"]);
 
+      // Returns success true, as json
       response["success"] = true;
       serializeJson(response, responseOut);
       server.send(200, "application/json", responseOut);
 
       digitalWrite(RUNNINGLED, HIGH);
-      run_pulley();
+      run_pulley(); // Runs pulley to desired point
       digitalWrite(RUNNINGLED, LOW);
 
       return;
   }
 
+  // Checks if "steps_pr_dm"
+  // Feature for setting the steps_pr_dm without need to upload new code
   else if (doc.containsKey("steps_pr_dm")) {
       steps_pr_dm = (double) doc["steps_pr_dm"];
       response["success"] = true;
@@ -167,8 +181,10 @@ void handleBody() {
       return;
   }
 
+  // If received json does not match any if-statements
   Serial.println("Error - request does not contain known key \n");
 
+  // Returns error as JSON with error code 400
   response["error"] = "Unknown Key";
   serializeJson(response, responseOut);
 

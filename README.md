@@ -1,54 +1,54 @@
-# maltmover
-A gantry system like the SpiderCam, that can lift stuff around a room using Inverse Kinematics
+<p align="center">
+  <img src="https://github.com/MaltMover/maltmover/blob/main/Server/images/crane.png" style="width: 10%" alt="maltmover"/>
+</p>
 
-## Request formats:
+<h1 align="center">MaltMover</h1>
+<p align="center"> A gantry system like the SpiderCam, that can lift stuff around a room using Inverse Kinematics</p>
 
-### Set new length in buffer:
-Length 10, with 10 dm/s^2 acceleration and 14 dm/s max speed:<br>
-`{"length": 10.0, "acceleration": 10.0, "speed": 14.0}`
-### Move pulley to buffer length:
-`{"run": True}`
-### Cancel run from pulley:
-`{"run": False}`
-### Request pulley current length:
-`{"get_length": True}`
+<p align="center">
+  <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/MaltMover/maltmover?color=red">
+  <a href="https://github.com/MaltMover/maltmover/blob/main/LICENSE"><img alt="GitHub license" src="https://img.shields.io/github/license/MaltMover/maltmover"></a>
+  <img alt="ESP8266" src="https://img.shields.io/badge/MicroController-ESP8266-rgb(255,%20215,%200)">
+  <img alt="C++" src="https://img.shields.io/badge/-C%2B%2B-rgb(219,%2055,%20203)">
+  <a href="https://python.org"><img alt="Python 3.10" src="https://img.shields.io/badge/python-3.10-blue"></a>
+  <a href="https://github.com/psf/black"><img alt="Code style" src="https://img.shields.io/badge/code%20style-black-black"></a>
+</p>
 
-### Set new state for grabber:
-For open:<br>
-`{"set_open": True}`<br>
-For close:<br>
-`{"set_open": False}`
-### Get state of grabber:
-`{"get_state": True}`
+# Installation
+Start by uploading the pulley code to all of the pulleys. We have to change the static IP address when uploading, so they don't all get the same address.
+To do this navigate to the pulley code:
+```bash
+cd Pulleys/POSTPulley/
+```
+and edit the last number on this line:
+```c++
+IPAddress local_IP(192, 168, 4, 69);  //Only change this
+```
+As long as a value in the range 0-255 is used, it does not matter, but the correct values should be stored in `Server/config.json`
 
-## Settings
-The settings can be found in `Server/config.json`
-| Option                  | Unit       | Function                                                                                                         |
-|-------------------------|------------|------------------------------------------------------------------------------------------------------------------|
-| edge_limit              | dm         | The closest the object is allowed to get to the edge of the defined area                                         |
-| init                    |            |                                                                                                                  |
-| - speed                 | dm/s       | Maximum speed during initial extension and final retraction of ropes                                             |
-| - acceleration          | dm/s/s     | Acceleration during initial extension and final retraction of ropes                                              |
-| max_speed               | dm/s       | Maximum speed reached by a single pulley during normal use of the MaltMover                                      |
-| max_acceleration        | dm/s/s     | Acceleration used by all pulleys during normal use of the MaltMover                                              |
-| rope_length             | dm         | Length of rope attached to the pulleys, insures no fatal error                                                   |
-| three_point_move        | bool       | True if the system should move to three different points, instead of a straight line from a to b                 |
-| three_point_delay       | s          | Delay between each of the three moves, if three_point_move is set to true                                        |
-| length_offset           | dm         | Difference between actual length of the ropes, and percieved length by the system (size of the carabiner)        |
-| size                    | dm\*dm\*dm | Size of the area, the MaltMover works within. (x, y, z)                                                          |
-| ips                     | string     | IP addresses of the four pulleys                                                                                 |
-| grabber_ip              | string     | IP address if the MaltGrabber                                                                                    |
-| grabber_corner_distance | string     | Distance shown on the image below                                                                                |
-| steps_pr_dm             | float      | calibrated steps_pr_dm value for each pulley.                                                                    |
-
-#### grabber_corner_distance
-![image](https://user-images.githubusercontent.com/32793938/231836288-831a0dc6-23f1-40ea-8c44-8f729cd65514.png)
+Now we are ready to install the python dependencies and run the program:
+```bash
+python -m pip install -r requirements.txt
+cd Server/
+python main.py
+```
 
 
-## Grid layout
-Pulley nums:
-![image](https://user-images.githubusercontent.com/32793938/209009362-444277ef-e5a5-4a44-9927-2049bb359b5d.png)
+# Resources
+The MaltMover system consist of multiple parts. All models and diagrams are freely accessible [here](https://drive.google.com/drive/folders/1pCBQdqCMux7k-YYwpfTq4ijKMqQ0Y-yf?usp=share_link). Clicking any of the below pictures will let you download any resources used to create it.
+
+## 3D Models
+The MaltMover hardware uses both steel and 3D printed parts. All parts colored blue on this render are 3D printed.
 
 
-## Led Layout
-![image](https://user-images.githubusercontent.com/32793938/221839271-6b0e50c0-ff64-4f22-bd8a-001ffda9d0f7.png)
+<a href="bingbong.org"><img alt="MaltMover 3D model" src="https://user-images.githubusercontent.com/32793938/231972383-1a49fd21-c05f-41de-a45c-1aa60a1fcfde.png" style="width: 50%"></a>
+
+
+## Electrical diagrams
+The MaltMover system used four identical PCBs, the diagrams for these can be found below.
+
+<a href="bingbong.org"><img alt="MaltMover electrical diagram" src="https://user-images.githubusercontent.com/32793938/231974598-fba7e8d9-b9d5-431d-afff-40060a33ad53.png" style="width: 50%"></a>
+
+A possible PCB with this diagram can be layed out like this:
+
+<a href="bingbong.org"><img alt="MaltMover PCB diagram" src="https://user-images.githubusercontent.com/32793938/231976041-8c771256-e330-4b80-b8c2-fc3bddaa7e5b.png" style="width: 50%"></a>
