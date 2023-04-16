@@ -426,17 +426,28 @@ class HomePage(customtkinter.CTkFrame):
         self.waypoint_buttons = []
         self.configure(fg_color="transparent")
 
-    def load(self):
+    def load(self) -> None:
+        """
+        Load the home page
+        Loads waypoints and creates buttons for them
+        :return: None
+        """
         for button in self.waypoint_buttons:
+            # Destroy all the old waypoint buttons
             button.destroy()
+
         self.waypoint_buttons = []
-        legal_waypoints = [
+        legal_waypoints = [  # Get all the waypoints that are possible to react
             w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)
         ]
+        # Get all the waypoints that are not possible to reach
         illegal_waypoints = [w for w in self.master.space.waypoints if w not in legal_waypoints]
+
         with open("config.json", "r") as f:
-            config = json.load(f)
-        three_point = config["three_point_move"]
+            # Read three_point_move from config.json
+            three_point = json.load(f)["three_point_move"]
+
+        # Create a button for each waypoint, illegal are at the buttom
         for i, waypoint in enumerate(legal_waypoints + illegal_waypoints):
             time = self.master.space.calculate_min_move_time(waypoint, three_point)
             waypoint_button = customtkinter.CTkButton(
@@ -455,10 +466,13 @@ class HomePage(customtkinter.CTkFrame):
                 self.master.move_as_thread(waypoint, three_point),
             )
             if self.master.space.grabber.location == waypoint:
+                # If the grabber is at the waypoint, disable the button
                 waypoint_button.configure(state="disabled")
             waypoint_button.grid(row=i, column=0, sticky="ew")
             self.waypoint_buttons.append(waypoint_button)
+
         for i in range(len(legal_waypoints), len(self.waypoint_buttons)):
+            # Disable all illegal waypoints
             self.waypoint_buttons[i].configure(state="disabled")
         print(self.master.space.grabber.location)
 
@@ -547,13 +561,21 @@ class StatusPage(customtkinter.CTkFrame):
         """
         self.master.load_mechanical_info()
 
-    def show_reset_dialog(self, pulley_id=0):
+    def show_reset_dialog(self, pulley_id=0) -> None:
+        """
+        Show dialog to reset pulley length
+        :param pulley_id: Pulley id
+        :return: None
+        """
+        # Create toplevel
         toplevel = customtkinter.CTkToplevel()
         toplevel.title(f"Reset Pulley {pulley_id}")
         toplevel.geometry("300x200")
         toplevel.resizable(False, False)
         toplevel.grab_set()
         toplevel.focus_set()
+
+        # Create and place labels and buttons
         customtkinter.CTkLabel(
             toplevel,
             text=f"Reset length of pulley {pulley_id}?",
@@ -576,19 +598,39 @@ class StatusPage(customtkinter.CTkFrame):
             command=lambda: self.reset_pulley(pulley_id, toplevel),
         ).place(relx=0.7, rely=0.7, anchor="center")
 
-    def reset_pulley(self, pulley_id, toplevel):
+    def reset_pulley(self, pulley_id, toplevel) -> None:
+        """
+        Reset pulley length
+        :param pulley_id: Pulley id
+        :param toplevel: Parent toplevel to destroy
+        :return: None
+        """
         self.master.request_handler.reset_pulley(pulley_id)
         toplevel.destroy()
 
 
 class ConfigPage(customtkinter.CTkFrame):
+    """
+    Config page
+    Shows config options and allows user to change them
+    :param master: Parent App object
+    :param config_path: Path to config file
+    """
     def __init__(self, master: App, config_path: str):
         super().__init__(master)
         self.config_path = config_path
+
         small_font = customtkinter.CTkFont(size=15)
         big_font = customtkinter.CTkFont(size=20, weight="bold")
-        self.configure(self, corner_radius=0, fg_color="transparent")
-        # Room Size
+
+        self.configure(
+            self,
+            corner_radius=0,
+            fg_color="transparent"
+        )
+
+        # Create and place labels and entries
+        # Acceleration
         self.acceleration_label = customtkinter.CTkLabel(self, text="Acceleration", font=big_font)
         self.acceleration_entry = customtkinter.CTkEntry(
             self, width=150, justify="right", font=small_font
@@ -599,7 +641,8 @@ class ConfigPage(customtkinter.CTkFrame):
         self.acceleration_label.place(relx=0.03, rely=0.08, anchor="sw")
         self.acceleration_entry.place(relx=0.65, rely=0.08, anchor="se")
         self.acceleration_unit_label.place(relx=0.69, rely=0.08, anchor="sw")
-        # Rope Length
+
+        # Rope length
         self.rope_length_label = customtkinter.CTkLabel(self, text="Rope Length", font=big_font)
         self.rope_length_entry = customtkinter.CTkEntry(
             self, width=150, justify="right", font=small_font
@@ -610,6 +653,7 @@ class ConfigPage(customtkinter.CTkFrame):
         self.rope_length_label.place(relx=0.03, rely=0.18, anchor="sw")
         self.rope_length_entry.place(relx=0.65, rely=0.18, anchor="se")
         self.rope_length_unit_label.place(relx=0.69, rely=0.18, anchor="sw")
+
         # Max speed
         self.max_speed_label = customtkinter.CTkLabel(self, text="Max Speed", font=big_font)
         self.max_speed_entry = customtkinter.CTkEntry(
@@ -621,6 +665,7 @@ class ConfigPage(customtkinter.CTkFrame):
         self.max_speed_label.place(relx=0.03, rely=0.28, anchor="sw")
         self.max_speed_entry.place(relx=0.65, rely=0.28, anchor="se")
         self.max_speed_unit_label.place(relx=0.69, rely=0.28, anchor="sw")
+
         # Edge limit
         self.edge_limit_label = customtkinter.CTkLabel(self, text="Edge Limit", font=big_font)
         self.edge_limit_entry = customtkinter.CTkEntry(
@@ -632,13 +677,17 @@ class ConfigPage(customtkinter.CTkFrame):
         self.edge_limit_label.place(relx=0.03, rely=0.38, anchor="sw")
         self.edge_limit_entry.place(relx=0.65, rely=0.38, anchor="se")
         self.edge_limit_unit_label.place(relx=0.69, rely=0.38, anchor="sw")
+
         # Separating line
         line = customtkinter.CTkCanvas(self, width=510, height=2, bg="gray25", highlightthickness=0)
         line.create_line(0, 0, 510, 0, fill="gray25", width=4)
         line.place(relx=0.03, rely=0.4, anchor="w")
+
         # IPS
         self.ips_label = customtkinter.CTkLabel(self, text="IP Addresses", font=big_font)
         self.ips_label.place(relx=0.03, rely=0.48, anchor="sw")
+
+        # Pulley labels
         self.pulley_0_label = customtkinter.CTkLabel(self, text="Pulley 0", font=small_font)
         self.pulley_0_entry = customtkinter.CTkEntry(
             self, width=150, justify="right", font=small_font
@@ -659,6 +708,8 @@ class ConfigPage(customtkinter.CTkFrame):
         self.grabber_entry = customtkinter.CTkEntry(
             self, width=150, justify="right", font=small_font
         )
+
+        # Pulley entries
         self.pulley_0_label.place(relx=0.03, rely=0.54, anchor="sw")
         self.pulley_0_entry.place(relx=0.65, rely=0.53, anchor="se")
         self.pulley_1_label.place(relx=0.03, rely=0.62, anchor="sw")
@@ -669,11 +720,11 @@ class ConfigPage(customtkinter.CTkFrame):
         self.pulley_3_entry.place(relx=0.65, rely=0.77, anchor="se")
         self.grabber_label.place(relx=0.03, rely=0.86, anchor="sw")
         self.grabber_entry.place(relx=0.65, rely=0.85, anchor="se")
+
         # 3-point move toggle
         self.three_point_move_label = customtkinter.CTkLabel(
             self, text="3-point Move", font=big_font
         )
-
         self.three_point_move_toggle = customtkinter.CTkButton(
             self,
             width=150,
@@ -688,16 +739,23 @@ class ConfigPage(customtkinter.CTkFrame):
         self.three_point_move_label.place(relx=0.72, rely=0.48, anchor="sw")
         self.three_point_move_toggle.place(relx=0.98, rely=0.60, anchor="se")
 
-        self.read_config()
+        self.read_config()  # Read config file
         self.save_button = customtkinter.CTkButton(
             self, text="Save Config", font=big_font, command=self.save_config
         )
         self.save_button.place(relx=0.5, rely=0.92, anchor="center")
 
-    def load(self):
+    def load(self) -> None:
+        """
+        Load the config file
+        :return: None
+        """
         self.read_config()
 
-    def toggle_3_point(self):
+    def toggle_3_point(self) -> None:
+        """
+        Flip the 3-point move toggle
+        """
         if self.three_point_move_toggle.cget("text") == "OFF":
             self.three_point_move_toggle.configure(
                 text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870"
@@ -707,7 +765,11 @@ class ConfigPage(customtkinter.CTkFrame):
                 text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608"
             )
 
-    def read_config(self):
+    def read_config(self) -> None:
+        """
+        Read the config file
+        :return: None
+        """
         with open(self.config_path, "r") as f:
             config = json.load(f)
         # Acceleration
@@ -742,7 +804,11 @@ class ConfigPage(customtkinter.CTkFrame):
                 text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608"
             )
 
-    def save_config(self):
+    def save_config(self) -> None:
+        """
+        Save the config file
+        :return: None
+        """
         with open(self.config_path, "r") as f:
             config = json.load(f)
         config["max_acceleration"] = float(self.acceleration_entry.get())
@@ -767,6 +833,10 @@ class ConfigPage(customtkinter.CTkFrame):
 
 
 class WaypointPage(customtkinter.CTkFrame):
+    """
+    The waypoint create/edit page
+    :param master: The parent App object
+    """
     def __init__(self, master: App):
         super().__init__(master)
         self.master: App = master
@@ -776,11 +846,16 @@ class WaypointPage(customtkinter.CTkFrame):
             self, text="Waypoints", font=customtkinter.CTkFont(size=15, weight="bold")
         ).place(relx=0.5, rely=0.05, anchor="center")
 
-    def load(self):
+    def load(self) -> None:
+        """
+        Load the page
+        """
         for button in self.waypoint_buttons:
+            # Destroy the old buttons
             button.destroy()
 
         self.waypoint_buttons = []
+        # Iterate through the waypoints and create a button for each
         for i, waypoint in enumerate(self.master.space.waypoints):
             button = customtkinter.CTkButton(
                 self,
@@ -788,9 +863,11 @@ class WaypointPage(customtkinter.CTkFrame):
                 font=customtkinter.CTkFont(size=15),
                 command=lambda i=i: self.edit_waypoint(i),
             )
+            # Place the button in a 3 wide gri3 wide grid
             button.place(relx=0.2 + (i % 3) * 0.3, rely=0.2 + (i // 3) * 0.1, anchor="center")
             self.waypoint_buttons.append(button)
 
+        # Create the add waypoint button
         add_button = customtkinter.CTkButton(
             self,
             text="Add Waypoint",
@@ -799,13 +876,21 @@ class WaypointPage(customtkinter.CTkFrame):
         )
         add_button.place(relx=0.5, rely=0.9, anchor="center")
 
-    def edit_waypoint(self, index: int):
+    def edit_waypoint(self, index: int) -> None:
+        """
+        Create edit waypoint window
+        :param index: The index of the waypoint to edit
+        :return: None
+        """
         waypoint = self.master.space.waypoints[index]
+        # Create the editor window
         editor = customtkinter.CTkToplevel(self)
         editor.title("Edit Waypoint")
         editor.geometry("500x300")
         editor.resizable(False, False)
         editor.grab_set()
+
+        # Create labels and buttons
         name_entry = customtkinter.CTkEntry(editor, width=200, font=customtkinter.CTkFont(size=15))
         name_entry.insert(0, waypoint.name)
         name_entry.place(relx=0.5, rely=0.1, anchor="center")
@@ -846,23 +931,44 @@ class WaypointPage(customtkinter.CTkFrame):
         )
         save_button.place(relx=0.6, rely=0.9, anchor="center")
 
-    def save_waypoint(self, index: int, editor: customtkinter.CTkToplevel, x, y, z, name):
+    def save_waypoint(
+            self,
+            index: int,
+            editor: customtkinter.CTkToplevel,
+            x, y, z,
+            name
+    ) -> None:
+        """
+        Save the waypoint
+        :param index: The index of the waypoint to save
+        :param editor: The editor window to destroy
+        :param x: The x coordinate
+        :param y: The y coordinate
+        :param z: The z coordinate
+        :param name: The name of the waypoint
+        :return: None
+        """
         self.master.space.waypoints[index] = Waypoint(float(x), float(y), float(z), name)
         self.master.space.write_waypoints("waypoints.json")
         editor.destroy()
         self.load()
 
-    def add_waypoint(self):
+    def add_waypoint(self) -> None:
+        """
+        Add an empty waypoint
+        :return: None
+        """
         self.master.space.waypoints.append(Waypoint(0, 0, 0, "New Waypoint"))
         self.load()
-        self.edit_waypoint(-1)
+        self.edit_waypoint(-1)  # Edit the last waypoint
 
-    def delete_waypoint(self, index: int, editor: customtkinter.CTkToplevel):
+    def delete_waypoint(self, index: int, editor: customtkinter.CTkToplevel) -> None:
+        """
+        Delete a waypoint
+        :param index: The index of the waypoint to delete
+        :param editor: The editor window to destroy
+        :return: None
+        """
         self.master.space.waypoints.pop(index)
         editor.destroy()
         self.load()
-
-
-if __name__ == "__main__":
-    app = App()
-    app.mainloop()
