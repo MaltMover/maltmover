@@ -1,6 +1,11 @@
 from point import Point, Waypoint
 from space import Space, create_space
-from request_handler import PulleyRequestHandler, GrabberRequestHandler, create_request_handler, create_grabber_handler
+from request_handler import (
+    PulleyRequestHandler,
+    GrabberRequestHandler,
+    create_request_handler,
+    create_grabber_handler,
+)
 
 import customtkinter
 import json
@@ -37,7 +42,12 @@ class App(customtkinter.CTk):
     :param grabber_handler: GrabberRequestHandler object
     """
 
-    def __init__(self, space: Space, request_handler: PulleyRequestHandler, grabber_handler: GrabberRequestHandler):
+    def __init__(
+            self,
+            space: Space,
+            request_handler: PulleyRequestHandler,
+            grabber_handler: GrabberRequestHandler,
+    ):
         super().__init__()
         self.space = space
         self.request_handler = request_handler
@@ -87,13 +97,23 @@ class App(customtkinter.CTk):
         :param name: Name of frame to show
         :return: None
         """
-        self.hide_all_frames()  # Hide all frames
-        frames = {
+        frames = {  # Dict of all frames with name as key
             "home": self.home_frame,
             "pulleys": self.status_frame,
             "waypoints": self.waypoint_frame,
-            "config": self.config_frame
+            "config": self.config_frame,
         }
+        nav_buttons = {  # Dict of all navbar buttons with name as key
+            "home": self.navigation_frame.home_button,
+            "pulleys": self.navigation_frame.pulley_button,
+            "waypoints": self.navigation_frame.waypoint_button,
+            "config": self.navigation_frame.config_button,
+        }
+
+        self.hide_all_frames()  # Hide all frames
+        for button in nav_buttons.values():
+            button.configure(fg_color="transparent")  # Reset all navbar buttons
+
         # Pick selected frame
         selected_frame = frames[name]
 
@@ -102,10 +122,7 @@ class App(customtkinter.CTk):
         selected_frame.load()
 
         # Color selected navbar button
-        self.navigation_frame.home_button.configure(fg_color=("gray75", "gray25") if name == "home" else "transparent")
-        self.navigation_frame.pulley_button.configure(fg_color=("gray75", "gray25") if name == "pulleys" else "transparent")
-        self.navigation_frame.waypoint_button.configure(fg_color=("gray75", "gray25") if name == "waypoints" else "transparent")
-        self.navigation_frame.config_button.configure(fg_color=("gray75", "gray25") if name == "config" else "transparent")
+        nav_buttons[name].configure(fg_color=("gray75", "gray25"))
 
     def join_connection_threads(self) -> None:
         """
@@ -208,17 +225,25 @@ class App(customtkinter.CTk):
             # This is the time to pause between each point
             delay = json.load(f)["three_point_delay"]
         targets = [  # Create list of targets
-            # First point is the top limit of the space above starting position
-            Point(self.space.grabber.location.x, self.space.grabber.location.y, self.space.size_z - self.space.edge_limit),
-            # Second point is the top limit of the space above target position
-            Point(target.x, target.y, self.space.size_z - self.space.edge_limit),
-            # Third point is the target position
-            target
+            Point(  # First point is the top limit of the space above starting position
+                self.space.grabber.location.x,
+                self.space.grabber.location.y,
+                self.space.size_z - self.space.edge_limit,
+            ),
+            Point(  # Second point is the top limit of the space above target position
+                target.x,
+                target.y,
+                self.space.size_z - self.space.edge_limit
+            ),
+            target,  # Third point is the target position
         ]
         times = [  # Calculate move times for each point
+            # Move from current position to first point
             self.space.calculate_min_move_time(targets[0]),
-            self.space.calculate_min_move_time(targets[1], origin=targets[0]),  # Move from first point to second point
-            self.space.calculate_min_move_time(targets[2], origin=targets[1])  # Move from second point to third point
+            # Move from first point to second point
+            self.space.calculate_min_move_time(targets[1], origin=targets[0]),
+            # Move from second point to third point
+            self.space.calculate_min_move_time(targets[2], origin=targets[1]),
         ]
 
         # Iterate through targets and move to each one
@@ -251,14 +276,32 @@ class App(customtkinter.CTk):
 
     def load_mechanical_info(self):
         # Load the lengths of the pulleys
-        labels = [
+        pulley_images = (
+            self.status_frame.pulley_0_image,
+            self.status_frame.pulley_1_image,
+            self.status_frame.pulley_2_image,
+            self.status_frame.pulley_3_image,
+        )
+
+        # Update the images of the pulleys
+        for success, image in zip(self.request_handler.success_map[0], pulley_images):
+            if not success:
+                # Red if the pulley is not connected
+                image.configure(image=images["red_pulley_image"])
+                continue
+            # Green if the pulley is connected
+            image.configure(image=images["green_pulley_image"])
+
+        labels = (
             self.status_frame.pulley_0_length,
             self.status_frame.pulley_1_length,
             self.status_frame.pulley_2_length,
             self.status_frame.pulley_3_length
-        ]
+        )
         for pulley, label in zip(self.space.pulleys, labels):
+            # Set labels to show the length of the pulleys
             label.configure(text=f"{pulley.length} dm")
+
         # Load the state of the grabber
         is_open = "o" if self.space.grabber.is_open else "c"
         color = "g" if self.grabber_handler.success else "r"
@@ -268,33 +311,23 @@ class App(customtkinter.CTk):
         """
         Get the states of the mechanical system and update the GUI accordingly
         """
-        threads = [threading.Thread(target=self.get_grabber_state, args=(timeout,))]
         if not grabber_only:
-            threads.append(threading.Thread(target=self.get_pulley_states, args=(timeout,)))
+            # Get the states of the pulleys
+            pulley_thread = threading.Thread(target=self.get_pulley_states, args=(timeout,))
+            pulley_thread.start()
 
-        for thread in threads:
-            thread.start()
+        # Get the state of the grabber
+        grabber_thread = threading.Thread(target=self.get_grabber_state, args=(timeout,))
+        grabber_thread.start()
 
     def get_grabber_state(self, timeout: float):
-        self.space.grabber.is_open = self.grabber_handler.get_state(timeout=timeout)  # Get state of grabber
+        # Get state of grabber
+        self.space.grabber.is_open = self.grabber_handler.get_state(timeout=timeout)
         self.load_mechanical_info()  # Reload the state of the grabber
 
     def get_pulley_states(self, timeout: float):
-        lengths, success_map = self.request_handler.get_lengths(timeout=timeout)  # Get the lengths of the pulleys
-        pulley_images = [
-            self.status_frame.pulley_0_image,
-            self.status_frame.pulley_1_image,
-            self.status_frame.pulley_2_image,
-            self.status_frame.pulley_3_image
-        ]
-        # Update the images of the pulleys
-        for success, image in zip(success_map, pulley_images):
-            if not success:
-                # Red if the pulley is not connected
-                image.configure(image=images["red_pulley_image"])
-                continue
-            # Green if the pulley is connected
-            image.configure(image=images["green_pulley_image"])
+        # Get the lengths of the pulleys
+        lengths, success_map = self.request_handler.get_lengths(timeout=timeout)
 
         # Update the lengths of the pulleys
         for i, length in enumerate(lengths):
@@ -311,36 +344,82 @@ class NavigationBar(customtkinter.CTkFrame):
             corner_radius=0,
         )
         self.grid_rowconfigure(5, weight=1)
-        self.nav_label = customtkinter.CTkLabel(self, text="  Malt Mover", image=images["logo_image"],
-                                                compound="left", font=customtkinter.CTkFont(size=15, weight="bold"))
+        self.nav_label = customtkinter.CTkLabel(
+            self,
+            text="  Malt Mover",
+            image=images["logo_image"],
+            compound="left",
+            font=customtkinter.CTkFont(size=15, weight="bold"),
+        )
         self.nav_label.grid(row=0, column=0, padx=20, pady=20)
 
-        self.home_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Home",
-                                                   fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                   image=images["home_image"], anchor="w",
-                                                   command=lambda: master.select_frame_by_name("home"))
+        self.home_button = customtkinter.CTkButton(
+            self,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Home",
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            image=images["home_image"],
+            anchor="w",
+            command=lambda: master.select_frame_by_name("home"),
+        )
         self.home_button.grid(row=1, column=0, sticky="ew")
 
-        self.pulley_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=5, text="Pulley status",
-                                                     fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                     image=images["white_pulley_image"], anchor="w",
-                                                     command=lambda: master.select_frame_by_name("pulleys"))
+        self.pulley_button = customtkinter.CTkButton(
+            self,
+            corner_radius=0,
+            height=40,
+            border_spacing=5,
+            text="Pulley status",
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            image=images["white_pulley_image"],
+            anchor="w",
+            command=lambda: master.select_frame_by_name("pulleys"),
+        )
         self.pulley_button.grid(row=2, column=0, sticky="ew")
 
-        self.waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Waypoints",
-                                                       fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                       image=images["waypoint_image"], anchor="w",
-                                                       command=lambda: master.select_frame_by_name("waypoints"))
+        self.waypoint_button = customtkinter.CTkButton(
+            self,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Waypoints",
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            image=images["waypoint_image"],
+            anchor="w",
+            command=lambda: master.select_frame_by_name("waypoints"),
+        )
         self.waypoint_button.grid(row=3, column=0, sticky="ew")
 
-        self.config_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10, text="Config",
-                                                     fg_color="transparent", text_color=("gray10", "gray90"), hover_color=("gray70", "gray30"),
-                                                     image=images["cog_image"], anchor="w",
-                                                     command=lambda: master.select_frame_by_name("config"))
+        self.config_button = customtkinter.CTkButton(
+            self,
+            corner_radius=0,
+            height=40,
+            border_spacing=10,
+            text="Config",
+            fg_color="transparent",
+            text_color=("gray10", "gray90"),
+            hover_color=("gray70", "gray30"),
+            image=images["cog_image"],
+            anchor="w",
+            command=lambda: master.select_frame_by_name("config"),
+        )
         self.config_button.grid(row=4, column=0, sticky="ew")
 
 
 class HomePage(customtkinter.CTkFrame):
+    """
+    The home page of the application
+    Shows available waypoints
+    :param master: The parent App object
+    """
     def __init__(self, master: App):
         super().__init__(master)
         self.master: App = master
@@ -351,18 +430,30 @@ class HomePage(customtkinter.CTkFrame):
         for button in self.waypoint_buttons:
             button.destroy()
         self.waypoint_buttons = []
-        legal_waypoints = [w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)]
+        legal_waypoints = [
+            w for w in self.master.space.waypoints if self.master.space.is_legal_point(w)
+        ]
         illegal_waypoints = [w for w in self.master.space.waypoints if w not in legal_waypoints]
         with open("config.json", "r") as f:
             config = json.load(f)
         three_point = config["three_point_move"]
         for i, waypoint in enumerate(legal_waypoints + illegal_waypoints):
             time = self.master.space.calculate_min_move_time(waypoint, three_point)
-            waypoint_button = customtkinter.CTkButton(self, corner_radius=0, height=40, border_spacing=10,
-                                                      text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
-                                                      fg_color="transparent", text_color="gray90", hover_color="gray30",
-                                                      image=images["waypoint_image"], anchor="w", font=(customtkinter.CTkFont, 18),
-                                                      command=lambda waypoint=waypoint, time=time: self.master.move_as_thread(waypoint, three_point))
+            waypoint_button = customtkinter.CTkButton(
+                self,
+                corner_radius=0,
+                height=40,
+                border_spacing=10,
+                text=f"{waypoint.name}      x: {waypoint.x}   y: {waypoint.y}   z: {waypoint.z}   time: {time}",
+                fg_color="transparent",
+                text_color="gray90",
+                hover_color="gray30",
+                image=images["waypoint_image"],
+                anchor="w",
+                font=(customtkinter.CTkFont, 18),
+                command=lambda waypoint=waypoint, time=time:
+                self.master.move_as_thread(waypoint, three_point),
+            )
             if self.master.space.grabber.location == waypoint:
                 waypoint_button.configure(state="disabled")
             waypoint_button.grid(row=i, column=0, sticky="ew")
@@ -373,27 +464,38 @@ class HomePage(customtkinter.CTkFrame):
 
 
 class StatusPage(customtkinter.CTkFrame):
+    """
+    Page for displaying the status of the pulleys and grabber
+    :param master: The parent App object
+    """
     def __init__(self, master: App):
         super().__init__(master)
         self.master: App = master
         self.configure(self, corner_radius=0, fg_color="transparent")
+
+        # Pulley images
         self.pulley_0_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
         self.pulley_1_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
         self.pulley_2_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
         self.pulley_3_image = customtkinter.CTkLabel(self, text="", image=images["red_pulley_image"])
+        # Bind right click to show reset dialog
         self.pulley_0_image.bind("<Button-3>", lambda event: self.show_reset_dialog(0))
         self.pulley_1_image.bind("<Button-3>", lambda event: self.show_reset_dialog(1))
         self.pulley_2_image.bind("<Button-3>", lambda event: self.show_reset_dialog(2))
         self.pulley_3_image.bind("<Button-3>", lambda event: self.show_reset_dialog(3))
 
+        # Pulley id labels
         self.pulley_0_id = customtkinter.CTkLabel(self, text="0", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_1_id = customtkinter.CTkLabel(self, text="1", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_2_id = customtkinter.CTkLabel(self, text="2", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_3_id = customtkinter.CTkLabel(self, text="3", font=customtkinter.CTkFont(size=17, weight="bold"))
+        # Pulley length labels
         self.pulley_0_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_1_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_2_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
         self.pulley_3_length = customtkinter.CTkLabel(self, text="0.0 dm", font=customtkinter.CTkFont(size=17, weight="bold"))
+
+        # Place images and labels
         self.pulley_0_image.place(relx=0.12, rely=0.78, anchor="center")
         self.pulley_1_image.place(relx=0.88, rely=0.78, anchor="center")
         self.pulley_2_image.place(relx=0.12, rely=0.18, anchor="center")
@@ -407,29 +509,43 @@ class StatusPage(customtkinter.CTkFrame):
         self.pulley_2_length.place(relx=0.12, rely=0.33, anchor="center")
         self.pulley_3_length.place(relx=0.88, rely=0.33, anchor="center")
 
+        # Create and bind grabber image
         self.grabber_image = customtkinter.CTkLabel(self, text="", image=images["grabber_or"])
         self.grabber_image.place(relx=0.5, rely=0.3, anchor="center")
         self.grabber_image.bind("<Button-1>", lambda event: self.master.toggle_grabber_as_thread())
 
-        self.test_connection_button = customtkinter.CTkButton(self, text="Test Connection", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                              command=lambda master=master: master.get_mechanical_states())
-        self.center_pulleys_button = customtkinter.CTkButton(self, text="Center Pulleys", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                             command=lambda master=master: master.center_system_as_thread())
-        self.set_steps_button = customtkinter.CTkButton(self, text="Set steps pr dm", font=customtkinter.CTkFont(size=19, weight="bold"),
-                                                        command=lambda master=master: master.set_steps_pr_dm())
+        # Create buttons
+        self.test_connection_button = customtkinter.CTkButton(
+            self,
+            text="Test Connection",
+            font=customtkinter.CTkFont(size=19, weight="bold"),
+            command=lambda master=master: master.get_mechanical_states(),
+        )
+        self.center_pulleys_button = customtkinter.CTkButton(
+            self,
+            text="Center Pulleys",
+            font=customtkinter.CTkFont(size=19, weight="bold"),
+            command=lambda master=master: master.center_system_as_thread(),
+        )
+        self.set_steps_button = customtkinter.CTkButton(
+            self,
+            text="Set steps pr dm",
+            font=customtkinter.CTkFont(size=19, weight="bold"),
+            command=lambda master=master: master.set_steps_pr_dm(),
+        )
+
+        # Place buttons
         self.test_connection_button.place(relx=0.5, rely=0.6, anchor="center")
         self.center_pulleys_button.place(relx=0.5, rely=0.7, anchor="center")
         self.set_steps_button.place(relx=0.5, rely=0.8, anchor="center")
 
-    def load(self):
-        for success, image in zip(self.master.request_handler.success_map[0],
-                                  [self.pulley_0_image, self.pulley_1_image, self.pulley_2_image, self.pulley_3_image]):
-            if success:
-                image.configure(image=images["green_pulley_image"])
-            else:
-                image.configure(image=images["red_pulley_image"])
+    def load(self) -> None:
+        """
+        Load mechanical info from master
+        Run when tab is selected
+        :return: None
+        """
         self.master.load_mechanical_info()
-
 
     def show_reset_dialog(self, pulley_id=0):
         toplevel = customtkinter.CTkToplevel()
@@ -438,12 +554,27 @@ class StatusPage(customtkinter.CTkFrame):
         toplevel.resizable(False, False)
         toplevel.grab_set()
         toplevel.focus_set()
-        customtkinter.CTkLabel(toplevel, text=f"Reset length of pulley {pulley_id}?", font=customtkinter.CTkFont(size=17, weight="bold")).place(
-            relx=0.5, rely=0.3, anchor="center")
-        customtkinter.CTkButton(toplevel, text="Cancel", font=customtkinter.CTkFont(size=14, weight="bold"), fg_color="#b52802",
-                                width=15, command=toplevel.destroy).place(relx=0.3, rely=0.7, anchor="center")
-        customtkinter.CTkButton(toplevel, text="Confirm", font=customtkinter.CTkFont(size=14, weight="bold"), fg_color="#0a8c02",
-                                width=15, command=lambda: self.reset_pulley(pulley_id, toplevel)).place(relx=0.7, rely=0.7, anchor="center")
+        customtkinter.CTkLabel(
+            toplevel,
+            text=f"Reset length of pulley {pulley_id}?",
+            font=customtkinter.CTkFont(size=17, weight="bold"),
+        ).place(relx=0.5, rely=0.3, anchor="center")
+        customtkinter.CTkButton(
+            toplevel,
+            text="Cancel",
+            font=customtkinter.CTkFont(size=14, weight="bold"),
+            fg_color="#b52802",
+            width=15,
+            command=toplevel.destroy,
+        ).place(relx=0.3, rely=0.7, anchor="center")
+        customtkinter.CTkButton(
+            toplevel,
+            text="Confirm",
+            font=customtkinter.CTkFont(size=14, weight="bold"),
+            fg_color="#0a8c02",
+            width=15,
+            command=lambda: self.reset_pulley(pulley_id, toplevel),
+        ).place(relx=0.7, rely=0.7, anchor="center")
 
     def reset_pulley(self, pulley_id, toplevel):
         self.master.request_handler.reset_pulley(pulley_id)
@@ -459,29 +590,45 @@ class ConfigPage(customtkinter.CTkFrame):
         self.configure(self, corner_radius=0, fg_color="transparent")
         # Room Size
         self.acceleration_label = customtkinter.CTkLabel(self, text="Acceleration", font=big_font)
-        self.acceleration_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
-        self.acceleration_unit_label = customtkinter.CTkLabel(self, text="[dm/s²] (10 cm/s/s)", font=small_font)
+        self.acceleration_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
+        self.acceleration_unit_label = customtkinter.CTkLabel(
+            self, text="[dm/s²] (10 cm/s/s)", font=small_font
+        )
         self.acceleration_label.place(relx=0.03, rely=0.08, anchor="sw")
         self.acceleration_entry.place(relx=0.65, rely=0.08, anchor="se")
         self.acceleration_unit_label.place(relx=0.69, rely=0.08, anchor="sw")
         # Rope Length
         self.rope_length_label = customtkinter.CTkLabel(self, text="Rope Length", font=big_font)
-        self.rope_length_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
-        self.rope_length_unit_label = customtkinter.CTkLabel(self, text="[dm] (10 cm)", font=big_font)
+        self.rope_length_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
+        self.rope_length_unit_label = customtkinter.CTkLabel(
+            self, text="[dm] (10 cm)", font=big_font
+        )
         self.rope_length_label.place(relx=0.03, rely=0.18, anchor="sw")
         self.rope_length_entry.place(relx=0.65, rely=0.18, anchor="se")
         self.rope_length_unit_label.place(relx=0.69, rely=0.18, anchor="sw")
         # Max speed
         self.max_speed_label = customtkinter.CTkLabel(self, text="Max Speed", font=big_font)
-        self.max_speed_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
-        self.max_speed_unit_label = customtkinter.CTkLabel(self, text="[dm/s] (10 cm/s)", font=big_font)
+        self.max_speed_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
+        self.max_speed_unit_label = customtkinter.CTkLabel(
+            self, text="[dm/s] (10 cm/s)", font=big_font
+        )
         self.max_speed_label.place(relx=0.03, rely=0.28, anchor="sw")
         self.max_speed_entry.place(relx=0.65, rely=0.28, anchor="se")
         self.max_speed_unit_label.place(relx=0.69, rely=0.28, anchor="sw")
         # Edge limit
         self.edge_limit_label = customtkinter.CTkLabel(self, text="Edge Limit", font=big_font)
-        self.edge_limit_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
-        self.edge_limit_unit_label = customtkinter.CTkLabel(self, text="[dm] (10 cm)", font=big_font)
+        self.edge_limit_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
+        self.edge_limit_unit_label = customtkinter.CTkLabel(
+            self, text="[dm] (10 cm)", font=big_font
+        )
         self.edge_limit_label.place(relx=0.03, rely=0.38, anchor="sw")
         self.edge_limit_entry.place(relx=0.65, rely=0.38, anchor="se")
         self.edge_limit_unit_label.place(relx=0.69, rely=0.38, anchor="sw")
@@ -493,15 +640,25 @@ class ConfigPage(customtkinter.CTkFrame):
         self.ips_label = customtkinter.CTkLabel(self, text="IP Addresses", font=big_font)
         self.ips_label.place(relx=0.03, rely=0.48, anchor="sw")
         self.pulley_0_label = customtkinter.CTkLabel(self, text="Pulley 0", font=small_font)
-        self.pulley_0_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_0_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
         self.pulley_1_label = customtkinter.CTkLabel(self, text="Pulley 1", font=small_font)
-        self.pulley_1_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_1_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
         self.pulley_2_label = customtkinter.CTkLabel(self, text="Pulley 2", font=small_font)
-        self.pulley_2_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_2_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
         self.pulley_3_label = customtkinter.CTkLabel(self, text="Pulley 3", font=small_font)
-        self.pulley_3_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.pulley_3_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
         self.grabber_label = customtkinter.CTkLabel(self, text="Grabber", font=small_font)
-        self.grabber_entry = customtkinter.CTkEntry(self, width=150, justify="right", font=small_font)
+        self.grabber_entry = customtkinter.CTkEntry(
+            self, width=150, justify="right", font=small_font
+        )
         self.pulley_0_label.place(relx=0.03, rely=0.54, anchor="sw")
         self.pulley_0_entry.place(relx=0.65, rely=0.53, anchor="se")
         self.pulley_1_label.place(relx=0.03, rely=0.62, anchor="sw")
@@ -513,15 +670,28 @@ class ConfigPage(customtkinter.CTkFrame):
         self.grabber_label.place(relx=0.03, rely=0.86, anchor="sw")
         self.grabber_entry.place(relx=0.65, rely=0.85, anchor="se")
         # 3-point move toggle
-        self.three_point_move_label = customtkinter.CTkLabel(self, text="3-point Move", font=big_font)
-        self.three_point_move_toggle = customtkinter.CTkButton(self, width=150, height=50, font=small_font, text="OFF", fg_color="#b52802",
-                                                               text_color="white", hover_color="#cc1608",
-                                                               command=self.toggle_3_point)
-        self.three_point_move_label.place(relx=.72, rely=0.48, anchor="sw")
+        self.three_point_move_label = customtkinter.CTkLabel(
+            self, text="3-point Move", font=big_font
+        )
+
+        self.three_point_move_toggle = customtkinter.CTkButton(
+            self,
+            width=150,
+            height=50,
+            font=small_font,
+            text="OFF",
+            fg_color="#b52802",
+            text_color="white",
+            hover_color="#cc1608",
+            command=self.toggle_3_point,
+        )
+        self.three_point_move_label.place(relx=0.72, rely=0.48, anchor="sw")
         self.three_point_move_toggle.place(relx=0.98, rely=0.60, anchor="se")
 
         self.read_config()
-        self.save_button = customtkinter.CTkButton(self, text="Save Config", font=big_font, command=self.save_config)
+        self.save_button = customtkinter.CTkButton(
+            self, text="Save Config", font=big_font, command=self.save_config
+        )
         self.save_button.place(relx=0.5, rely=0.92, anchor="center")
 
     def load(self):
@@ -529,9 +699,13 @@ class ConfigPage(customtkinter.CTkFrame):
 
     def toggle_3_point(self):
         if self.three_point_move_toggle.cget("text") == "OFF":
-            self.three_point_move_toggle.configure(text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870")
+            self.three_point_move_toggle.configure(
+                text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870"
+            )
         else:
-            self.three_point_move_toggle.configure(text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608")
+            self.three_point_move_toggle.configure(
+                text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608"
+            )
 
     def read_config(self):
         with open(self.config_path, "r") as f:
@@ -560,9 +734,13 @@ class ConfigPage(customtkinter.CTkFrame):
         self.grabber_entry.delete(0, customtkinter.END)
         self.grabber_entry.insert(0, config["grabber_ip"])
         if config["three_point_move"]:
-            self.three_point_move_toggle.configure(text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870")
+            self.three_point_move_toggle.configure(
+                text="ON", fg_color="#1f6aa5", text_color="white", hover_color="#144870"
+            )
         else:
-            self.three_point_move_toggle.configure(text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608")
+            self.three_point_move_toggle.configure(
+                text="OFF", fg_color="#b52802", text_color="white", hover_color="#cc1608"
+            )
 
     def save_config(self):
         with open(self.config_path, "r") as f:
@@ -594,20 +772,31 @@ class WaypointPage(customtkinter.CTkFrame):
         self.master: App = master
         self.waypoint_buttons = []
         self.configure(self, corner_radius=0, fg_color="transparent")
-        customtkinter.CTkLabel(self, text="Waypoints", font=customtkinter.CTkFont(size=15, weight="bold")
-                               ).place(relx=0.5, rely=0.05, anchor="center")
+        customtkinter.CTkLabel(
+            self, text="Waypoints", font=customtkinter.CTkFont(size=15, weight="bold")
+        ).place(relx=0.5, rely=0.05, anchor="center")
 
     def load(self):
         for button in self.waypoint_buttons:
             button.destroy()
+
         self.waypoint_buttons = []
         for i, waypoint in enumerate(self.master.space.waypoints):
-            button = customtkinter.CTkButton(self, text=waypoint.name, font=customtkinter.CTkFont(size=15),
-                                             command=lambda i=i: self.edit_waypoint(i))
+            button = customtkinter.CTkButton(
+                self,
+                text=waypoint.name,
+                font=customtkinter.CTkFont(size=15),
+                command=lambda i=i: self.edit_waypoint(i),
+            )
             button.place(relx=0.2 + (i % 3) * 0.3, rely=0.2 + (i // 3) * 0.1, anchor="center")
             self.waypoint_buttons.append(button)
-        add_button = customtkinter.CTkButton(self, text="Add Waypoint", font=customtkinter.CTkFont(size=15),
-                                             command=self.add_waypoint)
+
+        add_button = customtkinter.CTkButton(
+            self,
+            text="Add Waypoint",
+            font=customtkinter.CTkFont(size=15),
+            command=self.add_waypoint,
+        )
         add_button.place(relx=0.5, rely=0.9, anchor="center")
 
     def edit_waypoint(self, index: int):
@@ -635,12 +824,26 @@ class WaypointPage(customtkinter.CTkFrame):
         z_entry.insert(0, waypoint.z)
         z_label.place(relx=0.25, rely=0.7, anchor="center")
         z_entry.place(relx=0.5, rely=0.7, anchor="center")
-        delete_button = customtkinter.CTkButton(editor, text="Delete", font=customtkinter.CTkFont(size=15), width=75, fg_color="#b52802",
-                                                command=lambda: self.delete_waypoint(index, editor))
+
+        delete_button = customtkinter.CTkButton(
+            editor,
+            text="Delete",
+            font=customtkinter.CTkFont(size=15),
+            width=75,
+            fg_color="#b52802",
+            command=lambda: self.delete_waypoint(index, editor),
+        )
         delete_button.place(relx=0.4, rely=0.9, anchor="center")
-        save_button = customtkinter.CTkButton(editor, text="Save", font=customtkinter.CTkFont(size=15), width=75,
-                                              command=lambda: self.save_waypoint(index, editor, x_entry.get(), y_entry.get(), z_entry.get(),
-                                                                                 name_entry.get()))
+
+        save_button = customtkinter.CTkButton(
+            editor,
+            text="Save",
+            font=customtkinter.CTkFont(size=15),
+            width=75,
+            command=lambda: self.save_waypoint(
+                index, editor, x_entry.get(), y_entry.get(), z_entry.get(), name_entry.get()
+            ),
+        )
         save_button.place(relx=0.6, rely=0.9, anchor="center")
 
     def save_waypoint(self, index: int, editor: customtkinter.CTkToplevel, x, y, z, name):
