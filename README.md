@@ -41,14 +41,14 @@ The MaltMover system consist of multiple parts. All models and diagrams are free
 The MaltMover hardware uses both steel and 3D printed parts. All parts colored blue on this render are 3D printed.
 
 
-<a href="bingbong.org"><img alt="MaltMover 3D model" src="https://user-images.githubusercontent.com/32793938/231972383-1a49fd21-c05f-41de-a45c-1aa60a1fcfde.png" style="width: 50%"></a>
+<a href="https://drive.google.com/drive/folders/1qzkBXYEvscYtyos7S_VAo2ytms7zgHjh?usp=share_link"><img alt="MaltMover 3D model" src="https://user-images.githubusercontent.com/32793938/231972383-1a49fd21-c05f-41de-a45c-1aa60a1fcfde.png" style="width: 50%"></a>
 
 
 ## Electrical diagrams
 The MaltMover system used four identical PCBs, the diagrams for these can be found below.
 
-<a href="bingbong.org"><img alt="MaltMover electrical diagram" src="https://user-images.githubusercontent.com/32793938/231974598-fba7e8d9-b9d5-431d-afff-40060a33ad53.png" style="width: 50%"></a>
+<a href="https://drive.google.com/drive/folders/1IsWnVXTo5KvXZRKMOOIyqDj1Af5hVqMQ?usp=sharing"><img alt="MaltMover electrical diagram" src="https://user-images.githubusercontent.com/32793938/231974598-fba7e8d9-b9d5-431d-afff-40060a33ad53.png" style="width: 50%"></a>
 
 A possible PCB with this diagram can be layed out like this:
 
-<a href="bingbong.org"><img alt="MaltMover PCB diagram" src="https://user-images.githubusercontent.com/32793938/231976041-8c771256-e330-4b80-b8c2-fc3bddaa7e5b.png" style="width: 50%"></a>
+<a><img alt="MaltMover PCB diagram" src="https://user-images.githubusercontent.com/32793938/231976041-8c771256-e330-4b80-b8c2-fc3bddaa7e5b.png" style="width: 50%"></a>
