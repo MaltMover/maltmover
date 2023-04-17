@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">MaltMover</h1>
-<p align="center"> A gantry system like the SpiderCam, that can lift stuff around a room using Inverse Kinematics</p>
+<p align="center"> A gantry system like the SpiderCam, that can reposition objects in a room using Inverse Kinematics</p>
 
 <p align="center">
   <img alt="Lines of code" src="https://img.shields.io/tokei/lines/github/MaltMover/maltmover?color=red">
